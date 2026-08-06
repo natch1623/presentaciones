@@ -1,0 +1,73 @@
+name: Desplegar a GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un despliegue a la vez; no cancela el que ya está corriendo.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Descubrir y compilar cada presentación
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+
+          # El menú y su manifiesto son estáticos: van tal cual.
+          cp index.html presentaciones.json _site/
+
+          # Toda carpeta modulo-*/<parte>/ con package.json se compila sola.
+          # Agregar una presentación nueva no requiere tocar este workflow.
+          encontradas=0
+          for pkg in modulo-*/*/package.json; do
+            [ -e "$pkg" ] || continue
+            dir="$(dirname "$pkg")"
+            echo "::group::Compilando $dir"
+            npm --prefix "$dir" ci
+            npm --prefix "$dir" run build
+            mkdir -p "_site/$dir"
+            cp -r "$dir/dist/." "_site/$dir/"
+            echo "::endgroup::"
+            encontradas=$((encontradas + 1))
+          done
+
+          if [ "$encontradas" -eq 0 ]; then
+            echo "No se encontró ninguna presentación para compilar." >&2
+            exit 1
+          fi
+          echo "Presentaciones compiladas: $encontradas"
+
+          # Jekyll ignora carpetas que empiezan con _ ; esto lo desactiva.
+          touch _site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

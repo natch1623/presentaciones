@@ -1,0 +1,10 @@
+# Normaliza finales de línea: LF en el repositorio, nativo en el disco.
+# Sin esto, editar desde Windows y compilar en Ubuntu (el runner de Actions)
+# produce diffs completos por cambio de CRLF.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

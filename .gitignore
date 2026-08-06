@@ -1,0 +1,29 @@
+# dependencias y artefactos de build
+node_modules/
+dist/
+build/
+.cache/
+.vite/
+*.tsbuildinfo
+vite.config.*.timestamp-*
+
+# material fuente (libros de texto y escaneos del programa).
+# Se queda en tu disco pero NO se publica: son obras con derechos de autor
+# y el repositorio es público.
+_fuentes/
+
+# logs y temporales
+*.log
+logs/
+.tmp-*
+.pdf-build/
+.pdf-pages/
+.pdf-preview/
+.claude-replay.*
+
+# entorno
+.env*
+
+# sistema
+.DS_Store
+Thumbs.db

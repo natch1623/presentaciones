@@ -1,0 +1,11 @@
+{
+  "title": "Análisis Vectorial · Teoría Electromagnética I",
+  "description": "Escalares y vectores, álgebra vectorial, componentes y vectores unitarios, campos vectoriales, producto punto y cruz, y los sistemas de coordenadas cartesiano, cilíndrico y esférico.",
+  "robots": {
+    "index": true
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
