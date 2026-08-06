@@ -27,3 +27,8 @@ logs/
 # sistema
 .DS_Store
 Thumbs.db
+
+# PDFs generados con `npm run export:pdf` (~12 MB cada uno). Son artefactos
+# regenerables; cada versión añadiría un blob permanente al historial.
+# Para distribuirlos, adjuntarlos a un GitHub Release.
+modulo-*/*/*.pdf
