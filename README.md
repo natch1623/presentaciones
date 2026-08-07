@@ -58,6 +58,25 @@ npm --prefix modulo-1/parte-a run build && npm --prefix modulo-1/parte-b run bui
 # servir la raíz del repo con las carpetas dist/ en su sitio
 ```
 
+## Exportar a PDF
+
+Desde la carpeta de cualquier presentación:
+
+```bash
+npm run export:pdf
+```
+
+Compila, levanta un servidor estático interno, recorre las láminas con un navegador
+headless y las une en un solo PDF de 16:9 a página completa. El nombre sale del
+título en `site.json`, así que no hay que configurarlo.
+
+Dos cosas que conviene saber:
+
+- El texto **no queda seleccionable**: Chromium rasteriza estas páginas (se embeben
+  a ~266 DPI, así que imprimen bien, pero no se pueden buscar).
+- Los PDF pesan ~12 MB y están en `.gitignore`. Para distribuirlos desde GitHub,
+  adjúntalos a un *Release* en vez de commitearlos.
+
 ## Notas
 
 - Cada app usa `base: './'` en `vite.config.ts`. Es lo que permite servirlas desde
