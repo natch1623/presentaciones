@@ -1,6 +1,7 @@
 {
   "curso": "Teoría Electromagnética I",
-  "institucion": "UDELAS",
+  "institucion": "Universidad Tecnológica de Panamá",
+  "carrera": "Ingeniería Electromecánica",
   "_comentario": "Para agregar una presentación: crea la carpeta (p. ej. modulo-2/parte-a) con su app de Vite y añade su entrada aquí. El workflow compila toda carpeta modulo-*/*/ que tenga package.json; esta lista sólo controla qué se muestra en el menú y cómo.",
   "modulos": [
     {

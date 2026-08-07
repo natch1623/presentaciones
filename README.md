@@ -1,7 +1,8 @@
 # Teoría Electromagnética I
 
-Presentaciones interactivas del curso (UDELAS). Cada presentación es una aplicación
-independiente de Vite + React + TypeScript, con diagramas SVG animados y manipulables.
+Presentaciones interactivas del curso, de la carrera de Ingeniería Electromecánica en
+la Universidad Tecnológica de Panamá. Cada presentación es una aplicación independiente
+de Vite + React + TypeScript, con diagramas SVG animados y manipulables.
 
 **Sitio publicado:** https://natch1623.github.io/teoria_electromagnetica_I/
 
