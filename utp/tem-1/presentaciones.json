@@ -1,0 +1,51 @@
+{
+  "curso": "Teoría Electromagnética I",
+  "institucion": "Universidad Tecnológica de Panamá",
+  "carrera": "Ingeniería Electromecánica",
+  "_comentario": "Para agregar una presentación: crea la carpeta (p. ej. modulo-2/parte-a) con su app de Vite y añade su entrada aquí. El workflow compila toda carpeta modulo-*/*/ que tenga package.json; esta lista sólo controla qué se muestra en el menú y cómo.",
+  "modulos": [
+    {
+      "id": "modulo-1",
+      "numero": "I",
+      "titulo": "Fundamentos matemáticos",
+      "descripcion": "El lenguaje vectorial del electromagnetismo: del álgebra de vectores a los operadores diferenciales y los teoremas integrales.",
+      "acento": "#f0c040",
+      "presentaciones": [
+        {
+          "id": "parte-a",
+          "etiqueta": "Parte A",
+          "titulo": "Análisis Vectorial",
+          "descripcion": "Escalares y vectores, álgebra vectorial, componentes y unitarios, campos, producto punto y cruz, y los tres sistemas de coordenadas.",
+          "referencia": "Hayt & Buck · cap. 1 · §1.1 – 1.9",
+          "laminas": 27,
+          "estado": "disponible"
+        },
+        {
+          "id": "parte-b",
+          "etiqueta": "Parte B",
+          "titulo": "Operadores Diferenciales",
+          "descripcion": "Nabla, gradiente, divergencia, rotacional y laplaciano; los teoremas de la divergencia y de Stokes, y las ecuaciones de Maxwell en forma puntual.",
+          "referencia": "Hayt & Buck · §3.5 – 3.7 · §4.5 – 4.6 · §7.4 · §8.3 – 8.4",
+          "laminas": 26,
+          "estado": "disponible"
+        }
+      ]
+    },
+    {
+      "id": "modulo-2",
+      "numero": "II",
+      "titulo": "Campos Electrostáticos",
+      "descripcion": "Fuentes de campo, ley de Coulomb, ley de Gauss, potencial eléctrico y energía electrostática.",
+      "acento": "#60a5fa",
+      "presentaciones": []
+    },
+    {
+      "id": "modulo-3",
+      "numero": "III",
+      "titulo": "Por definir",
+      "descripcion": "Contenido del tercer módulo del programa.",
+      "acento": "#4ade80",
+      "presentaciones": []
+    }
+  ]
+}

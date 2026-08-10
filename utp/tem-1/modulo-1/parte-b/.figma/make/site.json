@@ -1,0 +1,11 @@
+{
+  "title": "Operadores Diferenciales · Teoría Electromagnética I",
+  "description": "Nabla, gradiente, divergencia, rotacional y laplaciano; el teorema de la divergencia y el teorema de Stokes, con sus aplicaciones a las ecuaciones de Maxwell en forma puntual.",
+  "robots": {
+    "index": true
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

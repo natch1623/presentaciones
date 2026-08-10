@@ -1,0 +1,375 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,900;1,9..144,300;1,9..144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+/* ── Reset ── */
+html, body, #root { width:100%; height:100%; margin:0; padding:0; overflow:hidden; }
+*, *::before, *::after { box-sizing:border-box; }
+::-webkit-scrollbar { display:none; }
+
+/* ═══════════════════════════════════════════════════════════
+   MATH TYPOGRAPHY
+   Sub/superscripts with zeroed line-height so baselines never
+   shift and rows keep an even rhythm.
+═══════════════════════════════════════════════════════════ */
+.fx sub, .fx sup {
+  font-size: .64em;
+  line-height: 0;
+  position: relative;
+  font-weight: inherit;
+}
+.fx sub { bottom: -.25em; }
+.fx sup { top: -.52em; }
+
+/* ── Stacked fractions ──
+   Numerator over a rule over denominator, centred on the run and
+   nudged onto the maths axis so the bar lines up with an "=" sign
+   rather than sitting on the baseline. */
+.fx-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  position: relative;
+  top: -.12em;
+  margin: 0 .18em;
+  font-size: .94em;
+  line-height: 1.15;
+}
+.fx-num { padding: 0 .34em .06em; }
+.fx-den {
+  padding: .08em .34em 0;
+  border-top: 1px solid currentColor;
+  align-self: stretch;
+  text-align: center;
+}
+/* a fraction inside a fraction should not keep shrinking away */
+.fx-frac .fx-frac { font-size: 1em; }
+
+/* ═══════════════════════════════════════════════════════════
+   SLIDE TRANSITIONS
+═══════════════════════════════════════════════════════════ */
+
+/* Forward: new slide comes from bottom */
+@keyframes slideEnterFwd {
+  0%   { opacity:0; transform: translateY(40px) scale(0.96); filter: blur(6px); }
+  100% { opacity:1; transform: translateY(0)    scale(1);    filter: blur(0);   }
+}
+@keyframes slideExitFwd {
+  0%   { opacity:1; transform: translateY(0)     scale(1);    filter: blur(0);   }
+  100% { opacity:0; transform: translateY(-30px) scale(1.03); filter: blur(6px); }
+}
+/* Backward: new slide comes from top */
+@keyframes slideEnterBwd {
+  0%   { opacity:0; transform: translateY(-40px) scale(0.96); filter: blur(6px); }
+  100% { opacity:1; transform: translateY(0)     scale(1);    filter: blur(0);   }
+}
+@keyframes slideExitBwd {
+  0%   { opacity:1; transform: translateY(0)    scale(1);    filter: blur(0);   }
+  100% { opacity:0; transform: translateY(30px) scale(1.03); filter: blur(6px); }
+}
+
+/* Zoom flavour — used by cover, summary and end */
+@keyframes zoomEnterFwd {
+  0%   { opacity:0; transform: scale(1.09); filter: blur(12px); }
+  100% { opacity:1; transform: scale(1);    filter: blur(0);    }
+}
+@keyframes zoomExitFwd {
+  0%   { opacity:1; transform: scale(1);   filter: blur(0);    }
+  100% { opacity:0; transform: scale(.93); filter: blur(12px); }
+}
+@keyframes zoomEnterBwd {
+  0%   { opacity:0; transform: scale(.92); filter: blur(12px); }
+  100% { opacity:1; transform: scale(1);   filter: blur(0);    }
+}
+@keyframes zoomExitBwd {
+  0%   { opacity:1; transform: scale(1);    filter: blur(0);    }
+  100% { opacity:0; transform: scale(1.07); filter: blur(12px); }
+}
+
+/* Lateral flavour — used by agenda, tables and the pitfalls grid */
+@keyframes sideEnterFwd {
+  0%   { opacity:0; transform: translateX(70px) scale(.97); filter: blur(7px); }
+  100% { opacity:1; transform: translateX(0)    scale(1);   filter: blur(0);   }
+}
+@keyframes sideExitFwd {
+  0%   { opacity:1; transform: translateX(0)     scale(1);    filter: blur(0);   }
+  100% { opacity:0; transform: translateX(-55px) scale(1.02); filter: blur(7px); }
+}
+@keyframes sideEnterBwd {
+  0%   { opacity:0; transform: translateX(-70px) scale(.97); filter: blur(7px); }
+  100% { opacity:1; transform: translateX(0)     scale(1);   filter: blur(0);   }
+}
+@keyframes sideExitBwd {
+  0%   { opacity:1; transform: translateX(0)    scale(1);    filter: blur(0);   }
+  100% { opacity:0; transform: translateX(55px) scale(1.02); filter: blur(7px); }
+}
+
+.slide-enter-fwd  { animation: slideEnterFwd  .55s cubic-bezier(.22,1,.36,1) forwards; }
+.slide-exit-fwd   { animation: slideExitFwd   .28s cubic-bezier(.4,0,1,1)    forwards; }
+.slide-enter-bwd  { animation: slideEnterBwd  .55s cubic-bezier(.22,1,.36,1) forwards; }
+.slide-exit-bwd   { animation: slideExitBwd   .28s cubic-bezier(.4,0,1,1)    forwards; }
+
+.zoom-enter-fwd   { animation: zoomEnterFwd   .68s cubic-bezier(.22,1,.36,1) forwards; }
+.zoom-exit-fwd    { animation: zoomExitFwd    .28s cubic-bezier(.4,0,1,1)    forwards; }
+.zoom-enter-bwd   { animation: zoomEnterBwd   .68s cubic-bezier(.22,1,.36,1) forwards; }
+.zoom-exit-bwd    { animation: zoomExitBwd    .28s cubic-bezier(.4,0,1,1)    forwards; }
+
+.side-enter-fwd   { animation: sideEnterFwd   .58s cubic-bezier(.22,1,.36,1) forwards; }
+.side-exit-fwd    { animation: sideExitFwd    .28s cubic-bezier(.4,0,1,1)    forwards; }
+.side-enter-bwd   { animation: sideEnterBwd   .58s cubic-bezier(.22,1,.36,1) forwards; }
+.side-exit-bwd    { animation: sideExitBwd    .28s cubic-bezier(.4,0,1,1)    forwards; }
+
+/* Flip flavour — worked examples arrive on a hinge, so a derivation
+   reads as "a new page" rather than more of the same scroll. */
+@keyframes flipEnterFwd {
+  0%   { opacity:0; transform: perspective(1600px) rotateY(13deg) translateX(72px) scale(.95); filter: blur(9px); }
+  65%  { filter: blur(0); }
+  100% { opacity:1; transform: perspective(1600px) rotateY(0)     translateX(0)    scale(1);   filter: blur(0); }
+}
+@keyframes flipExitFwd {
+  0%   { opacity:1; transform: perspective(1600px) rotateY(0)      translateX(0)     scale(1);    filter: blur(0); }
+  100% { opacity:0; transform: perspective(1600px) rotateY(-11deg) translateX(-62px) scale(1.02); filter: blur(9px); }
+}
+@keyframes flipEnterBwd {
+  0%   { opacity:0; transform: perspective(1600px) rotateY(-13deg) translateX(-72px) scale(.95); filter: blur(9px); }
+  65%  { filter: blur(0); }
+  100% { opacity:1; transform: perspective(1600px) rotateY(0)      translateX(0)     scale(1);   filter: blur(0); }
+}
+@keyframes flipExitBwd {
+  0%   { opacity:1; transform: perspective(1600px) rotateY(0)     translateX(0)    scale(1);    filter: blur(0); }
+  100% { opacity:0; transform: perspective(1600px) rotateY(11deg) translateX(62px) scale(1.02); filter: blur(9px); }
+}
+
+.flip-enter-fwd  { animation: flipEnterFwd .62s cubic-bezier(.22,1,.36,1) forwards; }
+.flip-exit-fwd   { animation: flipExitFwd  .28s cubic-bezier(.4,0,1,1)    forwards; }
+.flip-enter-bwd  { animation: flipEnterBwd .62s cubic-bezier(.22,1,.36,1) forwards; }
+.flip-exit-bwd   { animation: flipExitBwd  .28s cubic-bezier(.4,0,1,1)    forwards; }
+
+/* Accent bar that crosses the stage on every slide change */
+@keyframes sweepX {
+  0%   { transform: translateX(-100%); opacity:0; }
+  12%  { opacity:.95; }
+  100% { transform: translateX(100%);  opacity:0; }
+}
+.sweep { animation: sweepX .95s cubic-bezier(.4,0,.15,1) forwards; }
+
+/* A second, slower and softer pass right behind the first — reads as
+   depth rather than as two separate bars. */
+.sweep-soft { animation: sweepX 1.5s cubic-bezier(.3,0,.2,1) .1s forwards; }
+
+/* ═══════════════════════════════════════════════════════════
+   ELEMENT ANIMATIONS — spring-feel stagger system
+═══════════════════════════════════════════════════════════ */
+
+@keyframes riseIn {
+  0%   { opacity:0; transform: translateY(20px) scale(0.96); filter:blur(3px); }
+  60%  { filter:blur(0); }
+  100% { opacity:1; transform: translateY(0)    scale(1);    filter:blur(0); }
+}
+@keyframes riseInLeft {
+  0%   { opacity:0; transform: translateX(-24px) scale(0.96); filter:blur(3px); }
+  100% { opacity:1; transform: translateX(0)     scale(1);    filter:blur(0); }
+}
+@keyframes popIn {
+  0%   { opacity:0; transform: scale(0.88); filter:blur(4px); }
+  70%  { transform: scale(1.02); }
+  100% { opacity:1; transform: scale(1); filter:blur(0); }
+}
+@keyframes drawStroke {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes glowPulse {
+  0%,100% { opacity:.6; }
+  50%      { opacity:1; }
+}
+@keyframes arcAppear {
+  from { stroke-dashoffset: 80; opacity:0; }
+  to   { stroke-dashoffset: 0;  opacity:1; }
+}
+@keyframes markerPop {
+  0%   { opacity:0; transform:scale(0); }
+  70%  { transform:scale(1.3); }
+  100% { opacity:1; transform:scale(1); }
+}
+@keyframes floatY {
+  0%,100% { transform:translateY(0); }
+  50%      { transform:translateY(-7px); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* Kinetic headings — each word arrives on its own */
+@keyframes wordIn {
+  0%   { opacity:0; transform: translateY(34px) rotateX(-55deg); filter:blur(5px); }
+  70%  { filter:blur(0); }
+  100% { opacity:1; transform: translateY(0)    rotateX(0);      filter:blur(0); }
+}
+
+/* Formula lines uncover left to right */
+@keyframes wipeIn {
+  0%   { opacity:0; clip-path: inset(0 100% 0 0); transform: translateX(-10px); }
+  100% { opacity:1; clip-path: inset(0 0 0 0);    transform: translateX(0);     }
+}
+
+/* Continuous loops */
+@keyframes dashFlow     { to { stroke-dashoffset: -240; } }
+@keyframes dashFlowRev  { to { stroke-dashoffset:  240; } }
+@keyframes softPulse    { 0%,100% { opacity:.4; }  50% { opacity:1; } }
+@keyframes breathe      { 0%,100% { transform: scale(1); } 50% { transform: scale(1.045); } }
+@keyframes haloGrow     { 0% { r:6; opacity:.75; } 100% { r:22; opacity:0; } }
+@keyframes borderGlow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  50%     { box-shadow: -3px 0 16px -4px currentColor; }
+}
+@keyframes tiltDrift {
+  0%,100% { transform: translate3d(0,0,0) rotate(0deg); }
+  50%     { transform: translate3d(0,-9px,0) rotate(.6deg); }
+}
+
+/* Spring entrance with a little overshoot — used by the diagram panel,
+   so the illustration lands with some weight instead of just fading. */
+@keyframes springIn {
+  0%   { opacity:0; transform: scale(.9)  translateY(16px); filter: blur(6px); }
+  55%  { opacity:1; transform: scale(1.02) translateY(-3px); filter: blur(0); }
+  100% { opacity:1; transform: scale(1)   translateY(0);    filter: blur(0); }
+}
+
+/* A slow, barely-there glow behind every heading. Keeps the type from
+   sitting dead on the black once the entrance animation has finished. */
+@keyframes titleGlow {
+  0%,100% { text-shadow: 0 0 0 rgba(255,255,255,0); }
+  50%     { text-shadow: 0 0 30px rgba(255,255,255,.16); }
+}
+
+/* Utility classes */
+.rise        { opacity:0; animation: riseIn     .65s cubic-bezier(.22,1,.36,1) forwards; }
+.rise-left   { opacity:0; animation: riseInLeft .55s cubic-bezier(.22,1,.36,1) forwards; }
+.pop         { opacity:0; animation: popIn      .5s  cubic-bezier(.22,1,.36,1) forwards; }
+.wipe        { opacity:0; animation: wipeIn     .72s cubic-bezier(.22,1,.36,1) forwards; }
+.word        { opacity:0; animation: wordIn     .78s cubic-bezier(.2,1.02,.3,1) forwards; display:inline-block; }
+.spring      { opacity:0; animation: springIn   .78s cubic-bezier(.22,1,.36,1) forwards; }
+.title-glow  { animation: titleGlow 6s ease-in-out 1.2s infinite; }
+.float-loop  { animation: floatY 5s ease-in-out infinite; }
+.glow-loop   { animation: glowPulse 3s ease-in-out infinite; }
+.pulse-loop  { animation: softPulse 2.6s ease-in-out infinite; }
+.drift-loop  { animation: tiltDrift 9s ease-in-out infinite; }
+
+/* Marching ants for SVG guide lines. The dasharray must be set on
+   the element; only the offset is animated here. */
+.ants       { animation: dashFlow    9s  linear infinite; }
+.ants-fast  { animation: dashFlow    3.5s linear infinite; }
+.ants-slow  { animation: dashFlow    20s linear infinite; }
+.ants-rev   { animation: dashFlowRev 9s  linear infinite; }
+
+/* SVG groups that scale need an explicit box and origin */
+.breathe-loop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: breathe 4.2s ease-in-out infinite;
+}
+.halo { animation: haloGrow 2.4s ease-out infinite; }
+
+/* Delay ladder — kept for the SVG diagrams, which address it by name */
+.d0  { animation-delay:0s; }
+.d1  { animation-delay:.08s; }
+.d2  { animation-delay:.16s; }
+.d3  { animation-delay:.26s; }
+.d4  { animation-delay:.36s; }
+.d5  { animation-delay:.48s; }
+.d6  { animation-delay:.60s; }
+.d7  { animation-delay:.74s; }
+.d8  { animation-delay:.90s; }
+.d9  { animation-delay:1.06s; }
+.d10 { animation-delay:1.24s; }
+
+/* SVG draw system */
+.svg-draw {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: drawStroke .9s cubic-bezier(.22,1,.36,1) forwards;
+}
+.svg-arc {
+  animation: arcAppear .7s cubic-bezier(.22,1,.36,1) forwards;
+}
+.svg-marker {
+  opacity:0;
+  animation: markerPop .4s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+/* Progress bar shimmer */
+.progress-fill {
+  position: relative;
+  overflow: hidden;
+}
+.progress-fill::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Drag handle pulse */
+@keyframes dragPulse {
+  0%,100% { stroke-opacity: .45; }
+  50%      { stroke-opacity: .1; }
+}
+.drag-pulse { animation: dragPulse 1.8s ease-in-out infinite; }
+
+/* Nav dot hover */
+.nav-dot {
+  transition: all .3s cubic-bezier(.22,1,.36,1);
+  cursor: pointer;
+  border:none; padding:0;
+}
+.nav-dot:hover { transform: scaleY(2.2); }
+
+/* Arrow buttons */
+.arrow-btn {
+  display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.03);
+  color:rgba(255,255,255,.45);
+  cursor:pointer;
+  transition: all .25s cubic-bezier(.22,1,.36,1);
+}
+.arrow-btn:hover:not(:disabled) {
+  border-color:rgba(255,255,255,.3);
+  color:#fff;
+  background:rgba(255,255,255,.08);
+}
+.arrow-btn:disabled { opacity:.22; cursor:default; }
+
+/* Cards that respond to the pointer — helps when someone is talking
+   through the agenda and wants to point at one block. */
+.lift {
+  transition: transform .3s cubic-bezier(.22,1,.36,1), border-color .3s ease, background .3s ease;
+}
+.lift:hover {
+  transform: translateY(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .rise-left, .pop, .wipe, .word, .spring, .svg-draw, .svg-arc, .svg-marker,
+  .sweep, .sweep-soft,
+  .slide-enter-fwd, .slide-exit-fwd, .slide-enter-bwd, .slide-exit-bwd,
+  .zoom-enter-fwd, .zoom-exit-fwd, .zoom-enter-bwd, .zoom-exit-bwd,
+  .side-enter-fwd, .side-exit-fwd, .side-enter-bwd, .side-exit-bwd,
+  .flip-enter-fwd, .flip-exit-fwd, .flip-enter-bwd, .flip-exit-bwd {
+    animation-duration: .01ms !important;
+    animation-delay: 0s !important;
+  }
+  .float-loop, .glow-loop, .pulse-loop, .drift-loop, .drag-pulse, .title-glow,
+  .ants, .ants-fast, .ants-slow, .ants-rev, .breathe-loop, .halo,
+  .progress-fill::after {
+    animation: none !important;
+  }
+  .lift { transition: none !important; }
+  .lift:hover { transform: none !important; }
+}
