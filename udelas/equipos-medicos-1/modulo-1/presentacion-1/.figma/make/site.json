@@ -1,0 +1,11 @@
+{
+  "title": "Salón de Operaciones — Módulo N°1 | Equipos Médicos I",
+  "description": "Historia y conceptos básicos del salón de operaciones — presentación del Módulo N°1 de Equipos Médicos I, UDELAS.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
