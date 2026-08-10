@@ -1,0 +1,50 @@
+{
+  "curso": "Equipos Médicos III",
+  "institucion": "UDELAS",
+  "carrera": "Ingeniería Biomédica",
+  "_comentario": "Para agregar una presentación: crea la carpeta (p. ej. modulo-1/presentacion-2) con su app de Vite y añade su entrada aquí. El workflow compila toda carpeta modulo-*/*/ que tenga package.json; esta lista sólo controla qué se muestra en el menú y cómo.",
+  "modulos": [
+    {
+      "id": "modulo-1",
+      "numero": "I",
+      "titulo": "Equipos de Radiodiagnóstico",
+      "descripcion": "Física de producción de rayos X, radiaciones ionizantes, el tubo y el generador — de la teoría a la falla en el hospital.",
+      "acento": "#c8192e",
+      "presentaciones": [
+        {
+          "id": "presentacion-1",
+          "etiqueta": "Presentación 1",
+          "titulo": "Equipos de Radiodiagnóstico",
+          "descripcion": "Fundamentos, tubo y generador de rayos X — de la producción del fotón a las fallas de refrigeración y de generador.",
+          "referencia": "Ing. Bryan Rodríguez S. · Equipos Médicos III",
+          "laminas": 50,
+          "estado": "disponible"
+        }
+      ]
+    },
+    {
+      "id": "modulo-2",
+      "numero": "II",
+      "titulo": "Por definir",
+      "descripcion": "Contenido del segundo módulo del programa.",
+      "acento": "#a81428",
+      "presentaciones": []
+    },
+    {
+      "id": "modulo-3",
+      "numero": "III",
+      "titulo": "Por definir",
+      "descripcion": "Contenido del tercer módulo del programa.",
+      "acento": "#8a1020",
+      "presentaciones": []
+    },
+    {
+      "id": "modulo-4",
+      "numero": "IV",
+      "titulo": "Por definir",
+      "descripcion": "Contenido del cuarto módulo del programa.",
+      "acento": "#6a0c18",
+      "presentaciones": []
+    }
+  ]
+}

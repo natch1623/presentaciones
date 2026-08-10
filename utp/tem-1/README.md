@@ -4,19 +4,26 @@ Presentaciones interactivas del curso, de la carrera de Ingeniería Electromecá
 la Universidad Tecnológica de Panamá. Cada presentación es una aplicación independiente
 de Vite + React + TypeScript, con diagramas SVG animados y manipulables.
 
-**Sitio publicado:** https://natch1623.github.io/teoria_electromagnetica_I/
+**Sitio publicado:** https://natch1623.github.io/presentaciones/utp/tem-1/
+
+> Este curso vive dentro del hub [`presentaciones`](../../), junto con los
+> demás cursos de UTP y UDELAS. El repo original (`teoria_electromagnetica_I`)
+> se migró aquí conservando su historial completo (`git subtree`); esta
+> carpeta es ahora la ubicación canónica de trabajo.
 
 ## Estructura
 
 ```
-.
-├── index.html              menú principal (HTML estático, sin build)
+utp/tem-1/
+├── index.html              menú del curso (HTML estático, sin build)
 ├── presentaciones.json     qué módulos y partes aparecen en el menú
-├── modulo-1/
-│   ├── parte-a/            Análisis Vectorial
-│   └── parte-b/            Operadores Diferenciales
-└── .github/workflows/      compila todo y publica en Pages
+└── modulo-1/
+    ├── parte-a/            Análisis Vectorial
+    └── parte-b/            Operadores Diferenciales
 ```
+
+El workflow que compila y publica todo (`.github/workflows/deploy.yml`) vive
+en la raíz del hub, compartido por todos los cursos — no hay uno local aquí.
 
 ## Agregar una presentación nueva
 

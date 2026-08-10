@@ -1,0 +1,19 @@
+{
+  "_comentario": "Institución → curso → módulo → presentación. Para agregar una institución nueva: crea su carpeta con index.html + cursos.json (copia udelas/ o utp/ como plantilla) y añade su entrada aquí. El workflow descubre las presentaciones por su propia cuenta; esta lista sólo controla qué aparece en la portada.",
+  "instituciones": [
+    {
+      "id": "udelas",
+      "nombre": "UDELAS",
+      "nombreCompleto": "Universidad Especializada de las Américas",
+      "descripcion": "Ingeniería Biomédica — equipos médicos, mantenimiento y radiodiagnóstico.",
+      "acento": "#c8192e"
+    },
+    {
+      "id": "utp",
+      "nombre": "UTP",
+      "nombreCompleto": "Universidad Tecnológica de Panamá",
+      "descripcion": "Ingeniería Electromecánica — teoría electromagnética y talleres de diagnóstico.",
+      "acento": "#f0c040"
+    }
+  ]
+}

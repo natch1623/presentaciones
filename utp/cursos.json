@@ -1,0 +1,14 @@
+{
+  "institucion": "UTP",
+  "institucionCompleta": "Universidad Tecnológica de Panamá",
+  "_comentario": "Para agregar un curso: crea su carpeta (index.html + presentaciones.json) y añade su entrada aquí.",
+  "cursos": [
+    {
+      "id": "tem-1",
+      "nombre": "Teoría Electromagnética I",
+      "descripcion": "Ingeniería Electromecánica — análisis vectorial, operadores diferenciales y campos electrostáticos.",
+      "acento": "#f0c040",
+      "estado": "disponible"
+    }
+  ]
+}

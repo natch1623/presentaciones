@@ -1,0 +1,14 @@
+{
+  "institucion": "UDELAS",
+  "institucionCompleta": "Universidad Especializada de las Américas",
+  "_comentario": "Para agregar un curso: crea su carpeta (index.html + presentaciones.json, copia equipos-medicos-3/ como plantilla) y añade su entrada aquí.",
+  "cursos": [
+    {
+      "id": "equipos-medicos-3",
+      "nombre": "Equipos Médicos III",
+      "descripcion": "Fundamentos físicos, tubo y generador de rayos X — equipos de radiodiagnóstico.",
+      "acento": "#c8192e",
+      "estado": "disponible"
+    }
+  ]
+}

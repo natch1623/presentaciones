@@ -1,0 +1,102 @@
+name: Desplegar a GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un despliegue a la vez; no cancela el que ya está corriendo.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Descubrir y compilar cada nivel
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # El sitio se arma FUERA del checkout, en $RUNNER_TEMP. Si viviera
+          # dentro del repo (p. ej. ./_site), los globs sin prefijo de abajo
+          # (*/index.html, */*/index.html) terminarían encontrando y
+          # copiando el propio directorio de salida sobre sí mismo en cuanto
+          # empezara a llenarse — TEM1 se salvaba de esto porque su único
+          # glob era modulo-*/*/package.json, que nunca matchea nada bajo
+          # _site; aquí, con institución/curso sin prefijo compartido, sí lo
+          # haría. Construir afuera lo evita de raíz.
+          site="$RUNNER_TEMP/_site"
+          mkdir -p "$site"
+
+          # Portada raíz (elige institución): estática, va tal cual.
+          cp index.html instituciones.json "$site/"
+
+          # Portada de cada institución (elige curso).
+          for f in */index.html */cursos.json; do
+            [ -e "$f" ] || continue
+            mkdir -p "$site/$(dirname "$f")"
+            cp "$f" "$site/$f"
+          done
+
+          # Portada de cada curso (elige módulo / presentación).
+          for f in */*/index.html */*/presentaciones.json; do
+            [ -e "$f" ] || continue
+            mkdir -p "$site/$(dirname "$f")"
+            cp "$f" "$site/$f"
+          done
+
+          # Toda carpeta institución/curso/modulo-*/<presentación>/ con
+          # package.json es una app de Vite independiente y se compila sola.
+          # Agregar una presentación nueva no requiere tocar este workflow.
+          encontradas=0
+          for pkg in */*/modulo-*/*/package.json; do
+            [ -e "$pkg" ] || continue
+            dir="$(dirname "$pkg")"
+            echo "::group::Compilando $dir"
+            npm --prefix "$dir" ci
+            npm --prefix "$dir" run build
+            mkdir -p "$site/$dir"
+            cp -r "$dir/dist/." "$site/$dir/"
+            echo "::endgroup::"
+            encontradas=$((encontradas + 1))
+          done
+
+          if [ "$encontradas" -eq 0 ]; then
+            echo "No se encontró ninguna presentación para compilar." >&2
+            exit 1
+          fi
+          echo "Presentaciones compiladas: $encontradas"
+
+          # Jekyll ignora carpetas que empiezan con _ ; esto lo desactiva.
+          touch "$site/.nojekyll"
+
+          echo "SITE_DIR=$site" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.SITE_DIR }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
