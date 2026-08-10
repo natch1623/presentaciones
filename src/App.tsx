@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { slides } from './slides'
+import CustomSlide from './slides/CustomSlide'
 import ParticleCanvas from './components/ParticleCanvas'
+import { EditorProvider, useDeck } from './editor/DeckContext'
+import EditableSlide from './editor/EditableSlide'
+import EditorPanel from './editor/EditorPanel'
 
 type Direction = 'forward' | 'back'
 
@@ -13,7 +17,26 @@ const TRANSITION_MS = 380
 const CANVAS_W = 1280
 const CANVAS_H = 800
 
+// Identifica el deck en el almacenamiento del navegador. Si se clona esta
+// presentación para otro módulo, cambiar este id evita que las dos compartan
+// (y se pisen) las mismas ediciones.
+const DECK_ID = 'udelas-em1-m1-p1'
+
 export default function App() {
+  return (
+    <EditorProvider
+      deckId={DECK_ID}
+      baseSlides={slides}
+      renderCustom={data => <CustomSlide data={data} />}
+    >
+      <Deck />
+    </EditorProvider>
+  )
+}
+
+function Deck() {
+  const { visibleSlides, renderSlide, editing, nonce } = useDeck()
+
   const [current, setCurrent] = useState(0)
   const [displayIndex, setDisplayIndex] = useState(0)
   const [outClass, setOutClass] = useState('')
@@ -25,6 +48,9 @@ export default function App() {
   const [scale, setScale] = useState(1)
   const lockRef = useRef(false)
   const stageRef = useRef<HTMLDivElement>(null)
+  // Qué diapositiva queremos tener en pantalla, por clave y no por posición:
+  // reordenar u ocultar cambia los índices bajo los pies del presentador.
+  const anchorRef = useRef<string | null>(null)
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -53,38 +79,79 @@ export default function App() {
     }
   }, [])
 
-  const goTo = useCallback((index: number, dir: Direction) => {
-    if (lockRef.current || index < 0 || index >= slides.length) return
-    lockRef.current = true
-    setIsAnimating(true)
-    setScanning(true)
-
-    const outAnim = dir === 'forward' ? 'anim-forward-out' : 'anim-back-out'
-    const inAnim  = dir === 'forward' ? 'anim-forward-in'  : 'anim-back-in'
-
-    setOutClass(outAnim)
-    setInClass('')
-
-    setTimeout(() => {
-      setDisplayIndex(index)
-      setCurrent(index)
+  /** Salto inmediato, sin transición: para el editor y para reencuadrar. */
+  const jump = useCallback(
+    (index: number) => {
+      const clamped = Math.max(0, Math.min(index, visibleSlides.length - 1))
+      lockRef.current = false
+      setIsAnimating(false)
       setOutClass('')
-      setInClass(inAnim)
+      setInClass('')
       setScanning(false)
+      setCurrent(clamped)
+      setDisplayIndex(clamped)
+      anchorRef.current = visibleSlides[clamped]?.key ?? null
+    },
+    [visibleSlides],
+  )
+
+  const goTo = useCallback(
+    (index: number, dir: Direction) => {
+      if (lockRef.current || index < 0 || index >= visibleSlides.length) return
+      // Editando no hay transición: el vuelo de 3D dejaría el texto en
+      // movimiento justo cuando se le quiere hacer clic.
+      if (editing) return jump(index)
+
+      lockRef.current = true
+      setIsAnimating(true)
+      setScanning(true)
+
+      const outAnim = dir === 'forward' ? 'anim-forward-out' : 'anim-back-out'
+      const inAnim = dir === 'forward' ? 'anim-forward-in' : 'anim-back-in'
+
+      setOutClass(outAnim)
+      setInClass('')
 
       setTimeout(() => {
-        setInClass('')
-        lockRef.current = false
-        setIsAnimating(false)
-      }, 600)
-    }, TRANSITION_MS)
-  }, [])
+        setDisplayIndex(index)
+        setCurrent(index)
+        anchorRef.current = visibleSlides[index]?.key ?? null
+        setOutClass('')
+        setInClass(inAnim)
+        setScanning(false)
+
+        setTimeout(() => {
+          setInClass('')
+          lockRef.current = false
+          setIsAnimating(false)
+        }, 600)
+      }, TRANSITION_MS)
+    },
+    [visibleSlides, editing, jump],
+  )
 
   const next = useCallback(() => goTo(current + 1, 'forward'), [current, goTo])
   const prev = useCallback(() => goTo(current - 1, 'back'), [current, goTo])
 
+  // Reordenar, ocultar o agregar cambia la lista bajo el índice actual: seguimos
+  // a la diapositiva por su clave para no terminar mirando otra cosa.
+  useEffect(() => {
+    if (visibleSlides.length === 0) return
+    if (anchorRef.current === null) {
+      anchorRef.current = visibleSlides[Math.min(current, visibleSlides.length - 1)]?.key ?? null
+    }
+    const wanted = visibleSlides.findIndex(s => s.key === anchorRef.current)
+    const target = wanted >= 0 ? wanted : Math.min(current, visibleSlides.length - 1)
+    if (target !== current || target !== displayIndex) jump(target)
+  }, [visibleSlides]) // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Escribiendo en la diapositiva o en el panel, el teclado es del campo.
+      const t = e.target as HTMLElement | null
+      if (t?.isContentEditable || t?.tagName === 'INPUT' || t?.tagName === 'TEXTAREA' || t?.closest?.('[data-dk-ui]')) {
+        return
+      }
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); next() }
       if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prev()
       if (e.key === 'f' || e.key === 'F') toggleFullscreen()
@@ -94,8 +161,8 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler)
   }, [next, prev, toggleFullscreen])
 
-  const SlideComponent = slides[displayIndex].component
-  const progress = ((current + 1) / slides.length) * 100
+  const shown = visibleSlides[displayIndex]
+  const progress = visibleSlides.length ? ((current + 1) / visibleSlides.length) * 100 : 0
 
   return (
     <div
@@ -246,7 +313,7 @@ export default function App() {
               {String(current + 1).padStart(2, '0')}
             </span>
             <span className="font-mono" style={{ fontSize: 10, color: 'var(--white-faint)' }}>
-              / {String(slides.length).padStart(2, '0')}
+              / {String(visibleSlides.length).padStart(2, '0')}
             </span>
           </div>
         </div>
@@ -263,7 +330,7 @@ export default function App() {
         }}
       >
         <div
-          key={displayIndex}
+          key={`${shown?.key ?? 'empty'}-${nonce}`}
           className={inClass || outClass}
           style={{
             width: '100%',
@@ -274,7 +341,9 @@ export default function App() {
             willChange: 'transform, opacity, filter',
           }}
         >
-          <SlideComponent />
+          {shown && (
+            <EditableSlide slideKey={shown.key}>{renderSlide(shown.key)}</EditableSlide>
+          )}
         </div>
       </div>
 
@@ -320,13 +389,13 @@ export default function App() {
 
         {/* Dot nav */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-          {slides.map((_, i) => (
+          {visibleSlides.map((s, i) => (
             <button
-              key={i}
+              key={s.key}
               onClick={() => !isAnimating && goTo(i, i > current ? 'forward' : 'back')}
               onMouseEnter={() => setHoveredDot(i)}
               onMouseLeave={() => setHoveredDot(null)}
-              title={`Slide ${i + 1}`}
+              title={`${i + 1}. ${s.label}`}
               style={{
                 width: i === current ? 20 : hoveredDot === i ? 10 : 5,
                 height: 5,
@@ -351,10 +420,12 @@ export default function App() {
         <div style={{ display: 'flex', gap: 8 }}>
           <NavBtn onClick={toggleFullscreen} disabled={false} label={isFullscreen ? '⤡' : '⤢'} title={isFullscreen ? 'Salir de pantalla completa (Esc)' : 'Pantalla completa (F)'} />
           <NavBtn onClick={prev} disabled={current === 0 || isAnimating} label="←" />
-          <NavBtn onClick={next} disabled={current === slides.length - 1 || isAnimating} label="→" />
+          <NavBtn onClick={next} disabled={current === visibleSlides.length - 1 || isAnimating} label="→" />
         </div>
       </footer>
       </div>
+
+      <EditorPanel current={current} onGoTo={jump} />
     </div>
   )
 }

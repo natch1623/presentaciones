@@ -1,0 +1,319 @@
+/* ─── MODO EDITOR ─────────────────────────────────────────────────────────
+   Todo lo del editor vive bajo .dk- para que nunca choque con los estilos
+   de la presentación. */
+
+/* En modo edición las animaciones de entrada se saltan: si cada clic
+   reprodujera el stagger de la slide, el texto bailaría bajo el cursor. */
+.dk-flat,
+.dk-flat * {
+  animation-duration: 0.001s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0.001s !important;
+}
+
+.dk-flat [contenteditable] {
+  cursor: text;
+  outline: none;
+  caret-color: #00d4ff;
+}
+
+.dk-host {
+  position: relative;
+}
+
+/* ─── Panel ───────────────────────────────────────────────────────────── */
+
+.dk-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 348px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  background: rgba(3, 10, 32, 0.94);
+  backdrop-filter: blur(18px);
+  border-left: 1px solid rgba(0, 212, 255, 0.22);
+  box-shadow: -18px 0 60px rgba(0, 0, 0, 0.55);
+  font-family: 'Outfit', sans-serif;
+  color: #f0f9ff;
+  animation: dkSlideIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes dkSlideIn {
+  from { transform: translateX(24px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.dk-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.16);
+  flex-shrink: 0;
+}
+
+.dk-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #00d4ff;
+  flex: 1;
+}
+
+.dk-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 12px 28px;
+}
+
+.dk-scroll::-webkit-scrollbar { width: 8px; }
+.dk-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.22);
+  border-radius: 4px;
+}
+
+.dk-section {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(240, 249, 255, 0.4);
+  margin: 16px 4px 8px;
+}
+.dk-section:first-child { margin-top: 4px; }
+
+/* ─── Fila de slide ───────────────────────────────────────────────────── */
+
+.dk-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: rgba(10, 26, 74, 0.5);
+  margin-bottom: 4px;
+  cursor: grab;
+  transition: background 0.15s, border-color 0.15s;
+}
+.dk-row:hover { background: rgba(10, 26, 74, 0.9); border-color: rgba(0, 212, 255, 0.2); }
+.dk-row.is-current { border-color: rgba(0, 212, 255, 0.55); background: rgba(0, 212, 255, 0.1); }
+.dk-row.is-hidden { opacity: 0.42; }
+.dk-row.is-drop-before { box-shadow: inset 0 2px 0 #00d4ff; }
+.dk-row.is-drop-after  { box-shadow: inset 0 -2px 0 #00d4ff; }
+.dk-row.is-dragging { opacity: 0.35; }
+
+.dk-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgba(0, 212, 255, 0.6);
+  width: 20px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.dk-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(240, 249, 255, 0.85);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 2px 3px;
+  border-radius: 4px;
+  font-family: inherit;
+  text-overflow: ellipsis;
+}
+.dk-label:focus { background: rgba(0, 0, 0, 0.35); color: #fff; }
+
+.dk-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+.dk-chip.nueva { background: rgba(52, 211, 153, 0.16); color: #6ee7b7; }
+.dk-chip.copia { background: rgba(167, 139, 250, 0.16); color: #c4b5fd; }
+
+/* ─── Botones ─────────────────────────────────────────────────────────── */
+
+.dk-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(0, 212, 255, 0.28);
+  background: rgba(0, 212, 255, 0.07);
+  color: #00d4ff;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+.dk-btn:hover { background: rgba(0, 212, 255, 0.18); border-color: rgba(0, 212, 255, 0.65); }
+.dk-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.dk-btn.is-on {
+  background: linear-gradient(90deg, #2563eb, #00d4ff);
+  color: #02071a;
+  border-color: transparent;
+  font-weight: 600;
+}
+.dk-btn.danger { border-color: rgba(248, 113, 113, 0.35); color: #fca5a5; background: rgba(248, 113, 113, 0.06); }
+.dk-btn.danger:hover { background: rgba(248, 113, 113, 0.18); border-color: rgba(248, 113, 113, 0.7); }
+.dk-btn.ghost { border-color: rgba(240, 249, 255, 0.16); color: rgba(240, 249, 255, 0.6); background: transparent; }
+.dk-btn.ghost:hover { border-color: rgba(240, 249, 255, 0.4); color: #f0f9ff; background: rgba(240, 249, 255, 0.06); }
+
+.dk-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(240, 249, 255, 0.45);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+.dk-icon:hover { background: rgba(0, 212, 255, 0.15); color: #00d4ff; }
+.dk-icon.danger:hover { background: rgba(248, 113, 113, 0.18); color: #fca5a5; }
+
+.dk-toolbar { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 4px; }
+
+/* ─── Lista de textos ─────────────────────────────────────────────────── */
+
+.dk-text-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+
+.dk-text-input {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: rgba(240, 249, 255, 0.9);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(240, 249, 255, 0.1);
+  border-radius: 6px;
+  padding: 6px 8px;
+  outline: none;
+  resize: vertical;
+  min-height: 30px;
+}
+.dk-text-input:focus { border-color: rgba(0, 212, 255, 0.55); background: rgba(0, 0, 0, 0.5); }
+.dk-text-input.is-edited { border-left: 2px solid #00d4ff; }
+
+.dk-search {
+  width: 100%;
+  font-family: inherit;
+  font-size: 12px;
+  color: #f0f9ff;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(240, 249, 255, 0.12);
+  border-radius: 7px;
+  padding: 7px 10px;
+  outline: none;
+  margin-bottom: 8px;
+}
+.dk-search:focus { border-color: rgba(0, 212, 255, 0.5); }
+
+.dk-hint {
+  font-size: 11px;
+  line-height: 1.55;
+  color: rgba(240, 249, 255, 0.42);
+  padding: 8px 10px;
+  background: rgba(0, 212, 255, 0.04);
+  border: 1px solid rgba(0, 212, 255, 0.12);
+  border-left: 2px solid rgba(0, 212, 255, 0.5);
+  border-radius: 7px;
+  margin: 0 4px 4px;
+}
+.dk-hint b { color: rgba(240, 249, 255, 0.8); font-weight: 600; }
+
+/* ─── Lanzador ────────────────────────────────────────────────────────── */
+
+.dk-launcher {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 9997;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  background: rgba(3, 10, 32, 0.86);
+  backdrop-filter: blur(12px);
+  color: #00d4ff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  opacity: 0.4;
+}
+.dk-launcher:hover { opacity: 1; border-color: rgba(0, 212, 255, 0.75); box-shadow: 0 0 22px rgba(0, 212, 255, 0.28); }
+
+/* Aviso permanente de que se está editando, para no presentar por error. */
+.dk-editing-flag {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #00d4ff, #2563eb);
+  background-size: 200% 100%;
+  animation: dkFlag 2.4s linear infinite;
+  z-index: 9996;
+  pointer-events: none;
+}
+@keyframes dkFlag {
+  from { background-position: 0 0; }
+  to   { background-position: 200% 0; }
+}
+
+.dk-templates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 0 4px;
+}
+.dk-template {
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  background: rgba(10, 26, 74, 0.55);
+  color: rgba(240, 249, 255, 0.85);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11.5px;
+  transition: all 0.15s ease;
+}
+.dk-template:hover { border-color: rgba(0, 212, 255, 0.6); background: rgba(0, 212, 255, 0.12); }
+.dk-template small {
+  display: block;
+  font-size: 9.5px;
+  color: rgba(240, 249, 255, 0.4);
+  margin-top: 2px;
+}
