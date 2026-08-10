@@ -1,0 +1,11 @@
+{
+  "title": "Módulo I — Mantenimiento en equipos de laboratorio clínico",
+  "description": "Centrífuga, microscopio, cámara de flujo laminar, esterilizador de vapor, lavador de ELISA e incubadora de CO₂ — rutinas, diagnóstico y verificación. Técnico en Biomédica, UDELAS.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

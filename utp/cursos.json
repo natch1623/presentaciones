@@ -9,6 +9,13 @@
       "descripcion": "Ingeniería Electromecánica — análisis vectorial, operadores diferenciales y campos electrostáticos.",
       "acento": "#f0c040",
       "estado": "disponible"
+    },
+    {
+      "id": "taller-diagnostico-biomedico",
+      "nombre": "Taller de Diagnóstico Biomédico",
+      "descripcion": "Aún en preparación — por ahora solo existe el material fuente, sin presentación interactiva.",
+      "acento": "#60a5fa",
+      "estado": "pendiente"
     }
   ]
 }

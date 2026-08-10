@@ -1,0 +1,10 @@
+{
+  "description": "Create professional presentations from PDFs using color palettes extracted from images to ensure cohesive and visually appealing slides.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

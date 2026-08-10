@@ -4,10 +4,24 @@
   "_comentario": "Para agregar un curso: crea su carpeta (index.html + presentaciones.json, copia equipos-medicos-3/ como plantilla) y añade su entrada aquí.",
   "cursos": [
     {
+      "id": "equipos-medicos-1",
+      "nombre": "Equipos Médicos I",
+      "descripcion": "Salón de operaciones: de la anestesia con éter al quirófano híbrido, y los equipos que lo componen.",
+      "acento": "#00d4ff",
+      "estado": "disponible"
+    },
+    {
       "id": "equipos-medicos-3",
       "nombre": "Equipos Médicos III",
       "descripcion": "Fundamentos físicos, tubo y generador de rayos X — equipos de radiodiagnóstico.",
       "acento": "#c8192e",
+      "estado": "disponible"
+    },
+    {
+      "id": "mantenimiento-equipos",
+      "nombre": "Mantenimiento de Equipos",
+      "descripcion": "Centrífuga, microscopio, cámara de flujo laminar, esterilizador, lavador de ELISA e incubadora de CO₂ — rutinas, diagnóstico y verificación.",
+      "acento": "#8fdcff",
       "estado": "disponible"
     }
   ]

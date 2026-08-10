@@ -15,11 +15,22 @@ Vite + React + TypeScript.
 ├── udelas/
 │   ├── index.html                   elige curso
 │   ├── cursos.json
-│   └── equipos-medicos-3/
-│       ├── index.html               elige módulo / presentación
+│   ├── equipos-medicos-1/           Salón de Operaciones
+│   │   ├── index.html
+│   │   ├── presentaciones.json
+│   │   └── modulo-1/
+│   │       ├── presentacion-1/
+│   │       └── presentacion-2/
+│   ├── equipos-medicos-3/           Equipos de Radiodiagnóstico
+│   │   ├── index.html
+│   │   ├── presentaciones.json
+│   │   └── modulo-1/
+│   │       └── presentacion-1/
+│   └── mantenimiento-equipos/       Mantenimiento en equipos de laboratorio clínico
+│       ├── index.html
 │       ├── presentaciones.json
 │       └── modulo-1/
-│           └── presentacion-1/      Equipos de Radiodiagnóstico
+│           └── presentacion-1/
 ├── utp/
 │   ├── index.html
 │   ├── cursos.json
@@ -96,11 +107,17 @@ es exactamente lo que hace el workflow de despliegue.
   darán 404.
 - Los binarios (PDF, PNG, etc.) van por Git LFS — cada presentación trae su
   propio `.gitattributes` con las reglas de tracking.
-- `Teoría Electromagnética I` (UTP) se migró aquí desde su repo original
-  (`teoria_electromagnetica_I`) conservando el historial completo de commits
-  vía `git subtree`. Ese repo sigue existiendo en GitHub pero esta carpeta es
-  ahora la ubicación canónica de trabajo — ver la nota en
-  [`utp/tem-1/README.md`](utp/tem-1/README.md).
+- `Teoría Electromagnética I` (UTP) y `Equipos Médicos I · Presentación 1`
+  (UDELAS) se migraron aquí desde sus repos originales (`teoria_electromagnetica_I`
+  y `equiposmedicos`) conservando el historial completo de commits vía
+  `git subtree`. Esos repos siguen existiendo en GitHub tal cual, pero esta
+  carpeta es ahora la ubicación canónica de trabajo.
+- `udelas/equipos-medicos-1/modulo-1/presentacion-2/recursos/` (manuales de
+  fabricante, ~400 MB) está en `.gitignore` a propósito: no lo usa la app,
+  y tiene derechos de terceros — mismo trato que `utp/tem-1/_fuentes/`.
+  `presentacion-2/public/videos/` sí se publica (es el video que muestra la
+  presentación), vía Git LFS — pesa ~146 MB, así que cada clon completo del
+  repo consume una buena parte de la cuota gratuita de LFS de GitHub.
 
 ## Atajos de teclado (dentro de cada presentación)
 

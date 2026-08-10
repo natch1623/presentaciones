@@ -1,0 +1,19 @@
+node_modules/
+dist/
+build/
+.cache/
+.env*
+.vite/
+vite.config.*.timestamp-*
+*.tsbuildinfo
+*-debug.log*
+logs/
+*.log
+.claude-replay.*
+.tmp-*
+
+# Manuales de fabricante (COMEN AX900), material de entrenamiento y video de
+# referencia: no los usa la app, pesan ~400 MB y tienen derechos de terceros —
+# se quedan en el disco local, fuera del repo (mismo trato que _fuentes/ en
+# utp/tem-1).
+recursos/

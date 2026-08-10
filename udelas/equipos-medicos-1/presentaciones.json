@@ -1,0 +1,58 @@
+{
+  "curso": "Equipos Médicos I",
+  "institucion": "UDELAS",
+  "carrera": "Ingeniería Biomédica",
+  "_comentario": "Para agregar una presentación: crea la carpeta (p. ej. modulo-1/presentacion-3) con su app de Vite y añade su entrada aquí. El workflow compila toda carpeta modulo-*/*/ que tenga package.json; esta lista sólo controla qué se muestra en el menú y cómo.",
+  "modulos": [
+    {
+      "id": "modulo-1",
+      "numero": "I",
+      "titulo": "Salón de Operaciones",
+      "descripcion": "El ambiente más controlado del hospital: de la anestesia con éter al quirófano híbrido, su arquitectura, y el equipamiento que lo compone.",
+      "acento": "#00d4ff",
+      "presentaciones": [
+        {
+          "id": "presentacion-1",
+          "etiqueta": "Presentación 1",
+          "titulo": "Salón de Operaciones",
+          "descripcion": "Historia del quirófano —del éter a la asepsia y la tecnología—, zonificación, arquitectura, HVAC, gases medicinales, seguridad eléctrica y el rol del biomédico. Incluye modo editor para retocar el deck desde el navegador.",
+          "referencia": "Ing. Bryan Rodríguez S. · Equipos Médicos I",
+          "laminas": 24,
+          "estado": "disponible"
+        },
+        {
+          "id": "presentacion-2",
+          "etiqueta": "Presentación 2",
+          "titulo": "Equipos de Salón de Operaciones",
+          "descripcion": "Catálogo por equipo: máquina de anestesia, lámpara quirúrgica, electrocirugía, mesa quirúrgica, torre de endoscopía y bomba de circulación extracorpórea — qué es, cómo funciona, componentes y mantenimiento de cada uno.",
+          "referencia": "Ing. Bryan Rodríguez S. · Equipos Médicos I",
+          "estado": "disponible"
+        }
+      ]
+    },
+    {
+      "id": "modulo-2",
+      "numero": "II",
+      "titulo": "Por definir",
+      "descripcion": "Contenido del segundo módulo del programa.",
+      "acento": "#0ea5d4",
+      "presentaciones": []
+    },
+    {
+      "id": "modulo-3",
+      "numero": "III",
+      "titulo": "Por definir",
+      "descripcion": "Contenido del tercer módulo del programa.",
+      "acento": "#0a7ea3",
+      "presentaciones": []
+    },
+    {
+      "id": "modulo-4",
+      "numero": "IV",
+      "titulo": "Por definir",
+      "descripcion": "Contenido del cuarto módulo del programa.",
+      "acento": "#075f7f",
+      "presentaciones": []
+    }
+  ]
+}

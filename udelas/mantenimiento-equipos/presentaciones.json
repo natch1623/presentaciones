@@ -1,0 +1,50 @@
+{
+  "curso": "Mantenimiento de Equipos",
+  "institucion": "UDELAS",
+  "carrera": "Técnico en Biomédica",
+  "_comentario": "Para agregar una presentación: crea la carpeta (p. ej. modulo-1/presentacion-2) con su app de Vite y añade su entrada aquí. El workflow compila toda carpeta modulo-*/*/ que tenga package.json; esta lista sólo controla qué se muestra en el menú y cómo.",
+  "modulos": [
+    {
+      "id": "modulo-1",
+      "numero": "I",
+      "titulo": "Mantenimiento en equipos de laboratorio clínico",
+      "descripcion": "Centrífuga, microscopio, cámara de flujo laminar, esterilizador de vapor, lavador de ELISA e incubadora de CO₂ — rutinas, diagnóstico y verificación.",
+      "acento": "#8fdcff",
+      "presentaciones": [
+        {
+          "id": "presentacion-1",
+          "etiqueta": "Presentación 1",
+          "titulo": "Mantenimiento en equipos de laboratorio clínico",
+          "descripcion": "Seis equipos, un mismo recorrido: anatomía, rutina de mantenimiento, fallas comunes y práctica guiada — centrífuga, microscopio, flujo laminar, autoclave, lavador de ELISA e incubadora de CO₂.",
+          "referencia": "Técnico en Biomédica · UDELAS",
+          "laminas": 44,
+          "estado": "disponible"
+        }
+      ]
+    },
+    {
+      "id": "modulo-2",
+      "numero": "II",
+      "titulo": "Por definir",
+      "descripcion": "Contenido del segundo módulo del programa.",
+      "acento": "#7d63ff",
+      "presentaciones": []
+    },
+    {
+      "id": "modulo-3",
+      "numero": "III",
+      "titulo": "Por definir",
+      "descripcion": "Contenido del tercer módulo del programa.",
+      "acento": "#5c48bf",
+      "presentaciones": []
+    },
+    {
+      "id": "modulo-4",
+      "numero": "IV",
+      "titulo": "Por definir",
+      "descripcion": "Contenido del cuarto módulo del programa.",
+      "acento": "#3f3184",
+      "presentaciones": []
+    }
+  ]
+}
