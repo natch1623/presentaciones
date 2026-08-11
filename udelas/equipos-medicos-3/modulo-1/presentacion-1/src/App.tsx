@@ -1,6 +1,20 @@
 import { useState, useEffect, useRef } from 'react'
 import React from 'react'
 import katex from 'katex'
+import imgModalidades from './assets/figures/1-6-modalidades.png'
+import imgCadenaImagen from './assets/figures/1-7-cadena-imagen.png'
+import imgEspectro from './assets/figures/2-2-espectro.png'
+import imgInversoCuadrado from './assets/figures/2-5-inverso-cuadrado.png'
+import imgFotoelectrico from './assets/figures/2-7-fotoelectrico.jpg'
+import imgCompton from './assets/figures/2-8-compton.jpg'
+import imgTuboRayosX from './assets/figures/3-1-tubo-rayos-x.jpg'
+import imgAnodoGiratorio from './assets/figures/3-4-anodo-giratorio.jpg'
+import imgFocoLineal from './assets/figures/3-5-foco-lineal.jpg'
+import imgCoraza from './assets/figures/3-6-coraza.jpg'
+import imgDiagramaBloques from './assets/figures/4-2-diagrama-bloques.jpg'
+import imgRizado from './assets/figures/4-4-rizado.jpg'
+import imgAltaFrecuencia from './assets/figures/4-5-alta-frecuencia.jpg'
+import imgFluoroscopia from './assets/figures/4-7-fluoroscopia.png'
 
 // ── PALETTE ────────────────────────────────────────────────────────────────
 const P = {
@@ -195,6 +209,68 @@ function TwoCol({ left, right }: { left: React.ReactNode; right: React.ReactNode
   )
 }
 
+/**
+ * A photograph or diagram slot. Without `src` it's a dashed placeholder
+ * naming exactly what should fill it — without pretending to be art the
+ * deck doesn't have yet. With `src` it renders the generated image itself,
+ * captioned. `kind` swaps the icon/label between "fotografía" (real
+ * hospital/equipment photos) and "diagrama" (a drawn schematic).
+ */
+/**
+ * A slide's Figure lives many components deep inside a JSX tree built once
+ * at module load (the SLIDES array), so threading React state down to it
+ * would mean plumbing a callback through every slide. A window event is the
+ * simplest way for any Figure, anywhere, to reach the single <Lightbox>
+ * mounted at the app root.
+ */
+function openLightbox(src: string, label: string) {
+  window.dispatchEvent(new CustomEvent('deck:lightbox', { detail: { src, label } }))
+}
+
+function Figure({ kind = 'photo', label, tall = false, src, filter }: { kind?: 'photo' | 'diagram'; label: string; tall?: boolean; src?: string; filter?: string }) {
+  if (src) {
+    return (
+      <div style={{ marginTop: 14, borderRadius: 10, overflow: 'hidden', border: `1px solid ${P.brd}`, textAlign: 'center' }}>
+        {/* width/height both 'auto' with maxWidth + maxHeight lets the
+            browser's own replaced-element sizing shrink the image to fit
+            whichever limit binds first, preserving its aspect ratio exactly
+            — no cropping (a forced box + object-fit) and no letterboxing
+            (forcing width:100% while capping height). Centered because a
+            height-bound image no longer spans the full column width.
+            The in-slide copy stays small so dense slides don't overflow;
+            clicking it opens the full-size lightbox instead of growing it
+            in place. */}
+        <img
+          src={src} alt={label}
+          onClick={() => openLightbox(src, label)}
+          style={{ display: 'inline-block', width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: tall ? 260 : 140, filter, cursor: 'zoom-in' }}
+        />
+        <div style={{ padding: '7px 14px', background: P.card, fontSize: 11, color: P.muted, lineHeight: 1.4, textAlign: 'left' }}>{label}</div>
+      </div>
+    )
+  }
+  return (
+    <div style={{
+      marginTop: 14, border: `1.5px dashed ${P.rd}`, borderRadius: 10,
+      background: 'rgba(200,25,46,0.045)',
+      display: 'flex', alignItems: 'center', gap: 14,
+      padding: '14px 20px', minHeight: tall ? 200 : 92,
+    }}>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={P.rd} strokeWidth="1.4" style={{ flexShrink: 0 }}>
+        {kind === 'diagram'
+          ? <><circle cx="12" cy="12" r="9" /><path d="M12 3v18M3 12h18" /></>
+          : <><rect x="3" y="4" width="18" height="15" rx="2" /><circle cx="8.5" cy="10" r="1.6" /><path d="M21 16l-5.5-5.5L9 17" /></>}
+      </svg>
+      <div>
+        <div style={{ ...cf, fontSize: 10, letterSpacing: '0.12em', color: P.rd, marginBottom: 3 }}>
+          {kind === 'diagram' ? 'ESPACIO PARA DIAGRAMA' : 'ESPACIO PARA FOTOGRAFÍA'}
+        </div>
+        <div style={{ fontSize: 12.5, color: '#a89090', lineHeight: 1.4 }}>{label}</div>
+      </div>
+    </div>
+  )
+}
+
 function SW({ block, lam, title, children }: { block?: 'A'|'B'|'C'|'D'; lam?: string; title: string; children: React.ReactNode }) {
   const bl: Record<string,string> = { A:'BLOQUE A · Radiodiagnóstico', B:'BLOQUE B · Radiaciones Ionizantes', C:'BLOQUE C · Tubo de Rayos X', D:'BLOQUE D · Generador de Rayos X' }
   const tLen = title.length
@@ -210,7 +286,7 @@ function SW({ block, lam, title, children }: { block?: 'A'|'B'|'C'|'D'; lam?: st
       <h1 style={{ ...cf, fontSize: tSize, fontWeight: 700, color: P.text, lineHeight: 1.2, marginBottom: 18, textShadow: `0 0 40px ${P.rg}` }}>
         {title}
       </h1>
-      <div style={{ flex: 1 }}>{children}</div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>{children}</div>
     </div>
   )
 }
@@ -246,11 +322,12 @@ function Cover() {
       <div style={{ width: 100, height: 2, background: `linear-gradient(to right, transparent, ${P.red}, transparent)`, margin: '0 auto 20px' }} />
       <div style={{ fontSize: 17, color: '#b8a0a0', marginBottom: 34, lineHeight: 1.5 }}>Fundamentos, Tubo y Generador de Rayos X</div>
       <div style={{ border: `1px solid ${P.rd}`, borderRadius: 12, padding: '16px 26px', marginBottom: 32, background: 'rgba(20,8,12,0.8)', maxWidth: 660 }}>
-        <div style={{ fontSize: 11, color: P.muted, marginBottom: 8, ...cf, letterSpacing: '0.14em' }}>PREGUNTA DE APERTURA</div>
+        <div style={{ fontSize: 11, color: P.muted, marginBottom: 8, ...cf, letterSpacing: '0.14em' }}>CITA DE APERTURA</div>
         <div style={{ fontSize: 15, color: '#e0c8c8', fontStyle: 'italic', lineHeight: 1.7 }}>
-          "¿Cuál es el único equipo del hospital que produce, de forma deliberada y controlada,
-          un agente cancerígeno reconocido — y aun así lo instalamos en cada piso?"
+          "El cáncer es ubicuo en la población humana; la única manera cierta de evitarlo
+          consiste en no nacer, ya que vivir supone un riesgo."
         </div>
+        <div style={{ fontSize: 12, color: P.muted, marginTop: 10, ...cf, letterSpacing: '0.06em' }}>— Stanley L. Robbins</div>
       </div>
       <div style={{ display: 'flex', gap: 32, ...cf, fontSize: 12, color: P.muted, letterSpacing: '0.07em' }}>
         <span>Ing. Bryan Rodríguez S.</span>
@@ -357,6 +434,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       [<Bd>Tomografía computarizada</Bd>,'Proyecciones múltiples + reconstrucción','80–140','→ Módulo II'],
     ]} />
     <Def>Todas comparten la <Bd>misma cadena básica</Bd> (generador → tubo → colimador → paciente → receptor). Cambian la geometría, el receptor y el régimen de trabajo. <Rd>Si dominas la cadena, dominas todas las modalidades.</Rd></Def>
+    <Figure src={imgModalidades} label="Modalidades del radiodiagnóstico en sala: radiografía fija, arco en C, mamógrafo, sala de angiografía y tomógrafo." />
   </SW> },
 
   /* 7 ── 1.7 Cadena de imagen */
@@ -388,6 +466,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
           "Dispara pero no hay imagen" → <Bd>no es el generador</Bd>: el generador disparó. Continuar por la cadena: colimador cerrado, receptor desconectado, procesamiento.
         </div>
       </div>
+      <Figure kind="diagram" src={imgCadenaImagen} filter="hue-rotate(130deg) saturate(1.5) brightness(0.95)" label="Diagrama de la cadena de imagen: generador → tubo → filtración → colimador → paciente → rejilla → receptor → PACS." />
     </>} />
   </SW> },
 
@@ -452,6 +531,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ['Rayos gamma','100 keV – varios MeV','Sí'],
       ]} />
       <Note type="k">Rayos X y γ son <Bd>físicamente idénticos</Bd>. Se distinguen solo por su <Bd>origen</Bd>: X fuera del núcleo (interacción de electrones), γ dentro del núcleo (decaimiento radiactivo).</Note>
+      <Figure kind="diagram" src={imgEspectro} label="Barra del espectro electromagnético con la ventana de rayos X del radiodiagnóstico resaltada en rojo." />
     </>} />
   </SW> },
 
@@ -514,6 +594,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       <Li>+15% kVp duplica la densidad de imagen, igual que duplicar el mAs</Li>
       <Li>Uso: subir kVp 15% y reducir mAs a la mitad → misma densidad, <Rd>menor dosis</Rd></Li>
       <Note type="k">Ejemplo: 70 kVp / 20 mAs → 80 kVp / 10 mAs. Misma densidad, menor dosis, algo menos contraste.</Note>
+      <Figure kind="diagram" src={imgInversoCuadrado} label="Fuente puntual con dos conos de radiación a d y 2d: el mismo flujo de fotones repartido sobre un área 4× mayor." />
     </>} />
   </SW> },
 
@@ -549,6 +630,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ['Mamografía usa 22–35 kVp','A baja E el fotoeléctrico distingue tejido glandular de adiposo'],
       ]} />
       <Note type="w"><Bd>Más contraste = más dosis.</Bd> El fotoeléctrico implica absorción total → toda esa energía queda depositada en el paciente.</Note>
+      <Figure kind="diagram" src={imgFotoelectrico} label="Átomo con fotón incidente, expulsión del fotoelectrón de capa K y llegada de la radiación característica secundaria." />
     </>} />
   </SW> },
 
@@ -572,6 +654,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       <Ni n={2}><Bd>Rejilla antidifusora</Bd> (Bucky) — láminas de plomo que solo dejan pasar fotones alineados con el foco</Ni>
       <Ni n={3}><Bd>Air gap</Bd> — distancia objeto-receptor</Ni>
       <Ni n={4}><Bd>Compresión</Bd> — reduce el espesor (mamografía)</Ni>
+      <Figure kind="diagram" src={imgCompton} label="Átomo con fotón incidente sobre un electrón de capa externa: el fotón dispersado sale con ángulo θ y energía reducida." />
     </>} />
   </SW> },
 
@@ -765,6 +848,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         Aceite dieléctrico<br/>
         Ventana → <span style={{color:P.rb}}>HAZ ÚTIL</span>
       </div>
+      <Figure src={imgTuboRayosX} label="Corte transversal del tubo de rayos X: cátodo, ampolla de vidrio, ánodo giratorio y coraza de plomo." />
     </>} />
   </SW> },
 
@@ -842,6 +926,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ['Frenado anormalmente corto','Rodamiento agarrotado'],
       ]} />
       <Note type="k">Enseñar a <Bd>escuchar el tubo</Bd>. Un rotor que se detiene en 5 s tiene los rodamientos comprometidos — diagnóstico gratuito sin abrir nada.</Note>
+      <Figure src={imgAnodoGiratorio} label="Disco de ánodo giratorio (W-Re sobre molibdeno/grafito) montado en el eje del rotor, fuera de la ampolla." />
     </>} />
   </SW> },
 
@@ -869,6 +954,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ['Mamografía',<Rd>Cátodo hacia la pared torácica</Rd>],
       ]} />
       <Note type="n">El efecto anódico es un <Ita>defecto</Ita> de fabricación que la práctica clínica convirtió en <Bd>herramienta</Bd>.</Note>
+      <Figure kind="diagram" src={imgFocoLineal} label="Corte del ánodo angulado mostrando el foco real grande sobre la pista y su proyección como foco efectivo pequeño hacia el paciente." />
     </>} />
   </SW> },
 
@@ -905,6 +991,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         Filtro del intercambiador sucio → misma consecuencia
       </Note>
       <Note type="n">"Si el usuario reporta que el equipo 'se bloquea después de 20 estudios', el problema casi nunca es electrónico: es térmico. Empiece por el ventilador y el intercambiador."</Note>
+      <Figure src={imgCoraza} label="Coraza del tubo abierta, mostrando el aceite dieléctrico, el fuelle de expansión y el intercambiador de calor." />
     </>} />
   </SW> },
 
@@ -1132,6 +1219,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         <Li>Alimenta el estator — arranque y frenado dinámico del ánodo giratorio</Li>
       </div>
       <Note type="k"><Bd>Separación fundamental:</Bd> el circuito de alta tensión controla el <Rd>kVp</Rd>; el de filamento controla el <Rd>mA</Rd>. Son independientes — eso es el aporte del tubo Coolidge de 1913.</Note>
+      <Figure kind="diagram" src={imgDiagramaBloques} tall label="Diagrama de bloques completo: red → compensador → autotransformador → temporizador → transformador de alta → rectificador → tubo, con los circuitos de filamento y rotor en paralelo." />
     </>} />
   </SW> },
 
@@ -1179,6 +1267,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ['Reproducibilidad','↑'],
       ]} />
     </>} />
+    <Figure kind="diagram" src={imgRizado} label="Formas de onda superpuestas: monofásico (cae a cero), trifásico 12 pulsos (rizado leve) y alta frecuencia (casi DC pura)." />
   </SW> },
 
   /* 43 ── 4.5 Alta frecuencia */
@@ -1208,6 +1297,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         [<Bd>Permite portátiles potentes</Bd>,'Peso y volumen reducidos'],
       ]} />
       <Note type="k">"Un generador de alta frecuencia produce, con el mismo mAs, una imagen equivalente a un monofásico usando aproximadamente un <Rd>tercio menos de dosis</Rd>."</Note>
+      <Figure src={imgAltaFrecuencia} label="Generador de alta frecuencia compacto, mostrando el tamaño reducido del transformador frente a un modelo monofásico antiguo." />
     </>} />
   </SW> },
 
@@ -1260,6 +1350,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         [<Bd>Distancia mínima foco-piel</Bd>,'≥ 38 cm (fijo) / ≥ 30 cm (móvil)'],
       ]} />
       <Note type="w">Las lesiones radiodérmicas por fluoroscopia prolongada aparecen como eritema y necrosis <Bd>semanas después</Bd>. El registro de PKA es la única forma de identificar al paciente en riesgo antes de que aparezca la lesión.</Note>
+      <Figure src={imgFluoroscopia} label="Sala de fluoroscopia con arco en C sobre mesa de operaciones y pedal hombre-muerto visible en el piso." />
     </>} />
   </SW> },
 
@@ -1359,6 +1450,55 @@ function Embers() {
           animationDelay: e.delay, opacity: 0,
         }} />
       ))}
+    </div>
+  )
+}
+
+// Read by App's keydown handler so arrow keys and F don't navigate slides or
+// toggle fullscreen out from under an open lightbox — Lightbox itself is the
+// only thing that writes to it.
+const lightboxOpenRef = { current: false }
+
+/** Full-size viewer for a Figure image, opened via the `deck:lightbox` event. */
+function Lightbox() {
+  const [data, setData] = useState<{ src: string; label: string } | null>(null)
+
+  useEffect(() => {
+    const h = (e: Event) => setData((e as CustomEvent).detail)
+    window.addEventListener('deck:lightbox', h)
+    return () => window.removeEventListener('deck:lightbox', h)
+  }, [])
+
+  useEffect(() => {
+    lightboxOpenRef.current = !!data
+  }, [data])
+
+  useEffect(() => {
+    if (!data) return
+    const h = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); setData(null) }
+    }
+    // Capture phase, so this runs before App's own keydown handler.
+    window.addEventListener('keydown', h, true)
+    return () => window.removeEventListener('keydown', h, true)
+  }, [data])
+
+  if (!data) return null
+  return (
+    <div
+      onClick={() => setData(null)}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(4,2,4,0.92)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        cursor: 'zoom-out', padding: 48,
+      }}
+    >
+      <img
+        src={data.src} alt={data.label} onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: '92vw', maxHeight: '82vh', objectFit: 'contain', borderRadius: 8, boxShadow: '0 24px 70px rgba(0,0,0,0.6)', cursor: 'default' }}
+      />
+      <div style={{ ...cf, marginTop: 18, color: '#c8b0b0', fontSize: 14, maxWidth: 820, textAlign: 'center', lineHeight: 1.5 }}>{data.label}</div>
+      <div style={{ marginTop: 10, fontSize: 11, color: P.muted, letterSpacing: '0.08em' }}>ESC o clic para cerrar</div>
     </div>
   )
 }
@@ -1525,8 +1665,11 @@ function SlideLayers({
           animationFillMode: 'both',
         }}
       >
-        {/* Reproduces the scroll position the slide had when it was cut */}
-        <div style={{ marginTop: -scrollTop }}>{children}</div>
+        {/* Reproduces the scroll position the slide had when it was cut.
+            height: '100%' gives slide layouts (SW's minHeight: '100%', etc.) a
+            definite ancestor to resolve percentage heights against — without
+            it they collapse to content size, leaving fullscreen mostly empty. */}
+        <div style={{ marginTop: -scrollTop, height: '100%' }}>{children}</div>
       </div>
 
       {/* Displaced copies. steps(1) — no interpolation between keyframes, so
@@ -1768,14 +1911,44 @@ export default function App() {
   const [dur, setDur] = useState<{ out: number; in: number }>(TIMING.normal)
   const [recipe, setRecipe] = useState<Recipe>(() => buildRecipe(1, false, 'r', null))
   const [fullscreen, setFullscreen] = useState(false)
+  const [scale, setScale] = useState(1)
 
   const baseRef = useRef<HTMLDivElement | null>(null)
+  const slideAreaRef = useRef<HTMLDivElement | null>(null)
   const timers = useRef<number[]>([])
   const lastVariant = useRef<string | null>(null)
   const reduced = useReducedMotion()
 
+  // Every font size and spacing in the deck is authored in px against a
+  // ~1280×760 canvas — the size of a normal (non-fullscreen) browser window.
+  // On a bigger screen or a projector, that canvas would otherwise render at
+  // its fixed pixel size and read as tiny. Scaling the whole slide area up
+  // to fill whatever space is actually available keeps text legible at any
+  // resolution without touching per-slide font sizes. Never scales below 1x
+  // — a cramped window should scroll, not shrink text further.
+  useEffect(() => {
+    const el = slideAreaRef.current
+    if (!el) return
+    const REF_W = 1280
+    const REF_H = 760
+    const ro = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect
+      const next = Math.max(1, Math.min(width / REF_W, height / REF_H))
+      setScale(Math.round(next * 1000) / 1000)
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   useGlitchEmphasis(aKey, phase === 'idle' && !reduced)
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
+
+  // The index.html <title> only fills in the build-time default (or gets
+  // stuck on the Figma Make scaffold's own name) — set it directly so the
+  // browser tab always reads the actual deck title, dev server included.
+  useEffect(() => {
+    document.title = 'Equipos de Radiodiagnóstico — Equipos Médicos III'
+  }, [])
 
   const total = SLIDES.length
   const slide = SLIDES[cur]
@@ -1829,6 +2002,7 @@ export default function App() {
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
+      if (lightboxOpenRef.current) return
       if (['ArrowRight','ArrowDown',' '].includes(e.key)) { e.preventDefault(); go(cur + 1, 'r') }
       if (['ArrowLeft','ArrowUp'].includes(e.key)) { e.preventDefault(); go(cur - 1, 'l') }
       if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen() }
@@ -1857,6 +2031,7 @@ export default function App() {
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `radial-gradient(ellipse at 80% 50%, rgba(100,10,20,0.18) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(80,8,16,0.12) 0%, transparent 50%)` }} />
 
       <Embers />
+      <Lightbox />
 
       {/* progress bar */}
       <div style={{ height: 3, background: '#120610', flexShrink: 0, position: 'relative', zIndex: 10 }}>
@@ -1864,40 +2039,46 @@ export default function App() {
       </div>
 
       {/* slide area */}
-      <div style={{ flex: 1, overflow: 'hidden', position: 'relative', zIndex: 5 }}>
-        {/* ACT I — the outgoing slide, mounted only while it is coming apart */}
-        {outIdx !== null && (
-          <SlideLayers
-            key={`break-${aKey}`}
-            act="break" recipe={recipe} dur={dur.out}
-            fragments={!reduced} scrollTop={outScroll}
-          >
-            {SLIDES[outIdx].el}
-          </SlideLayers>
-        )}
+      <div ref={slideAreaRef} style={{ flex: 1, overflow: 'hidden', position: 'relative', zIndex: 5 }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          width: `${100 / scale}%`, height: `${100 / scale}%`,
+          transform: `scale(${scale})`, transformOrigin: 'top left',
+        }}>
+          {/* ACT I — the outgoing slide, mounted only while it is coming apart */}
+          {outIdx !== null && (
+            <SlideLayers
+              key={`break-${aKey}`}
+              act="break" recipe={recipe} dur={dur.out}
+              fragments={!reduced} scrollTop={outScroll}
+            >
+              {SLIDES[outIdx].el}
+            </SlideLayers>
+          )}
 
-        {/* ACT III — the incoming slide. Fragment copies exist only for the
-            length of the rebuild; at rest this is a single plain layer. */}
-        {phase !== 'break' && (
-          <SlideLayers
-            key={`rebuild-${aKey}`}
-            act="rebuild" recipe={recipe} dur={dur.in}
-            fragments={!reduced && phase === 'rebuild'} scrollTop={0}
-            baseRef={baseRef}
-          >
-            {slide.el}
-          </SlideLayers>
-        )}
+          {/* ACT III — the incoming slide. Fragment copies exist only for the
+              length of the rebuild; at rest this is a single plain layer. */}
+          {phase !== 'break' && (
+            <SlideLayers
+              key={`rebuild-${aKey}`}
+              act="rebuild" recipe={recipe} dur={dur.in}
+              fragments={!reduced && phase === 'rebuild'} scrollTop={0}
+              baseRef={baseRef}
+            >
+              {slide.el}
+            </SlideLayers>
+          )}
 
-        {phase !== 'idle' && !reduced && (
-          <GlitchOverlay
-            key={`ov-${phase}-${aKey}`}
-            act={phase}
-            dur={phase === 'break' ? dur.out : dur.in}
-            ceremonial={ceremonial}
-            recipe={recipe}
-          />
-        )}
+          {phase !== 'idle' && !reduced && (
+            <GlitchOverlay
+              key={`ov-${phase}-${aKey}`}
+              act={phase}
+              dur={phase === 'break' ? dur.out : dur.in}
+              ceremonial={ceremonial}
+              recipe={recipe}
+            />
+          )}
+        </div>
       </div>
 
       {/* nav bar */}
