@@ -201,10 +201,24 @@ function Def({ children, head = 'Definición' }: { children: React.ReactNode; he
   )
 }
 
-function TwoCol({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
+/**
+ * Dos columnas asimétricas. Antes era `1fr 1fr` con las dos alineadas arriba:
+ * treinta y tres láminas partidas exactamente por la mitad, que es lo que hace
+ * que todo el deck se lea igual. La izquierda —donde caen las tablas y el
+ * desarrollo— pesa más, la derecha baja medio escalón, y el filete del canal
+ * separa sin dibujar una celda.
+ */
+function TwoCol({ left, right, ratio = 'wide' }: {
+  left: React.ReactNode; right: React.ReactNode; ratio?: 'wide' | 'narrow' | 'even'
+}) {
+  const cols = ratio === 'narrow' ? '0.78fr 1.22fr' : ratio === 'even' ? '1fr 1fr' : '1.28fr 0.72fr'
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22 }}>
-      <div>{left}</div><div>{right}</div>
+    <div style={{ display: 'grid', gridTemplateColumns: cols, gap: 34, position: 'relative' }}>
+      <div style={{ minWidth: 0 }}>{left}</div>
+      <div style={{
+        minWidth: 0, marginTop: 26,
+        borderLeft: `1px solid ${P.brd}`, paddingLeft: 30,
+      }}>{right}</div>
     </div>
   )
 }
@@ -230,22 +244,40 @@ function openLightbox(src: string, label: string) {
 function Figure({ kind = 'photo', label, tall = false, src, filter }: { kind?: 'photo' | 'diagram'; label: string; tall?: boolean; src?: string; filter?: string }) {
   if (src) {
     return (
-      <div style={{ marginTop: 14, borderRadius: 10, overflow: 'hidden', border: `1px solid ${P.brd}`, textAlign: 'center' }}>
-        {/* width/height both 'auto' with maxWidth + maxHeight lets the
-            browser's own replaced-element sizing shrink the image to fit
-            whichever limit binds first, preserving its aspect ratio exactly
-            — no cropping (a forced box + object-fit) and no letterboxing
-            (forcing width:100% while capping height). Centered because a
-            height-bound image no longer spans the full column width.
-            The in-slide copy stays small so dense slides don't overflow;
-            clicking it opens the full-size lightbox instead of growing it
-            in place. */}
-        <img
-          src={src} alt={label}
-          onClick={() => openLightbox(src, label)}
-          style={{ display: 'inline-block', width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: tall ? 260 : 140, filter, cursor: 'zoom-in' }}
-        />
-        <div style={{ padding: '7px 14px', background: P.card, fontSize: 11, color: P.muted, lineHeight: 1.4, textAlign: 'left' }}>{label}</div>
+      /* Sin marco. La versión anterior metía cada figura en una tarjeta con
+         borde, esquinas redondeadas y una barra de pie con fondo propio, y
+         limitaba la imagen a 140 px de alto: en un proyector la figura era
+         un sello diminuto dentro de un recuadro. Ahora la imagen flota sobre
+         su propio halo, corre bastante más grande, y el pie cuelga debajo
+         como texto suelto. Sigue abriendo el lightbox al hacer clic. */
+      <div style={{ marginTop: 12, position: 'relative' }}>
+        <div style={{
+          position: 'absolute', left: '50%', top: '46%', transform: 'translate(-50%,-50%)',
+          width: '78%', height: '150%', borderRadius: '50%', pointerEvents: 'none',
+          background: `radial-gradient(ellipse, ${P.rg} 0%, transparent 66%)`,
+        }} />
+        <div style={{ position: 'relative', textAlign: 'center' }}>
+          {/* width/height 'auto' con maxWidth + maxHeight deja que el navegador
+              encoja la imagen contra el límite que ate primero, conservando su
+              proporción exacta: ni recorte ni bandas. */}
+          <img
+            src={src} alt={label}
+            onClick={() => openLightbox(src, label)}
+            style={{
+              display: 'inline-block', width: 'auto', height: 'auto',
+              maxWidth: '100%', maxHeight: tall ? 236 : 146,
+              filter: filter ? `${filter} drop-shadow(0 16px 36px rgba(0,0,0,0.7))` : 'drop-shadow(0 16px 36px rgba(0,0,0,0.7))',
+              cursor: 'zoom-in',
+            }}
+          />
+        </div>
+        <div style={{
+          position: 'relative', marginTop: 10, paddingLeft: 14,
+          borderLeft: `2px solid ${P.rd}`,
+          fontSize: 11.5, color: P.muted, lineHeight: 1.45, textAlign: 'left',
+        }}>
+          {label}
+        </div>
       </div>
     )
   }
@@ -274,37 +306,63 @@ function Figure({ kind = 'photo', label, tall = false, src, filter }: { kind?: '
 function SW({ block, lam, title, children }: { block?: 'A'|'B'|'C'|'D'; lam?: string; title: string; children: React.ReactNode }) {
   const bl: Record<string,string> = { A:'BLOQUE A · Radiodiagnóstico', B:'BLOQUE B · Radiaciones Ionizantes', C:'BLOQUE C · Tubo de Rayos X', D:'BLOQUE D · Generador de Rayos X' }
   const tLen = title.length
-  const tSize = tLen > 52 ? 20 : tLen > 40 ? 24 : tLen > 30 ? 28 : 33
+  // El lienzo pasó de 1280×760 a 1440×810 y la barra de navegación dejó de
+  // robar 53 px, así que el título puede correr bastante más grande: es lo
+  // primero que se lee desde la última fila del salón.
+  const tSize = tLen > 52 ? 27 : tLen > 40 ? 31 : tLen > 30 ? 35 : 40
   return (
     <div className="tex-slide" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
       {block && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8, ...ui, fontSize: 10.5, fontWeight: 600, color: '#7a4050', letterSpacing: '0.12em' }}>
-          <div style={{ width: 3, height: 14, background: P.rd, borderRadius: 1 }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, ...ui, fontSize: 10.5, fontWeight: 600, color: '#8a5060', letterSpacing: '0.22em', textTransform: 'uppercase' }}>
+          <div style={{ width: 22, height: 2, background: P.red, boxShadow: `0 0 10px ${P.red}` }} />
           {bl[block]}{lam ? ` · ${lam}` : ''}
         </div>
       )}
-      <h1 style={{ ...cf, fontSize: tSize, fontWeight: 700, color: P.text, lineHeight: 1.2, marginBottom: 18, textShadow: `0 0 40px ${P.rg}` }}>
+      <h1 style={{ ...cf, fontSize: tSize, fontWeight: 700, color: P.text, lineHeight: 1.12, marginBottom: 6, textShadow: `0 0 50px ${P.rg}`, maxWidth: 1180 }}>
         {title}
       </h1>
+      {/* El filete del título sale del bloque de texto por la izquierda y se
+          desvanece a la derecha: ata la lámina al borde del escenario. */}
+      <div style={{
+        height: 1, marginLeft: -74, marginBottom: 14, width: 620,
+        background: `linear-gradient(to right, ${P.red}, ${P.rd}, transparent)`,
+      }} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>{children}</div>
     </div>
   )
 }
 
+/**
+ * Portadilla de bloque. Antes estaba centrada en los dos ejes con la letra
+ * gigante exactamente detrás del título y los temas en píldoras con borde:
+ * un escudo, no una escena. Ahora la letra se sale por el borde derecho, el
+ * texto se apoya contra ella desde la izquierda y los temas corren como una
+ * sola línea de versalitas.
+ */
 function BDiv({ letter, title, subtitle, themes }: { letter: string; title: string; subtitle: string; themes: string[] }) {
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', position: 'relative', minHeight: 'calc(100vh - 110px)' }}>
-      <div style={{ position: 'absolute', fontSize: 260, fontWeight: 900, ...cf, color: 'rgba(80,8,16,0.22)', lineHeight: 1, userSelect: 'none', letterSpacing: '-0.05em' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', minHeight: 560 }}>
+      <div style={{
+        position: 'absolute', right: -110, top: '50%', transform: 'translateY(-50%)',
+        fontSize: 470, fontWeight: 900, ...cf, color: 'rgba(80,8,16,0.26)',
+        lineHeight: 0.8, userSelect: 'none', letterSpacing: '-0.06em', pointerEvents: 'none',
+      }}>
         {letter}
       </div>
-      <div className="block-in" style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ ...cf, fontSize: 12, letterSpacing: '0.32em', color: P.muted, marginBottom: 14 }}>BLOQUE {letter}</div>
-        <h1 style={{ ...cf, fontSize: 54, fontWeight: 900, color: P.text, lineHeight: 1.1, marginBottom: 16, textShadow: `0 0 60px ${P.rg}, 0 0 120px rgba(200,25,46,0.1)` }}>{title}</h1>
-        <div style={{ width: 80, height: 2, background: P.red, margin: '0 auto 16px', borderRadius: 1 }} />
-        <div style={{ ...cf, fontSize: 14, color: P.muted, marginBottom: 26, fontStyle: 'italic' }}>{subtitle}</div>
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+      <div className="block-in" style={{ position: 'relative', zIndex: 1, maxWidth: 860 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <span style={{ width: 30, height: 2, background: P.red, boxShadow: `0 0 12px ${P.red}` }} />
+          <span style={{ ...cf, fontSize: 12, letterSpacing: '0.34em', color: P.muted }}>BLOQUE {letter}</span>
+        </div>
+        <h1 style={{ ...cf, fontSize: 82, fontWeight: 900, color: P.text, lineHeight: 1.02, marginBottom: 22, textShadow: `0 0 70px ${P.rg}, 0 0 140px rgba(200,25,46,0.12)` }}>{title}</h1>
+        <div style={{ width: 520, height: 2, marginLeft: -74, marginBottom: 22, background: `linear-gradient(to right, ${P.red}, transparent)` }} />
+        <div style={{ ...cf, fontSize: 17, color: P.muted, marginBottom: 34, fontStyle: 'italic' }}>{subtitle}</div>
+        <div style={{ ...cf, fontSize: 12, color: '#b09090', letterSpacing: '0.18em', lineHeight: 2 }}>
           {themes.map((t, i) => (
-            <div key={i} style={{ border: `1px solid ${P.rd}`, borderRadius: 18, padding: '5px 14px', ...cf, fontSize: 11, color: '#b09090', letterSpacing: '0.07em' }}>{t}</div>
+            <span key={i}>
+              {t}
+              {i < themes.length - 1 && <span style={{ color: P.rd, margin: '0 12px' }}>·</span>}
+            </span>
           ))}
         </div>
       </div>
@@ -312,29 +370,57 @@ function BDiv({ letter, title, subtitle, themes }: { letter: string; title: stri
   )
 }
 
+/**
+ * Portada. Todo estaba centrado y la cita venía dentro de un recuadro con
+ * borde y fondo — la caja competía con la cita. Ahora la composición se apoya
+ * en el margen izquierdo, el título corre al doble de cuerpo, y la cita es la
+ * cita: texto grande sobre un filete, sin marco.
+ */
 function Cover() {
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 60px', minHeight: 'calc(100vh - 110px)' }}>
-      <div style={{ ...cf, fontSize: 11, letterSpacing: '0.32em', color: P.muted, marginBottom: 20 }}>EQUIPOS MÉDICOS III · MÓDULO I · PRESENTACIÓN 1</div>
-      <h1 style={{ ...cf, fontSize: 52, fontWeight: 900, color: P.text, lineHeight: 1.1, marginBottom: 20, textShadow: `0 0 80px ${P.rg}` }}>
-        EQUIPOS DE<br /><span style={{ color: P.red }}>RADIODIAGNÓSTICO</span>
-      </h1>
-      <div style={{ width: 100, height: 2, background: `linear-gradient(to right, transparent, ${P.red}, transparent)`, margin: '0 auto 20px' }} />
-      <div style={{ fontSize: 17, color: '#b8a0a0', marginBottom: 34, lineHeight: 1.5 }}>Fundamentos, Tubo y Generador de Rayos X</div>
-      <div style={{ border: `1px solid ${P.rd}`, borderRadius: 12, padding: '16px 26px', marginBottom: 32, background: 'rgba(20,8,12,0.8)', maxWidth: 660 }}>
-        <div style={{ fontSize: 11, color: P.muted, marginBottom: 8, ...cf, letterSpacing: '0.14em' }}>CITA DE APERTURA</div>
-        <div style={{ fontSize: 15, color: '#e0c8c8', fontStyle: 'italic', lineHeight: 1.7 }}>
-          "El cáncer es ubicuo en la población humana; la única manera cierta de evitarlo
-          consiste en no nacer, ya que vivir supone un riesgo."
-        </div>
-        <div style={{ fontSize: 12, color: P.muted, marginTop: 10, ...cf, letterSpacing: '0.06em' }}>— Stanley L. Robbins</div>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', minHeight: 560 }}>
+      <div style={{
+        position: 'absolute', right: -80, top: '50%', transform: 'translateY(-50%)',
+        fontSize: 300, fontWeight: 900, ...cf, color: 'rgba(80,8,16,0.16)',
+        lineHeight: 0.8, userSelect: 'none', letterSpacing: '-0.05em', pointerEvents: 'none',
+      }}>
+        X
       </div>
-      <div style={{ display: 'flex', gap: 32, ...cf, fontSize: 12, color: P.muted, letterSpacing: '0.07em' }}>
-        <span>Ing. Bryan Rodríguez S.</span>
-        <span style={{ color: P.rd }}>·</span>
-        <span>UDELAS</span>
-        <span style={{ color: P.rd }}>·</span>
-        <span>Equipos Médicos III · II Semestre</span>
+
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 940 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+          <span style={{ width: 30, height: 2, background: P.red, boxShadow: `0 0 12px ${P.red}` }} />
+          <span style={{ ...cf, fontSize: 11, letterSpacing: '0.32em', color: P.muted }}>
+            EQUIPOS MÉDICOS III · MÓDULO I · PRESENTACIÓN 1
+          </span>
+        </div>
+
+        <h1 style={{ ...cf, fontSize: 84, fontWeight: 900, color: P.text, lineHeight: 1.0, marginBottom: 26, textShadow: `0 0 90px ${P.rg}` }}>
+          EQUIPOS DE<br /><span style={{ color: P.red, textShadow: `0 0 70px ${P.red}55` }}>RADIODIAGNÓSTICO</span>
+        </h1>
+
+        <div style={{ width: 640, height: 2, marginLeft: -74, marginBottom: 24, background: `linear-gradient(to right, ${P.red}, ${P.rd}, transparent)` }} />
+
+        <div style={{ fontSize: 21, color: '#b8a0a0', marginBottom: 40, lineHeight: 1.5 }}>
+          Fundamentos, Tubo y Generador de Rayos X
+        </div>
+
+        <div style={{ borderLeft: `2px solid ${P.rd}`, paddingLeft: 24, maxWidth: 760, marginBottom: 40 }}>
+          <div style={{ fontSize: 10.5, color: P.muted, marginBottom: 12, ...cf, letterSpacing: '0.24em' }}>CITA DE APERTURA</div>
+          <div style={{ fontSize: 22, color: '#e0c8c8', fontStyle: 'italic', lineHeight: 1.6 }}>
+            "El cáncer es ubicuo en la población humana; la única manera cierta de evitarlo
+            consiste en no nacer, ya que vivir supone un riesgo."
+          </div>
+          <div style={{ fontSize: 12.5, color: P.muted, marginTop: 14, ...cf, letterSpacing: '0.08em' }}>— Stanley L. Robbins</div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 20, ...cf, fontSize: 12, color: P.muted, letterSpacing: '0.09em' }}>
+          <span>Ing. Bryan Rodríguez S.</span>
+          <span style={{ color: P.rd }}>·</span>
+          <span>UDELAS</span>
+          <span style={{ color: P.rd }}>·</span>
+          <span>Equipos Médicos III · II Semestre</span>
+        </div>
       </div>
     </div>
   )
@@ -413,7 +499,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       <Li>Impresiona placas fotográficas · Produce fluorescencia</Li>
     </>} right={<>
       <Note type="k"><Bd>Röntgen no patentó su descubrimiento.</Bd> En 6 meses, hospitales de todo el mundo tenían equipos funcionando.</Note>
-      <div style={{ marginTop: 16, padding: 14, background: '#1a0810', border: `1px solid ${P.rd}`, borderRadius: 8 }}>
+      <div style={{ marginTop: 18, paddingLeft: 20, borderLeft: `2px solid ${P.red}` }}>
         <div style={{ ...cf, fontSize: 11, color: P.red, marginBottom: 7, letterSpacing: '0.1em' }}>CONSECUENCIA FÍSICA</div>
         <div style={{ fontSize: 13, color: '#d0c0c0', lineHeight: 1.6 }}>
           "No se puede enfocar con lentes" define toda la geometría radiográfica: la imagen se forma por <Bd>proyección cónica</Bd> desde un punto focal — de ahí la magnifcación y la penumbra.
@@ -460,7 +546,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       ))}
     </>} right={<>
       <Note type="k"><Bd>Regla de oro:</Bd> cada etapa puede degradar la imagen o aumentar la dosis. El diagnóstico de fallas se hace <Bd>recorriendo la cadena en orden</Bd>, no adivinando.</Note>
-      <div style={{ marginTop: 16, padding: 14, background: P.card, border: `1px solid ${P.brd}`, borderRadius: 8 }}>
+      <div style={{ marginTop: 18, paddingLeft: 20, borderLeft: `2px solid ${P.rd}` }}>
         <div style={{ ...cf, fontSize: 11, color: P.red, marginBottom: 7, letterSpacing: '0.1em' }}>REGLA PRÁCTICA</div>
         <div style={{ fontSize: 13, color: '#c0b0b0', lineHeight: 1.6 }}>
           "Dispara pero no hay imagen" → <Bd>no es el generador</Bd>: el generador disparó. Continuar por la cadena: colimador cerrado, receptor desconectado, procesamiento.
@@ -506,7 +592,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       ]} />
     </>} right={<>
       <Note type="k">El daño biológico de los rayos X no proviene del calor. Un fotón de 60 keV puede romper una hebra de ADN porque la energía está <Bd>concentrada en un solo evento</Bd>, no repartida.</Note>
-      <div style={{ marginTop: 16, padding: 14, background: P.card, border: `1px solid ${P.brd}`, borderRadius: 8 }}>
+      <div style={{ marginTop: 18, paddingLeft: 20, borderLeft: `2px solid ${P.rd}` }}>
         <div style={{ ...cf, fontSize: 11, color: P.red, marginBottom: 8, letterSpacing: '0.1em' }}>IMPLICACIÓN CLÍNICA</div>
         <div style={{ fontSize: 13, color: '#c0b0b0', lineHeight: 1.6 }}>La dosis de rayos X en diagnóstico (µGy – mGy) es termalmente insignificante. El riesgo es estocástico, no térmico.</div>
       </div>
@@ -590,12 +676,19 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ['Blindaje','Exponencial',<span style={{color:'#e09090'}}>Caro</span>],
       ]} />
       <Note type="n">"La distancia es el delantal plomado más barato que existe." Un paso atrás durante una fluoroscopia reduce más la dosis que cualquier accesorio.</Note>
-      <H2c>Técnica radiográfica: Regla del 15%</H2c>
+      <Figure kind="diagram" src={imgInversoCuadrado} label="Fuente puntual con dos conos de radiación a d y 2d: el mismo flujo de fotones repartido sobre un área 4× mayor." />
+    </>} />
+  </SW> },
+
+  /* 14b ── 2.5b Regla del 15% — separada de 2.5, que cargaba dos temas
+     distintos (la ley del inverso del cuadrado y la técnica radiográfica) en
+     una sola lámina y se salía del escenario. Va a una columna, sin partir. */
+  { id: '2.5b', block: 'B', el: <SW block="B" lam="2.5b" title="Técnica radiográfica: la regla del 15%">
+    <div style={{ maxWidth: 1080 }}>
       <Li>+15% kVp duplica la densidad de imagen, igual que duplicar el mAs</Li>
       <Li>Uso: subir kVp 15% y reducir mAs a la mitad → misma densidad, <Rd>menor dosis</Rd></Li>
       <Note type="k">Ejemplo: 70 kVp / 20 mAs → 80 kVp / 10 mAs. Misma densidad, menor dosis, algo menos contraste.</Note>
-      <Figure kind="diagram" src={imgInversoCuadrado} label="Fuente puntual con dos conos de radiación a d y 2d: el mismo flujo de fotones repartido sobre un área 4× mayor." />
-    </>} />
+    </div>
   </SW> },
 
   /* 15 ── 2.6 5 mecanismos */
@@ -608,7 +701,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       ['Fotodesintegración','> 10 MeV','NO','—'],
     ]} />
     <Note type="k">En el rango de radiodiagnóstico (20–150 keV) solo importan <Bd>dos</Bd>: el <Rd>fotoeléctrico</Rd> (amigo: hace la imagen) y el <Rd>Compton</Rd> (enemigo: hace el ruido y expone al personal).</Note>
-    <div style={{ textAlign: 'center', fontSize: 22, fontWeight: 700, color: P.rb, marginTop: 14, padding: '12px', background: '#200810', borderRadius: 8, border: `1px solid ${P.rd}`, ...cf, letterSpacing: '0.05em' }}>
+    <div style={{ fontSize: 30, fontWeight: 700, color: P.rb, marginTop: 18, paddingLeft: 22, borderLeft: `2px solid ${P.red}`, ...cf, letterSpacing: '0.04em' }}>
       Fotoeléctrico = imagen &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp; Compton = problema
     </div>
   </SW> },
@@ -642,6 +735,9 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       <Li>Le transfiere <Bd>parte</Bd> de su energía y <Rd>continúa desviado</Rd> con energía menor</Li>
       <Fml label="Corrimiento de Compton">{String.raw`\Delta\lambda = 0.00243\,(1-\cos\theta)\;\mathrm{nm}`}</Fml>
       <Fml label="Probabilidad">{String.raw`P_{\text{Compton}} \;\propto\; \frac{\rho_e}{E} \qquad (\approx \text{independiente de } Z)`}</Fml>
+      {/* La figura baja a la columna corta: en la derecha, bajo la tabla y las
+          cuatro medidas de control, empujaba la lámina fuera del escenario. */}
+      <Figure kind="diagram" src={imgCompton} label="Átomo con fotón incidente sobre un electrón de capa externa: el fotón dispersado sale con ángulo θ y energía reducida." />
     </>} right={<>
       <H2c>Por qué es un problema</H2c>
       <Tbl sm hs={['Problema','Consecuencia']} rs={[
@@ -654,7 +750,6 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       <Ni n={2}><Bd>Rejilla antidifusora</Bd> (Bucky) — láminas de plomo que solo dejan pasar fotones alineados con el foco</Ni>
       <Ni n={3}><Bd>Air gap</Bd> — distancia objeto-receptor</Ni>
       <Ni n={4}><Bd>Compresión</Bd> — reduce el espesor (mamografía)</Ni>
-      <Figure kind="diagram" src={imgCompton} label="Átomo con fotón incidente sobre un electrón de capa externa: el fotón dispersado sale con ángulo θ y energía reducida." />
     </>} />
   </SW> },
 
@@ -746,7 +841,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       <H2c>Ley de Bergonié y Tribondeau</H2c>
       <Def>La radiosensibilidad de un tejido es <Bd>mayor</Bd> cuanto más alta su tasa de división celular, menos diferenciadas sus células y más largo su futuro mitótico.</Def>
       <H2c>Orden de radiosensibilidad (de mayor a menor)</H2c>
-      <div style={{ fontSize: 13, color: P.text, lineHeight: 1.8, padding: '9px 12px', background: P.card, borderRadius: 6 }}>
+      <div style={{ fontSize: 14, color: P.text, lineHeight: 1.8, paddingLeft: 18, borderLeft: `2px solid ${P.rd}` }}>
         Linfocitos · Médula ósea<br/>
         &gt; Gónadas<br/>
         &gt; Epitelio intestinal &gt; Piel<br/>
@@ -838,7 +933,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       <Note type="n">Todo debe ocurrir en alto vacío (≈10⁻⁷ torr), para que los electrones no choquen con moléculas de gas antes de llegar al ánodo.</Note>
     </>} right={<>
       <H2c>Estructura general</H2c>
-      <div style={{ fontFamily: 'monospace', fontSize: 13, color: '#c0b8b8', background: P.card, padding: '12px 16px', borderRadius: 8, border: `1px solid ${P.brd}`, lineHeight: 2.2 }}>
+      <div style={{ fontFamily: 'monospace', fontSize: 14, color: '#c0b8b8', paddingLeft: 18, borderLeft: `2px solid ${P.rd}`, lineHeight: 2.2 }}>
         [CÁTODO −] &nbsp;─e⁻→&nbsp; [ÁNODO +]<br/>
         &nbsp;&nbsp;filamento &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; blanco W<br/>
         &nbsp;&nbsp;copa de enfoque<br/>
@@ -918,6 +1013,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       <Li>El <Bd>rotor</Bd> (cilindro de cobre + eje de molibdeno) está <Bd>dentro</Bd>, al vacío</Li>
       <Li>El campo magnético rotatorio del estator arrastra el rotor <Rd>sin contacto eléctrico</Rd></Li>
       <Li><Bd>Ganancia térmica:</Bd> factor de 100 a 200 respecto a un blanco estacionario</Li>
+    <Figure src={imgAnodoGiratorio} label="Disco de ánodo giratorio (W-Re sobre molibdeno/grafito) montado en el eje del rotor, fuera de la ampolla." />
     </>} right={<>
       <H2c>Fallas del sistema rotor</H2c>
       <Tbl sm hs={['Síntoma','Causa probable']} rs={[
@@ -926,7 +1022,6 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ['Frenado anormalmente corto','Rodamiento agarrotado'],
       ]} />
       <Note type="k">Enseñar a <Bd>escuchar el tubo</Bd>. Un rotor que se detiene en 5 s tiene los rodamientos comprometidos — diagnóstico gratuito sin abrir nada.</Note>
-      <Figure src={imgAnodoGiratorio} label="Disco de ánodo giratorio (W-Re sobre molibdeno/grafito) montado en el eje del rotor, fuera de la ampolla." />
     </>} />
   </SW> },
 
@@ -943,6 +1038,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ['Pequeño (7–10°)','Más pequeño → más nitidez','Campo limitado'],
         ['Grande (15–20°)','Mayor → menos nitidez','Campo amplio'],
       ]} />
+    <Figure kind="diagram" src={imgFocoLineal} label="Corte del ánodo angulado mostrando el foco real grande sobre la pista y su proyección como foco efectivo pequeño hacia el paciente." />
     </>} right={<>
       <H2c>Efecto anódico (heel effect)</H2c>
       <Li>La intensidad del haz <Bd>no es uniforme</Bd> a lo largo del eje cátodo-ánodo</Li>
@@ -954,7 +1050,6 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ['Mamografía',<Rd>Cátodo hacia la pared torácica</Rd>],
       ]} />
       <Note type="n">El efecto anódico es un <Ita>defecto</Ita> de fabricación que la práctica clínica convirtió en <Bd>herramienta</Bd>.</Note>
-      <Figure kind="diagram" src={imgFocoLineal} label="Corte del ánodo angulado mostrando el foco real grande sobre la pista y su proyección como foco efectivo pequeño hacia el paciente." />
     </>} />
   </SW> },
 
@@ -970,12 +1065,13 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         [<Bd>Filtración inherente</Bd>,'Vidrio + aceite + ventana ≈ 0.5–1.0 mm Al eq'],
       ]} />
       <H2c>Cadena de disipación térmica</H2c>
-      <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c0b8b8', background: P.card, padding: '10px 14px', borderRadius: 6, lineHeight: 1.9 }}>
+      <div style={{ fontFamily: 'monospace', fontSize: 13, color: '#c0b8b8', paddingLeft: 18, borderLeft: `2px solid ${P.rd}`, lineHeight: 1.9 }}>
         Foco (2600°C) → disco del ánodo →<br/>
         radiación al vacío → ampolla →<br/>
         conducción → aceite → convección →<br/>
         coraza → aire ambiente (o chiller)
       </div>
+    <Figure src={imgCoraza} label="Coraza del tubo abierta, mostrando el aceite dieléctrico, el fuelle de expansión y el intercambiador de calor." />
     </>} right={<>
       <H2c>Niveles de refrigeración</H2c>
       <Tbl sm hs={['Nivel','Sistema','Aplicación']} rs={[
@@ -991,7 +1087,6 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         Filtro del intercambiador sucio → misma consecuencia
       </Note>
       <Note type="n">"Si el usuario reporta que el equipo 'se bloquea después de 20 estudios', el problema casi nunca es electrónico: es térmico. Empiece por el ventilador y el intercambiador."</Note>
-      <Figure src={imgCoraza} label="Coraza del tubo abierta, mostrando el aceite dieléctrico, el fuelle de expansión y el intercambiador de calor." />
     </>} />
   </SW> },
 
@@ -1055,7 +1150,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
       <Ni n={2}>¿Hay picos y dónde? → me dice el <Rd>material del blanco</Rd> (y si kVp &gt; 69.5)</Ni>
       <Ni n={3}>¿Cuánta área hay? → me dice la <Rd>intensidad (dosis)</Rd></Ni>
       <Note type="k">Dibujar el espectro a mano en la pizarra tres veces: base, con +kVp y con +filtración. Es el ejercicio que más rendimiento da en el examen.</Note>
-      <div style={{ marginTop: 12, padding: '10px 14px', background: P.card, border: `1px solid ${P.brd}`, borderRadius: 8, fontFamily: 'monospace', fontSize: 11.5, color: '#c0b0b0', lineHeight: 1.9 }}>
+      <div style={{ marginTop: 14, paddingLeft: 18, borderLeft: `2px solid ${P.rd}`, fontFamily: 'monospace', fontSize: 11.5, color: '#c0b0b0', lineHeight: 1.9 }}>
         I ↑<br/>
         &nbsp;&nbsp;&nbsp;&nbsp;<span style={{color:P.rb}}>│╭─K-β(67.2)─╮</span><br/>
         &nbsp;&nbsp;&nbsp;&nbsp;│<span style={{color:P.red}}>╭K-α(59.3)╮</span>&nbsp;│<br/>
@@ -1209,12 +1304,12 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ))}
       </div>
     </>} right={<>
-      <div style={{ padding: 12, background: '#1a0810', border: `1px solid ${P.rd}`, borderRadius: 6, marginBottom: 12 }}>
+      <div style={{ paddingLeft: 18, borderLeft: `2px solid ${P.red}`, marginBottom: 16 }}>
         <div style={{ ...cf, fontSize: 11, color: P.red, marginBottom: 6, letterSpacing: '0.1em' }}>CIRCUITO DE FILAMENTO</div>
         <Li><Bd>Transformador reductor</Bd> (a ~10–12 V) + estabilizador</Li>
         <Li>Es el <Bd>selector de mA</Bd></Li>
       </div>
-      <div style={{ padding: 12, background: '#1a0810', border: `1px solid ${P.rd}`, borderRadius: 6, marginBottom: 12 }}>
+      <div style={{ paddingLeft: 18, borderLeft: `2px solid ${P.red}`, marginBottom: 16 }}>
         <div style={{ ...cf, fontSize: 11, color: P.red, marginBottom: 6, letterSpacing: '0.1em' }}>CIRCUITO DE ROTOR</div>
         <Li>Alimenta el estator — arranque y frenado dinámico del ánodo giratorio</Li>
       </div>
@@ -1258,6 +1353,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
     ]} />
     <TwoCol left={<>
       <Note type="k">Con 100% de rizado, la tensión pasa por <Bd>cero</Bd> dos veces por ciclo. Durante buena parte del tiempo el tubo opera muy por debajo del kVp nominal, produciendo fotones de baja energía que <Bd>la filtración eliminará</Bd>. Ese calor y ese desgaste <Rd>no producen imagen</Rd>.</Note>
+    <Figure kind="diagram" src={imgRizado} label="Formas de onda superpuestas: monofásico (cae a cero), trifásico 12 pulsos (rizado leve) y alta frecuencia (casi DC pura)." />
     </>} right={<>
       <H2c>Consecuencias de reducir el rizado</H2c>
       <Tbl sm hs={['Parámetro','Efecto al bajar el rizado']} rs={[
@@ -1267,7 +1363,6 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         ['Reproducibilidad','↑'],
       ]} />
     </>} />
-    <Figure kind="diagram" src={imgRizado} label="Formas de onda superpuestas: monofásico (cae a cero), trifásico 12 pulsos (rizado leve) y alta frecuencia (casi DC pura)." />
   </SW> },
 
   /* 43 ── 4.5 Alta frecuencia */
@@ -1275,7 +1370,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
     <TwoCol left={<>
       <Def>El estándar de la industria desde los años 80.</Def>
       <H2c>Principio de operación</H2c>
-      <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#c0b8b8', background: P.card, padding: '10px 14px', borderRadius: 6, lineHeight: 1.9 }}>
+      <div style={{ fontFamily: 'monospace', fontSize: 13, color: '#c0b8b8', paddingLeft: 18, borderLeft: `2px solid ${P.rd}`, lineHeight: 1.9 }}>
         AC 60 Hz → RECTIFICADOR → DC →<br/>
         INVERSOR (5–100 kHz) →<br/>
         TRANSFORMADOR DE ALTA (pequeño) →<br/>
@@ -1285,6 +1380,7 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         REALIMENTACIÓN (corrige kVp en tiempo real)
       </div>
       <Note type="n">Por qué el transformador se achica: V = 4.44·f·N·A·B. Al subir f de 60 Hz a 50 000 Hz, se reducen N y A drásticamente. Un transformador de 50 kW cabe en una caja que se levanta con las manos.</Note>
+    <Figure src={imgAltaFrecuencia} label="Generador de alta frecuencia compacto, mostrando el tamaño reducido del transformador frente a un modelo monofásico antiguo." />
     </>} right={<>
       <H2c>Ventajas decisivas</H2c>
       <Tbl hs={['Ventaja','Razón física']} rs={[
@@ -1297,7 +1393,6 @@ const SLIDES: Array<{ id: string; block?: string; el: React.ReactElement }> = [
         [<Bd>Permite portátiles potentes</Bd>,'Peso y volumen reducidos'],
       ]} />
       <Note type="k">"Un generador de alta frecuencia produce, con el mismo mAs, una imagen equivalente a un monofásico usando aproximadamente un <Rd>tercio menos de dosis</Rd>."</Note>
-      <Figure src={imgAltaFrecuencia} label="Generador de alta frecuencia compacto, mostrando el tamaño reducido del transformador frente a un modelo monofásico antiguo." />
     </>} />
   </SW> },
 
@@ -1516,7 +1611,10 @@ function Lightbox() {
 // animation-direction: reverse, so the fragments fly apart instead of
 // converging.
 
-const SLIDE_PAD = '34px 54px 20px'
+// Margen del bloque de texto dentro del lienzo. Deja aire abajo para que el
+// marco flotante no se monte sobre la última línea; las figuras se salen de él
+// con márgenes negativos cuando quieren ir a sangre.
+const SLIDE_PAD = '34px 74px 54px'
 
 // ── RANDOMISATION ──────────────────────────────────────────────────────────
 // Fifty slides means fifty transitions, and a single choreography — however
@@ -1878,6 +1976,10 @@ function useGlitchEmphasis(aKey: number, active: boolean) {
 // ── MAIN APP ─────────────────────────────────────────────────────────────────
 const BLOCK_ACCENT: Record<string, string> = { A: '#c8192e', B: '#a81428', C: '#8a1020', D: '#6a0c18' }
 
+// Lienzo de diseño fijo, 16:9 exacto.
+const CANVAS_W = 1440
+const CANVAS_H = 810
+
 // Act durations in ms. Block covers get the long, ceremonial version.
 const TIMING = {
   normal:     { out: 300, in: 820 },
@@ -1919,25 +2021,26 @@ export default function App() {
   const lastVariant = useRef<string | null>(null)
   const reduced = useReducedMotion()
 
-  // Every font size and spacing in the deck is authored in px against a
-  // ~1280×760 canvas — the size of a normal (non-fullscreen) browser window.
-  // On a bigger screen or a projector, that canvas would otherwise render at
-  // its fixed pixel size and read as tiny. Scaling the whole slide area up
-  // to fill whatever space is actually available keeps text legible at any
-  // resolution without touching per-slide font sizes. Never scales below 1x
-  // — a cramped window should scroll, not shrink text further.
+  // Todo tamaño y espaciado del deck está escrito en px contra un lienzo fijo
+  // de 1440×810 — 16:9 EXACTO, la proporción de cualquier proyector. El modelo
+  // anterior medía contra 1280×760 (1.68:1) y escalaba con un ResizeObserver
+  // sobre el propio contenedor: en un proyector 16:9 eso dejaba franja negra a
+  // los lados, y el `Math.max(1, …)` impedía que el lienzo se encogiera cuando
+  // la ventana era menor que la referencia, así que la lámina se salía.
+  // Escalar contra la ventana, sin suelo, hace que el encuadre sea siempre el
+  // mismo que verá la clase: a 1920×1080 escala ×1.333 y llena la pantalla.
   useEffect(() => {
-    const el = slideAreaRef.current
-    if (!el) return
-    const REF_W = 1280
-    const REF_H = 760
-    const ro = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect
-      const next = Math.max(1, Math.min(width / REF_W, height / REF_H))
+    const fit = () => {
+      const next = Math.min(window.innerWidth / CANVAS_W, window.innerHeight / CANVAS_H)
       setScale(Math.round(next * 1000) / 1000)
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
+    }
+    fit()
+    window.addEventListener('resize', fit)
+    document.addEventListener('fullscreenchange', fit)
+    return () => {
+      window.removeEventListener('resize', fit)
+      document.removeEventListener('fullscreenchange', fit)
+    }
   }, [])
 
   useGlitchEmphasis(aKey, phase === 'idle' && !reduced)
@@ -2019,32 +2122,26 @@ export default function App() {
     return () => document.removeEventListener('fullscreenchange', h)
   }, [])
 
-  const btnBase: React.CSSProperties = {
-    background: 'transparent', borderRadius: 6, padding: '6px 18px',
-    fontSize: 13, fontFamily: "'Cinzel', serif", letterSpacing: '0.06em',
-    cursor: 'pointer', transition: 'all 0.2s',
-  }
-
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: P.bg, overflow: 'hidden', position: 'relative' }}>
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: P.bg, overflow: 'hidden', position: 'relative' }}>
       {/* bg glow */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `radial-gradient(ellipse at 80% 50%, rgba(100,10,20,0.18) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(80,8,16,0.12) 0%, transparent 50%)` }} />
 
       <Embers />
       <Lightbox />
 
-      {/* progress bar */}
-      <div style={{ height: 3, background: '#120610', flexShrink: 0, position: 'relative', zIndex: 10 }}>
-        <div style={{ height: '100%', background: `linear-gradient(to right, ${accent}, ${P.rb})`, width: `${progress}%`, transition: 'width 0.4s ease', boxShadow: '0 0 10px rgba(200,25,46,0.6)' }} />
-      </div>
+      {/* Lienzo 16:9, escalado para llenar la pantalla */}
+      <div ref={slideAreaRef} style={{
+        width: CANVAS_W, height: CANVAS_H, flexShrink: 0,
+        transform: `scale(${scale})`, transformOrigin: 'center center',
+        position: 'relative', overflow: 'hidden', zIndex: 5,
+      }}>
+        {/* Hilo de progreso, pegado al borde superior del lienzo */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, zIndex: 40, pointerEvents: 'none' }}>
+          <div style={{ height: '100%', background: `linear-gradient(to right, ${accent}, ${P.rb})`, width: `${progress}%`, transition: 'width 0.4s ease', boxShadow: '0 0 12px rgba(200,25,46,0.7)' }} />
+        </div>
 
-      {/* slide area */}
-      <div ref={slideAreaRef} style={{ flex: 1, overflow: 'hidden', position: 'relative', zIndex: 5 }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          width: `${100 / scale}%`, height: `${100 / scale}%`,
-          transform: `scale(${scale})`, transformOrigin: 'top left',
-        }}>
+        <div data-stage="slide" style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
           {/* ACT I — the outgoing slide, mounted only while it is coming apart */}
           {outIdx !== null && (
             <SlideLayers
@@ -2079,49 +2176,61 @@ export default function App() {
             />
           )}
         </div>
-      </div>
 
-      {/* nav bar */}
-      <div style={{ height: 50, background: '#0c0508', borderTop: `1px solid ${P.brd}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 22px', flexShrink: 0, zIndex: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={prev} disabled={cur === 0}
-            style={{ ...btnBase, border: `1px solid ${cur === 0 ? '#1e0e14' : '#4a1020'}`, color: cur === 0 ? '#2a1018' : '#d0b8b8', opacity: cur === 0 ? 0.3 : 1 }}>
-            ← Anterior
-          </button>
-          <button
-            onClick={toggleFullscreen}
-            title={fullscreen ? 'Salir de pantalla completa (F)' : 'Pantalla completa (F)'}
-            style={{
-              ...btnBase, ...ui, padding: '5px 11px', fontSize: 11,
-              border: `1px solid ${fullscreen ? P.red : '#2e1218'}`,
-              color: fullscreen ? P.rb : '#6a4a52',
-              letterSpacing: '0.1em',
-            }}>
-            {fullscreen ? '⤡ F' : '⤢ F'}
-          </button>
+        {/* ── Marco flotante ──
+            La barra de navegación con borde y fondo propio encerraba la lámina
+            en una ventana y se llevaba 53 px de alto. Quedan marcas sueltas
+            sobre la escena, para que la lámina pueda sangrar por debajo. */}
+        <div style={{ position: 'absolute', bottom: 20, left: 54, display: 'flex', alignItems: 'center', gap: 16, zIndex: 40 }}>
+          <GlyphBtn onClick={prev} disabled={cur === 0} accent={accent} title="Anterior (←)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </GlyphBtn>
+          <GlyphBtn onClick={next} disabled={cur === total - 1} accent={accent} title="Siguiente (→)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </GlyphBtn>
+          <GlyphBtn onClick={toggleFullscreen} accent={accent} title={fullscreen ? 'Salir de pantalla completa (F)' : 'Pantalla completa (F)'}>
+            <span style={{ ...ui, fontSize: 12, letterSpacing: '0.06em' }}>{fullscreen ? '⤡' : '⤢'}</span>
+          </GlyphBtn>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          {slide.block && (
-            <div style={{ background: accent, borderRadius: 4, padding: '2px 10px', fontFamily: "'Cinzel', serif", fontSize: 11, fontWeight: 700, color: '#fff', letterSpacing: '0.12em' }}>
-              {slide.block}
-            </div>
-          )}
-          <span style={{ fontFamily: "'Cinzel', serif", fontSize: 12.5, color: P.muted, letterSpacing: '0.06em' }}>
-            {cur + 1} <span style={{ color: '#2a1018' }}>/</span> {total}
-          </span>
+        <div style={{ position: 'absolute', bottom: 24, right: 54, display: 'flex', alignItems: 'baseline', gap: 16, zIndex: 40, pointerEvents: 'none' }}>
           {slide.id !== 'portada' && !slide.id.startsWith('bloque') && (
-            <span style={{ fontSize: 11, color: '#4a2830', fontFamily: "'Cinzel', serif", letterSpacing: '0.1em' }}>
+            <span style={{ fontSize: 10.5, color: '#4a2830', ...cf, letterSpacing: '0.16em' }}>
               LÁMINA {slide.id.toUpperCase()}
             </span>
           )}
+          {slide.block && (
+            <span style={{ ...cf, fontSize: 11, fontWeight: 700, color: accent, letterSpacing: '0.2em' }}>
+              {slide.block}
+            </span>
+          )}
+          <span style={{ ...cf, fontSize: 13, color: P.muted, letterSpacing: '0.08em' }}>
+            {cur + 1} <span style={{ color: '#2a1018' }}>/</span> {total}
+          </span>
         </div>
-
-        <button onClick={next} disabled={cur === total - 1}
-          style={{ ...btnBase, background: cur === total - 1 ? 'transparent' : accent, border: `1px solid ${cur === total - 1 ? '#1e0e14' : accent}`, color: cur === total - 1 ? '#2a1018' : '#fff', opacity: cur === total - 1 ? 0.3 : 1 }}>
-          Siguiente →
-        </button>
       </div>
     </div>
+  )
+}
+
+/* Sin caja: un botón con borde en la esquina reintroduce el rectángulo que la
+   composición evita. Queda el glifo, y el disco de acento sólo al pasar. */
+function GlyphBtn({ onClick, title, accent, disabled, children }: {
+  onClick: () => void; title?: string; accent: string; disabled?: boolean; children: React.ReactNode
+}) {
+  const [hover, setHover] = useState(false)
+  return (
+    <button onClick={onClick} title={title} disabled={disabled}
+      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+      style={{
+        width: 30, height: 30, borderRadius: '50%', border: 'none', padding: 0,
+        background: !disabled && hover ? `${accent}2e` : 'transparent',
+        color: disabled ? '#2a1018' : hover ? '#f0dede' : '#8a6068',
+        cursor: disabled ? 'default' : 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.22s ease',
+      }}>
+      {children}
+    </button>
   )
 }
