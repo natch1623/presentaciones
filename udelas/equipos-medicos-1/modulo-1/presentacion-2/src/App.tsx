@@ -8,6 +8,7 @@ import imgBomba from './imports/equipos/bomba.jpg'
 import imgAnestesiaReal from './imports/equipos/anestesia-real.jpg'
 import imgAnestesiaCircuito from './imports/equipos/anestesia-circuito.jpg'
 import imgAnestesiaConector from './imports/equipos/anestesia-conector.jpg'
+import { At, Ghost, Halo, Eyebrow, Hang, dly, VI, GO, RE, WH, WD, WF, WG } from './Stage'
 
 // ─── image zoom (fullscreen lightbox) ──────────────────────────────────────────
 const ImageZoomCtx = createContext<(src:string, alt?:string) => void>(() => {})
@@ -874,12 +875,33 @@ const EQUIPOS = [
   },
 ]
 
+// Fotos reales de referencia (manual del fabricante) — solo disponibles para
+// Máquina de Anestesia por ahora. Va antes del registro porque éste decide con
+// ella si el equipo lleva o no su lámina de fotos.
+const COMPONENT_PHOTOS: Record<number, { src:string; label:string }[]> = {
+  0: [
+    { src: imgAnestesiaCircuito, label: 'Bolsa reservorio, absorbedor de CO₂ y vaporizador' },
+    { src: imgAnestesiaConector, label: 'Conexión de cilindro — Yugo / PISS' },
+  ],
+}
+
 // ─── slide registry ───────────────────────────────────────────────────────────
+// Cada entrada es *una escena*: una idea, una composición. Donde antes una
+// lámina apilaba el caso real, las lecciones y las normativas en tres columnas,
+// ahora hay dos o tres láminas. El texto es exactamente el mismo — lo que se
+// reparte es la carga, para que cada golpe visual se lea desde la última fila.
 type SEntry = { type:string; ei?:number }
 const EQUIPO_BLOCKS: SEntry[][] = EQUIPOS.map((e,i) => [
-  {type:'equipo-cover',ei:i},{type:'intro',ei:i},{type:'principio',ei:i},
-  {type:'componentes',ei:i},{type:'manejo',ei:i},{type:'marcas',ei:i},
-  {type:'mantenimiento',ei:i},{type:'fallas',ei:i},{type:'conclusion',ei:i},
+  {type:'equipo-cover',ei:i},
+  {type:'intro-que',ei:i}, {type:'intro-func',ei:i},
+  {type:'principio-concepto',ei:i}, {type:'principio-ppios',ei:i},
+  {type:'componentes',ei:i},
+  ...(COMPONENT_PHOTOS[i] ? [{type:'componentes-fotos',ei:i}] : []),
+  {type:'manejo-antes',ei:i}, {type:'manejo-durante',ei:i},
+  {type:'marcas',ei:i},
+  {type:'mant-calendario',ei:i}, {type:'mant-pruebas',ei:i}, {type:'mant-limpieza',ei:i},
+  {type:'fallas-tabla',ei:i}, {type:'fallas-riesgos',ei:i},
+  {type:'conclusion-caso',ei:i}, {type:'conclusion-cierre',ei:i},
   ...(e.video ? [{type:'video',ei:i}] : []),
 ])
 const ALL_SLIDES: SEntry[] = [
@@ -987,6 +1009,59 @@ const CSS = `
   .zoomable-img:hover .zoom-hint{opacity:1!important;}
   @keyframes lightboxFadeIn{0%{opacity:0}100%{opacity:1}}
   @keyframes lightboxZoomIn{0%{opacity:0;transform:scale(0.92)}100%{opacity:1;transform:scale(1)}}
+
+  /* ── COMPOSICIÓN EDITORIAL ──────────────────────────────────
+     Las láminas se componen en absoluto sobre un escenario de
+     1440×810: nada está contenido en tarjetas, así que la entrada
+     de cada elemento es lo único que ordena la lectura. Una sola
+     entrada fuerte por lámina (el título); el resto llega detrás,
+     con 50 ms de separación, para que la escena se lea de una vez
+     y no se vea "armarse" pieza por pieza.
+  ─────────────────────────────────────────────────────────── */
+  .font-display{font-family:'Playfair Display',serif;}
+  .font-mono{font-family:'JetBrains Mono',monospace;}
+  .select-none{user-select:none;}
+
+  @keyframes riseIn{from{opacity:0;transform:translateY(26px);filter:blur(7px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+  @keyframes driftIn{from{opacity:0;transform:translateX(-34px);filter:blur(7px)}to{opacity:1;transform:translateX(0);filter:blur(0)}}
+  @keyframes driftInRight{from{opacity:0;transform:translateX(34px);filter:blur(7px)}to{opacity:1;transform:translateX(0);filter:blur(0)}}
+  /* El título se descubre de izquierda a derecha, como un rótulo
+     que se ilumina. Es el único gesto ruidoso que se permite. */
+  @keyframes wipeIn{from{opacity:0;clip-path:inset(0 100% 0 0);transform:translateY(14px)}to{opacity:1;clip-path:inset(0 -12% 0 0);transform:translateY(0)}}
+  @keyframes bloomIn{from{opacity:0;transform:scale(1.06);filter:blur(14px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+  @keyframes plateIn{from{opacity:0;transform:scale(1.09)}to{opacity:1;transform:scale(1)}}
+  @keyframes spanIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes spanInY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes strokeIn{from{stroke-dashoffset:var(--len,1200)}to{stroke-dashoffset:0}}
+  /* La palabra fantasma sube hasta SU propia opacidad, no hasta 1:
+     una animación CSS gana sobre el estilo en línea, y un
+     to{opacity:1} dejaría el numeral gigante del fondo a plena luz. */
+  @keyframes ghostIn{from{opacity:0;transform:translateY(40px) scale(1.04)}to{opacity:var(--ghost-o,1);transform:translateY(0) scale(1)}}
+  @keyframes driftLoop{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-22px,16px) scale(1.05)}66%{transform:translate(18px,-14px) scale(0.97)}}
+
+  .rise{opacity:0;animation:riseIn 0.62s cubic-bezier(0.22,1,0.36,1) both;}
+  .drift{opacity:0;animation:driftIn 0.62s cubic-bezier(0.22,1,0.36,1) both;}
+  .drift-r{opacity:0;animation:driftInRight 0.62s cubic-bezier(0.22,1,0.36,1) both;}
+  .wipe{opacity:0;animation:wipeIn 0.85s cubic-bezier(0.22,1,0.36,1) both;}
+  .bloom{opacity:0;animation:bloomIn 0.75s cubic-bezier(0.22,1,0.36,1) both;}
+  .plate{opacity:0;animation:plateIn 1.10s cubic-bezier(0.22,1,0.36,1) both;}
+  .ghost-in{opacity:0;animation:ghostIn 1.20s cubic-bezier(0.22,1,0.36,1) both;}
+  .span-x{transform-origin:left center;animation:spanIn 0.75s cubic-bezier(0.22,1,0.36,1) both;}
+  .span-y{transform-origin:top center;animation:spanInY 0.85s cubic-bezier(0.22,1,0.36,1) both;}
+  .stroke-in{animation:strokeIn 1.4s cubic-bezier(0.22,1,0.36,1) both;}
+  .drift-loop{animation:driftLoop 16s ease-in-out infinite;}
+
+  /* Una foto a sangre no lleva marco: se disuelve en el fondo por
+     el lado que da hacia adentro de la composición. */
+  .fade-l{-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 26%,#000 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 26%,#000 100%);}
+  .fade-r{-webkit-mask-image:linear-gradient(270deg,transparent 0%,#000 26%,#000 100%);mask-image:linear-gradient(270deg,transparent 0%,#000 26%,#000 100%);}
+  .fade-lb{-webkit-mask-image:linear-gradient(75deg,transparent 0%,#000 34%,#000 100%);mask-image:linear-gradient(75deg,transparent 0%,#000 34%,#000 100%);}
+  .fade-rb{-webkit-mask-image:linear-gradient(285deg,transparent 0%,#000 34%,#000 100%);mask-image:linear-gradient(285deg,transparent 0%,#000 34%,#000 100%);}
+
+  @media (prefers-reduced-motion: reduce){
+    .rise,.drift,.drift-r,.wipe,.bloom,.plate,.ghost-in,.span-x,.span-y,.stroke-in{animation-duration:0.01ms!important;animation-delay:0ms!important;}
+    .drift-loop{animation:none!important;}
+  }
 `
 
 // ─── ANIMATED BACKGROUND ─────────────────────────────────────────────────────
@@ -1223,176 +1298,259 @@ function AnimatedBg({ accentColor = C.cyan, theme = -1 }: { accentColor?: string
 // ─── SLIDE TRANSITION SYSTEM ──────────────────────────────────────────────────
 type TSlide = { id: number; slideIdx: number; phase: 'enter'|'active'|'exit'; dir: 1|-1 }
 
-// ─── SHARED UI ────────────────────────────────────────────────────────────────
-function Card({ title, color, children, style, animIdx=0 }: { title:string; color:string; children:React.ReactNode; style?:React.CSSProperties; animIdx?:number }) {
-  return (
-    <div className="glow-card" style={{
-      background:'linear-gradient(135deg,rgba(5,15,45,0.88) 0%,rgba(8,22,60,0.72) 100%)',
-      backdropFilter:'blur(20px)', border:`1px solid ${color}1e`,
-      borderRadius:16, padding:'12px 14px',
-      boxShadow:`0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 ${color}10`,
-      animation:`elemFadeUp 0.48s ${0.06+animIdx*0.11}s both`,
-      // @ts-expect-error custom css vars for hover glow
-      '--accent': color, '--accent-glow': `${color}59`,
-      ...style,
-    }}>
-      <h3 style={{ color, fontWeight:700, fontSize:'0.73rem', letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:8, display:'flex', alignItems:'center', gap:8 }}>
-        <span style={{ width:3, height:14, borderRadius:2, background:`linear-gradient(to bottom,${color},${color}44)`, display:'inline-block', flexShrink:0 }} />
-        {title}
-      </h3>
-      {children}
-    </div>
-  )
-}
-
-function DotRow({ text, last, color=C.cyan, animIdx=0 }: { text:string; last:boolean; color?:string; animIdx?:number }) {
-  return (
-    <div style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'4px 0', borderBottom:last?'none':'1px solid rgba(255,255,255,0.04)', fontSize:'0.79rem', color:'rgba(232,244,255,0.8)', lineHeight:1.4, animation:`elemFadeRight 0.38s ${animIdx*0.07}s both` }}>
-      <span style={{ width:5, height:5, borderRadius:'50%', background:color, flexShrink:0, marginTop:5, boxShadow:`0 0 6px ${color}` }} />
-      {text}
-    </div>
-  )
-}
-
-function DataTable({ headers, rows, ac, aColor }: { headers:string[]; rows:string[][]; ac?:number; aColor?:string }) {
-  return (
-    <table style={{ width:'100%', borderCollapse:'collapse' }}>
-      <thead>
-        <tr style={{ animation:'rowFadeIn 0.35s 0.05s both' }}>{headers.map((h,i)=><th key={i} style={{ color:'rgba(0,212,255,0.75)', fontWeight:700, fontSize:'0.67rem', textTransform:'uppercase', letterSpacing:'0.09em', padding:'5px 10px', borderBottom:'1px solid rgba(0,212,255,0.15)', textAlign:'left' }}>{h}</th>)}</tr>
-      </thead>
-      <tbody>
-        {rows.map((row,ri)=>(
-          <tr key={ri} style={{ animation:`rowFadeIn 0.38s ${0.1+ri*0.07}s both` }}>
-            {row.map((cell,ci)=><td key={ci} style={{ padding:'6px 10px', fontSize:'0.8rem', color:ci===ac?(aColor||C.cyan):'rgba(232,244,255,0.78)', fontWeight:ci===ac?600:400, borderBottom:ri<rows.length-1?'1px solid rgba(255,255,255,0.04)':'none' }}>{cell}</td>)}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )
-}
-
-function LineLabel({ text, color=C.cyan }: { text:string; color?:string }) {
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:14, marginBottom:10 }}>
-      <div style={{ flex:1, height:'1px', background:`linear-gradient(to right,transparent,${color}70)` }} />
-      <span style={{ fontFamily:'JetBrains Mono,monospace', color, fontSize:'0.65rem', letterSpacing:'0.2em' }}>{text}</span>
-      <div style={{ flex:1, height:'1px', background:`linear-gradient(to left,transparent,${color}70)` }} />
-    </div>
-  )
-}
-
-function SlideH({ num, label, color=C.cyan }: { num:string; label:string; color?:string }) {
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14, animation:'titleReveal 0.42s 0.02s both' }}>
-      <span style={{ fontFamily:'JetBrains Mono,monospace', color, fontWeight:700, fontSize:'0.68rem', opacity:0.65, animation:'badgeSlide 0.4s 0.06s both' }}>{num}</span>
-      <div style={{ width:1, height:18, background:'rgba(0,212,255,0.15)' }} />
-      <h2 style={{ fontFamily:'Playfair Display,serif', color:C.white, fontWeight:800, fontSize:'clamp(0.95rem,1.7vw,1.28rem)', margin:0 }}>{label}</h2>
-    </div>
-  )
-}
-
-// ─── HEADER ───────────────────────────────────────────────────────────────────
-function Header({ idx, isFullscreen, onToggleFullscreen }: { idx:number; isFullscreen:boolean; onToggleFullscreen:()=>void }) {
+// ─── CHROME FLOTANTE ──────────────────────────────────────────────────────────
+// Ni cabecera ni pie: barras con borde y fondo propio convertían el escenario
+// en una ventana de navegador y le robaban 86 px de alto a cada lámina. Lo que
+// queda son marcas sueltas sobre la escena, tan tenues que la lámina puede
+// sangrar por debajo de ellas hasta tocar los cuatro bordes.
+function TopChrome({ idx, isFullscreen, onToggleFullscreen }: { idx:number; isFullscreen:boolean; onToggleFullscreen:()=>void }) {
   const slide = ALL_SLIDES[idx]
   const equipo = slide.ei !== undefined ? EQUIPOS[slide.ei] : null
+  const accent = equipo?.color ?? C.cyan
   return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 28px', height:44, flexShrink:0, zIndex:20, borderBottom:'1px solid rgba(0,212,255,0.08)', background:'linear-gradient(to bottom,rgba(3,8,15,0.97),rgba(3,8,15,0.85))', backdropFilter:'blur(20px)' }}>
-      <div style={{ fontFamily:'JetBrains Mono,monospace', color:C.cyan, fontSize:'0.67rem', letterSpacing:'0.13em', display:'flex', alignItems:'center', gap:10 }}>
-        <span style={{ width:7, height:7, borderRadius:'50%', background:C.cyan, display:'inline-block', animation:'pulseDot 2s ease-in-out infinite' }} />
-        EQUIPOS DE SALÓN DE OPERACIONES — EQUIPOS MÉDICOS I
+    <>
+      {/* Hilo de progreso pegado al borde superior */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:2, zIndex:40, pointerEvents:'none' }}>
+        <div style={{
+          height:'100%', width:`${((idx+1)/TOTAL)*100}%`,
+          background:`linear-gradient(90deg, ${C.purple}00, ${C.purple} 26%, ${accent})`,
+          transition:'width 0.55s cubic-bezier(0.22,1,0.36,1), background 0.5s ease',
+          boxShadow:`0 0 14px ${accent}b0`,
+        }} />
       </div>
-      <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-        {equipo && <span style={{ color:equipo.color, fontSize:'0.7rem', fontWeight:600, fontFamily:'JetBrains Mono,monospace', letterSpacing:'0.05em' }}>E{equipo.num} · {equipo.name}</span>}
-        <span style={{ color:C.muted, fontSize:'0.7rem' }}>Ing. Bryan Rodríguez S. · UDELAS</span>
-        <div style={{ border:`1px solid ${C.cyan}45`, borderRadius:6, padding:'2px 10px', color:C.cyan, fontSize:'0.74rem', fontWeight:700, fontFamily:'JetBrains Mono,monospace', background:'rgba(0,212,255,0.05)' }}>
-          {String(idx+1).padStart(2,'0')} / {String(TOTAL).padStart(2,'0')}
-        </div>
-        <button onClick={onToggleFullscreen} title={isFullscreen?'Salir de pantalla completa (F)':'Pantalla completa (F)'} style={{
-          display:'flex', alignItems:'center', justifyContent:'center', width:26, height:26, borderRadius:6,
-          border:`1px solid ${C.cyan}45`, background:'rgba(0,212,255,0.05)', color:C.cyan, cursor:'pointer', padding:0,
-          transition:'background 0.2s, transform 0.2s',
-        }}
-          onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='rgba(0,212,255,0.16)';(e.currentTarget as HTMLElement).style.transform='scale(1.08)'}}
-          onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.background='rgba(0,212,255,0.05)';(e.currentTarget as HTMLElement).style.transform='scale(1)'}}>
+
+      <div style={{ position:'absolute', top:26, left:46, zIndex:40, display:'flex', alignItems:'center', gap:10, pointerEvents:'none' }}>
+        <span style={{ width:6, height:6, borderRadius:'50%', background:accent, boxShadow:`0 0 10px ${accent}`, animation:'pulseDot 2s ease-in-out infinite' }} />
+        <span className="font-mono" style={{ fontSize:9.5, color:'rgba(140,185,230,0.62)', letterSpacing:'0.24em', textTransform:'uppercase' }}>
+          Equipos de Salón de Operaciones — Equipos Médicos I
+        </span>
+        {equipo && (
+          <>
+            <span style={{ width:1, height:12, background:'rgba(140,185,230,0.22)' }} />
+            <span className="font-mono" style={{ fontSize:9.5, color:accent, letterSpacing:'0.18em', textTransform:'uppercase' }}>
+              E{equipo.num} · {equipo.name}
+            </span>
+          </>
+        )}
+      </div>
+
+      <div style={{ position:'absolute', top:20, right:44, zIndex:40, display:'flex', alignItems:'center', gap:18 }}>
+        <span className="font-mono" style={{ fontSize:9.5, color:'rgba(238,246,255,0.26)', letterSpacing:'0.16em' }}>
+          Ing. Bryan Rodríguez S. · UDELAS
+        </span>
+        <span className="font-mono" style={{ fontSize:12, color:accent, letterSpacing:'0.1em' }}>
+          {String(idx+1).padStart(2,'0')}
+          <span style={{ color:'rgba(238,246,255,0.22)' }}> / {String(TOTAL).padStart(2,'0')}</span>
+        </span>
+        <GlyphBtn onClick={onToggleFullscreen} title={isFullscreen?'Salir de pantalla completa (F)':'Pantalla completa (F)'} color={accent}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
             {isFullscreen
               ? <path d="M9 3v4a2 2 0 0 1-2 2H3M15 3v4a2 2 0 0 0 2 2h4M21 15h-4a2 2 0 0 0-2 2v4M3 15h4a2 2 0 0 1 2 2v4" />
               : <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />}
           </svg>
-        </button>
+        </GlyphBtn>
       </div>
-    </div>
+    </>
   )
 }
 
-// ─── FOOTER ───────────────────────────────────────────────────────────────────
-function Footer({ cur, onPrev, onNext, onJump }: { cur:number; onPrev:()=>void; onNext:()=>void; onJump:(i:number)=>void }) {
+/* Sin caja: un botón con borde en la esquina reintroduce justamente el
+   rectángulo que la composición evita. Queda el glifo, y el disco de acento
+   solo aparece al pasar el puntero. */
+function GlyphBtn({ onClick, title, color, disabled, children }: { onClick:()=>void; title?:string; color:string; disabled?:boolean; children:React.ReactNode }) {
+  const [hover, setHover] = useState(false)
+  return (
+    <button onClick={onClick} title={title} disabled={disabled}
+      onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)}
+      style={{
+        width:30, height:30, borderRadius:'50%', border:'none', padding:0,
+        background: !disabled && hover ? `${color}24` : 'transparent',
+        color: disabled ? 'rgba(238,246,255,0.14)' : hover ? color : `${color}8c`,
+        cursor: disabled ? 'default' : 'pointer',
+        display:'flex', alignItems:'center', justifyContent:'center',
+        transition:'all 0.22s ease',
+      }}>
+      {children}
+    </button>
+  )
+}
+
+function BottomChrome({ cur, onPrev, onNext, onJump }: { cur:number; onPrev:()=>void; onNext:()=>void; onJump:(i:number)=>void }) {
   const jumps = [0, 1, ...EQUIPO_STARTS]
   const activeJumpIndex = cur<=1 ? cur : 1 + EQUIPO_STARTS.filter(s => s<=cur).length
+  const accent = ALL_SLIDES[cur].ei !== undefined ? EQUIPOS[ALL_SLIDES[cur].ei!].color : C.cyan
   return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 28px', height:42, flexShrink:0, zIndex:20, borderTop:'1px solid rgba(0,212,255,0.08)', background:'linear-gradient(to top,rgba(3,8,15,0.97),rgba(3,8,15,0.85))', backdropFilter:'blur(20px)' }}>
-      <div style={{ display:'flex', gap:5, alignItems:'center' }}>
+    <>
+      {/* Puntos de salto, centrados y sin suelo debajo */}
+      <div style={{ position:'absolute', bottom:22, left:'50%', transform:'translateX(-50%)', display:'flex', gap:5, alignItems:'center', zIndex:40 }}>
         {jumps.map((start,i) => {
           const active = i === activeJumpIndex
           const color = i<2 ? C.cyan : EQUIPOS[i-2]?.color || C.cyan
           return (
-            <button key={i} onClick={()=>onJump(start)} title={i<2?['Portada','Índice'][i]:`Equipo ${i-1}`} style={{ width:active?22:5, height:5, borderRadius:3, background:active?color:'rgba(255,255,255,0.08)', border:'none', cursor:'pointer', padding:0, transition:'all 0.4s cubic-bezier(0.34,1.56,0.64,1)', boxShadow:active?`0 0 12px ${color}80`:'none' }} />
+            <button key={i} onClick={()=>onJump(start)} title={i<2?['Portada','Índice'][i]:`Equipo ${i-1}`} style={{
+              width:active?24:5, height:4, borderRadius:2, background:active?color:'rgba(255,255,255,0.1)',
+              border:'none', cursor:'pointer', padding:0,
+              transition:'all 0.4s cubic-bezier(0.34,1.56,0.64,1)',
+              boxShadow:active?`0 0 12px ${color}90`:'none',
+            }} />
           )
         })}
       </div>
-      <div style={{ display:'flex', gap:22, alignItems:'center' }}>
-        <button onClick={onPrev} disabled={cur===0} style={{ background:'none', border:'none', cursor:cur===0?'not-allowed':'pointer', color:cur===0?'rgba(0,212,255,0.18)':C.muted, fontSize:'0.7rem', fontFamily:'JetBrains Mono,monospace', letterSpacing:'0.12em', transition:'color 0.2s' }}
-          onMouseEnter={e=>{if(cur>0)(e.currentTarget as HTMLElement).style.color=C.cyan}}
-          onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.color=cur===0?'rgba(0,212,255,0.18)':C.muted as string}}>
-          ← ANTERIOR
-        </button>
-        <button onClick={onNext} disabled={cur===TOTAL-1} style={{ background:'none', border:'none', cursor:cur===TOTAL-1?'not-allowed':'pointer', color:cur===TOTAL-1?'rgba(0,212,255,0.18)':C.cyan, fontSize:'0.7rem', fontFamily:'JetBrains Mono,monospace', letterSpacing:'0.12em', transition:'color 0.2s' }}>
-          {cur===0 ? '· PRESIONA → PARA COMENZAR ·' : cur===TOTAL-1 ? '· FIN ·' : 'SIGUIENTE →'}
-        </button>
+
+      <div style={{ position:'absolute', bottom:18, right:44, display:'flex', gap:6, alignItems:'center', zIndex:40 }}>
+        <GlyphBtn onClick={onPrev} title="Anterior" color={accent} disabled={cur===0}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+        </GlyphBtn>
+        <GlyphBtn onClick={onNext} title="Siguiente" color={accent} disabled={cur===TOTAL-1}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+        </GlyphBtn>
       </div>
-    </div>
+
+      {cur===0 && (
+        <div style={{ position:'absolute', bottom:20, left:46, zIndex:40, pointerEvents:'none' }}>
+          <span className="font-mono" style={{ fontSize:9.5, color:'rgba(238,246,255,0.3)', letterSpacing:'0.2em' }}>
+            PRESIONA → PARA COMENZAR
+          </span>
+        </div>
+      )}
+    </>
   )
 }
 
 // ─── SLIDE CONTENTS ───────────────────────────────────────────────────────────
-function SlideCover({ color }: { color:string }) {
+// Cada tipo de lámina es una escena compuesta en absoluto sobre 1440×810 con el
+// vocabulario de `Stage.tsx`: nada de tarjetas, nada de rejillas, nada de
+// paneles con borde. La estructura la dan la tipografía, las reglas que se
+// desvanecen y el espacio negativo; la profundidad, las capas.
+
+/** Rótulo de escena: número de sección y su nombre, sin píldora ni caja. */
+function Head({ num, label, color, d = 0 }: { num:string; label:string; color:string; d?:number }) {
   return (
-    <div style={{ height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', position:'relative', zIndex:5, padding:'0 48px' }}>
-      <div style={{ animation:'coverSub 0.5s 0.05s both' }}><LineLabel text="UDELAS · INGENIERÍA BIOMÉDICA" /></div>
-      <p style={{ fontFamily:'JetBrains Mono,monospace', color:C.cyan, fontSize:'0.67rem', letterSpacing:'0.2em', margin:'20px 0 24px', animation:'coverSub 0.5s 0.15s both' }}>MÓDULO N°2</p>
-      <h1 style={{ fontFamily:'Playfair Display,serif', fontSize:'clamp(2.4rem,5vw,4.5rem)', fontWeight:900, lineHeight:1.1, marginBottom:0 }}>
-        <span style={{ color:C.white, display:'block', animation:'coverWord 0.6s 0.22s both' }}>Equipos de</span>
-        <span style={{ color:C.cyan, textShadow:`0 0 80px ${C.cyan}50, 0 0 160px ${C.cyan}20`, display:'block', animation:'coverWord 0.65s 0.34s both' }}>Salón de Operaciones</span>
-      </h1>
-      <div style={{ width:220, height:1, margin:'24px auto', background:`linear-gradient(to right,transparent,${C.purple}cc,${C.cyan}cc,transparent)`, animation:'lineDraw 0.8s 0.55s both' }} />
-      <p style={{ color:C.muted, fontSize:'0.93rem', fontStyle:'italic', marginBottom:44, letterSpacing:'0.02em', animation:'coverSub 0.5s 0.65s both' }}>Equipos Médicos I — Estructura por equipo</p>
-      <div style={{ display:'flex', gap:12, animation:'elemFadeUp 0.5s 0.75s both' }}>
-        <div style={{ border:`1px solid ${C.cyan}40`, borderRadius:10, padding:'11px 24px', color:C.cyan, fontSize:'0.82rem', background:'rgba(0,212,255,0.06)', backdropFilter:'blur(8px)' }}>Ing. Bryan Rodríguez S.</div>
-      </div>
+    <div className="drift" style={{ display:'flex', alignItems:'center', gap:14, ...dly(d) }}>
+      <span className="font-mono" style={{ fontSize:11, color, letterSpacing:'0.14em', fontWeight:700, opacity:0.8 }}>{num}</span>
+      <span style={{ width:22, height:1, background:color, opacity:0.55 }} />
+      <span className="font-mono" style={{ fontSize:10.5, color, letterSpacing:'0.26em', textTransform:'uppercase', whiteSpace:'nowrap' }}>{label}</span>
+    </div>
+  )
+}
+
+/**
+ * Una imagen de equipo, suelta sobre el fondo. Los productos vienen
+ * fotografiados contra fondos distintos, así que no se sangran a los bordes
+ * (recortaría mal): se apoyan en su propio halo y su sombra, sin marco.
+ */
+function Plate({ src, alt, size, color, d = 2, style }: { src:string; alt:string; size:number; color:string; d?:number; style?:React.CSSProperties }) {
+  return (
+    <div style={{ position:'relative', width:size, height:size, ...style }}>
+      <div style={{
+        position:'absolute', inset:'-16%', borderRadius:'50%',
+        background:`radial-gradient(circle, ${color}26 0%, transparent 66%)`, pointerEvents:'none',
+      }} />
+      <ZoomableImg
+        src={src} alt={alt}
+        style={{ position:'relative', width:'100%', height:'100%', animation:`bloomIn 0.75s cubic-bezier(0.22,1,0.36,1) ${0.08 + d * 0.05}s both` }}
+        imgStyle={{ objectFit:'contain', filter:`drop-shadow(0 18px 40px rgba(0,0,0,0.6)) drop-shadow(0 0 26px ${color}44)` }}
+      />
+    </div>
+  )
+}
+
+/** Dos corrientes de texto enfrentadas, sin una sola caja entre ellas. */
+function TwoStreams({
+  a, b, accentA, accentB, top = 210,
+}: {
+  a: { label:string; items:string[] }
+  b: { label:string; items:string[] }
+  accentA:string; accentB:string; top?:number
+}) {
+  return (
+    <>
+      <At l={100} t={top} w={560} d={1} anim="drift">
+        <p className="font-mono" style={{ fontSize:11, color:accentA, letterSpacing:'0.24em', textTransform:'uppercase', margin:'0 0 14px' }}>{a.label}</p>
+        <div className="span-x" style={{ width:300, height:1, background:`linear-gradient(90deg, ${accentA}, transparent)`, marginBottom:24, ...dly(2) }} />
+        <Hang items={a.items} color={accentA} d={3} marker="tick" size={16.5} w={520} gap={16} />
+      </At>
+      <At l={790} t={top + 88} w={560} d={5} anim="drift-r">
+        <p className="font-mono" style={{ fontSize:11, color:accentB, letterSpacing:'0.24em', textTransform:'uppercase', margin:'0 0 14px' }}>{b.label}</p>
+        <div className="span-x" style={{ width:300, height:1, background:`linear-gradient(90deg, ${accentB}, transparent)`, marginBottom:24, ...dly(6) }} />
+        <Hang items={b.items} color={accentB} d={7} marker="tick" size={16.5} w={520} gap={16} />
+      </At>
+    </>
+  )
+}
+
+function SlideCover() {
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="02" side="right" size={520} top={150} opacity={0.03} font="mono" />
+      <Halo x={1120} y={360} size={900} color="rgba(0,212,255,0.2)" />
+      <Halo x={220} y={720} size={640} color="rgba(124,58,237,0.24)" />
+
+      <At l={100} t={214} anim="none">
+        <Eyebrow d={0}>UDELAS · Ingeniería Biomédica</Eyebrow>
+      </At>
+
+      <At l={104} t={252} d={1} anim="drift">
+        <span className="font-mono" style={{ fontSize:11, letterSpacing:'0.3em', color:'rgba(0,212,255,0.5)' }}>MÓDULO N°2</span>
+      </At>
+
+      <At l={94} t={288} w={880} anim="none">
+        <h1 className="font-display wipe" style={{ fontSize:96, lineHeight:0.98, margin:0, fontWeight:900, ...dly(2) }}>
+          <span style={{ color:WH, display:'block' }}>Equipos de</span>
+          <span style={{ color:C.cyan, textShadow:`0 0 90px ${C.cyan}55`, display:'block' }}>Salón de Operaciones</span>
+        </h1>
+      </At>
+
+      <At l={-70} t={532} w={700} h={2} z={1} anim="none">
+        <div className="span-x" style={{ width:'100%', height:2, background:`linear-gradient(90deg, transparent, ${C.purple}, ${C.cyan})`, boxShadow:`0 0 18px ${C.cyan}66`, ...dly(5) }} />
+      </At>
+
+      <At l={100} t={572} w={620} d={6}>
+        <p style={{ fontSize:20, color:WD, fontStyle:'italic', lineHeight:1.55, margin:0, fontWeight:300 }}>
+          Equipos Médicos I — Estructura por equipo
+        </p>
+      </At>
+
+      <At l={100} t={646} d={8}>
+        <span className="font-mono" style={{ fontSize:12, color:C.cyan, letterSpacing:'0.14em' }}>Ing. Bryan Rodríguez S.</span>
+      </At>
     </div>
   )
 }
 
 function SlideIndex({ onJump }: { onJump:(i:number)=>void }) {
   return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'22px 44px 14px', display:'flex', flexDirection:'column' }}>
-      <SlideH num="00" label="Índice de equipos" />
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14, flex:1 }}>
-        {EQUIPOS.map((e,i) => (
-          <button key={i} className="idx-card" onClick={()=>onJump(EQUIPO_STARTS[i])} style={{
-            background:`linear-gradient(135deg,rgba(5,15,45,0.9) 0%,${e.color}0a 100%)`,
-            border:`1px solid ${e.color}25`, borderRadius:16, padding:'20px 18px', textAlign:'left', cursor:'pointer',
-            boxShadow:`0 4px 24px rgba(0,0,0,0.45), 0 0 0 0 ${e.color}00`,
-            animation:`elemFadeUp 0.48s ${0.06+i*0.09}s both`,
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="06" side="right" size={460} top={210} opacity={0.026} font="mono" />
+      <Halo x={200} y={220} size={640} color="rgba(0,212,255,0.14)" />
+      <Halo x={1180} y={700} size={700} color="rgba(124,58,237,0.2)" />
+
+      <At l={100} t={78} anim="none">
+        <Head num="00" label="Índice de equipos" color={C.cyan} />
+      </At>
+
+      {EQUIPOS.map((e,i) => (
+        <At key={i} l={100 + i * 22} t={146 + i * 104} w={1240 - i * 22} d={1 + i} anim="drift">
+          <button onClick={()=>onJump(EQUIPO_STARTS[i])} title={`Ir a ${e.name}`} style={{
+            display:'flex', alignItems:'baseline', gap:22, width:'100%',
+            background:'none', border:'none', padding:0, textAlign:'left', cursor:'pointer',
           }}>
-            <div style={{ fontSize:'2rem', marginBottom:10, filter:`drop-shadow(0 0 12px ${e.color}60)` }}>{e.icon}</div>
-            <div style={{ fontFamily:'JetBrains Mono,monospace', color:e.color, fontSize:'0.64rem', letterSpacing:'0.12em', marginBottom:5 }}>EQUIPO {e.num}</div>
-            <div style={{ fontFamily:'Playfair Display,serif', color:C.white, fontWeight:700, fontSize:'0.93rem', marginBottom:8, lineHeight:1.25 }}>{e.name}</div>
-            <p style={{ color:C.muted, fontSize:'0.75rem', lineHeight:1.5, margin:0 }}>{e.desc}</p>
-            <div style={{ marginTop:14, color:e.color, fontSize:'0.67rem', fontFamily:'JetBrains Mono,monospace', opacity:0.75 }}>VER EQUIPO →</div>
+            <span className="font-mono" style={{ fontSize:12, color:e.color, opacity:0.7, flexShrink:0, width:78, letterSpacing:'0.14em' }}>
+              EQUIPO {e.num}
+            </span>
+            <span style={{ fontSize:26, flexShrink:0, filter:`drop-shadow(0 0 14px ${e.color}90)` }}>{e.icon}</span>
+            <span className="font-display" style={{
+              fontSize:29, fontWeight:700, color:e.color, flexShrink:0, lineHeight:1.2,
+              textShadow:`0 0 30px ${e.color}44`, minWidth:290,
+            }}>{e.name}</span>
+            <span style={{ fontSize:14, color:WF, lineHeight:1.5, fontWeight:300, flex:1 }}>{e.desc}</span>
           </button>
-        ))}
-      </div>
+          <div className="span-x" style={{
+            width:1160 - i * 22, height:1, marginTop:16,
+            background:`linear-gradient(90deg, ${e.color}44, ${e.color}0d, transparent)`, ...dly(2 + i),
+          }} />
+        </At>
+      ))}
     </div>
   )
 }
@@ -1400,306 +1558,608 @@ function SlideIndex({ onJump }: { onJump:(i:number)=>void }) {
 function SlideEquipoCover({ ei }: { ei:number }) {
   const e = EQUIPOS[ei]
   const tags = ['Introducción','Principio','Componentes','Manejo','Marcas','Mantenimiento','Fallas','Conclusión']
-  if (e.img) {
-    return (
-      <div style={{ height:'100%', display:'grid', gridTemplateColumns:'0.95fr 1.05fr', alignItems:'center', position:'relative', zIndex:5, padding:'0 40px', gap:20 }}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <ZoomableImg src={e.img} alt={e.name} style={{
-            width:'100%', maxWidth:400, aspectRatio:'1/1',
-            filter:`drop-shadow(0 0 40px ${e.color}55)`,
-            animation:'zoomIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.1s both',
-            borderRadius:18, border:`1px solid ${e.color}30`, background:'rgba(0,0,0,0.35)', padding:14,
-          }} imgStyle={{ objectFit:'contain' }} />
-        </div>
-        <div style={{ textAlign:'left' }}>
-          <p style={{ fontFamily:'JetBrains Mono,monospace', color:C.muted, fontSize:'0.65rem', letterSpacing:'0.2em', marginBottom:14 }}>EQUIPOS DE SALÓN DE OPERACIONES</p>
-          <p style={{ fontFamily:'JetBrains Mono,monospace', color:e.color, fontSize:'0.7rem', letterSpacing:'0.18em', marginBottom:14 }}>EQUIPO N°{e.num}</p>
-          <h2 style={{ fontFamily:'Playfair Display,serif', fontSize:'clamp(1.8rem,3.6vw,3.1rem)', fontWeight:900, color:C.white, lineHeight:1.1, marginBottom:0 }}>
-            <span style={{ display:'block', animation:'coverWord 0.55s 0.25s both' }}>{e.name.split(' ').slice(0,-1).join(' ')}{' '}</span>
-            <span style={{ color:e.color, textShadow:`0 0 60px ${e.color}50`, display:'block', animation:'coverWord 0.6s 0.38s both' }}>{e.name.split(' ').slice(-1)[0]}</span>
-          </h2>
-          <div style={{ width:90, height:2, margin:'18px 0', borderRadius:1, background:`linear-gradient(to right,${e.color},transparent)`, boxShadow:`0 0 16px ${e.color}60`, animation:'lineDraw 0.7s 0.55s both' }} />
-          <p style={{ color:C.muted, fontSize:'0.85rem', maxWidth:420, fontStyle:'italic', lineHeight:1.6, animation:'coverSub 0.5s 0.65s both' }}>{e.desc}</p>
-          <div style={{ marginTop:22, display:'flex', gap:7, flexWrap:'wrap' }}>
-            {tags.map((s,i)=>(
-              <span key={i} style={{ background:`${e.color}0f`, border:`1px solid ${e.color}28`, color:e.color, borderRadius:999, padding:'3px 11px', fontSize:'0.64rem', fontFamily:'JetBrains Mono,monospace', opacity:0.85, animation:`tagBounce 0.45s ${0.7+i*0.07}s both` }}>{i+1}. {s}</span>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const words = e.name.split(' ')
+  const last = words[words.length - 1]
+  const head = words.slice(0, -1).join(' ')
   return (
-    <div style={{ height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', position:'relative', zIndex:5, padding:'0 48px' }}>
-      <p style={{ fontFamily:'JetBrains Mono,monospace', color:C.muted, fontSize:'0.65rem', letterSpacing:'0.2em', marginBottom:18 }}>EQUIPOS DE SALÓN DE OPERACIONES</p>
-      <div style={{ fontSize:'4rem', marginBottom:22, animation:'iconFloat 4s ease-in-out infinite', filter:`drop-shadow(0 0 30px ${e.color}70)` }}>{e.icon}</div>
-      <p style={{ fontFamily:'JetBrains Mono,monospace', color:e.color, fontSize:'0.7rem', letterSpacing:'0.18em', marginBottom:16 }}>EQUIPO N°{e.num}</p>
-      <h2 style={{ fontFamily:'Playfair Display,serif', fontSize:'clamp(2rem,4.5vw,3.6rem)', fontWeight:900, color:C.white, lineHeight:1.1, marginBottom:0 }}>
-        <span style={{ display:'block', animation:'coverWord 0.55s 0.25s both' }}>{e.name.split(' ').slice(0,-1).join(' ')}{' '}</span>
-        <span style={{ color:e.color, textShadow:`0 0 60px ${e.color}50`, display:'block', animation:'coverWord 0.6s 0.38s both' }}>{e.name.split(' ').slice(-1)[0]}</span>
-      </h2>
-      <div style={{ width:100, height:2, margin:'22px auto', borderRadius:1, background:`linear-gradient(to right,transparent,${e.color},transparent)`, boxShadow:`0 0 16px ${e.color}60`, animation:'lineDraw 0.7s 0.55s both' }} />
-      <p style={{ color:C.muted, fontSize:'0.9rem', maxWidth:460, fontStyle:'italic', lineHeight:1.65, animation:'coverSub 0.5s 0.65s both' }}>{e.desc}</p>
-      <div style={{ marginTop:32, display:'flex', gap:8, flexWrap:'wrap', justifyContent:'center' }}>
-        {tags.map((s,i)=>(
-          <span key={i} style={{ background:`${e.color}0f`, border:`1px solid ${e.color}28`, color:e.color, borderRadius:999, padding:'3px 12px', fontSize:'0.67rem', fontFamily:'JetBrains Mono,monospace', opacity:0.85, animation:`tagBounce 0.45s ${0.7+i*0.07}s both` }}>{i+1}. {s}</span>
-        ))}
-      </div>
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text={String(e.num)} side="right" size={620} top={90} opacity={0.032} color={e.color} font="mono" />
+      <Halo x={1080} y={410} size={940} color={`${e.color}30`} />
+      <Halo x={180} y={740} size={620} color="rgba(124,58,237,0.18)" />
+
+      {e.img && (
+        <At l={880} t={172} z={1} anim="none">
+          <Plate src={e.img} alt={e.name} size={420} color={e.color} d={2} />
+        </At>
+      )}
+
+      <At l={100} t={172} anim="none" z={3}>
+        <Eyebrow d={0} color={e.color}>Equipo N°{e.num}</Eyebrow>
+      </At>
+
+      <At l={94} t={218} w={760} anim="none" z={3}>
+        <h2 className="font-display wipe" style={{ fontSize: head ? 66 : 78, lineHeight:1.0, fontWeight:900, margin:0, ...dly(1) }}>
+          {head && <span style={{ color:WH, display:'block' }}>{head}</span>}
+          <span style={{ color:e.color, textShadow:`0 0 70px ${e.color}55`, display:'block' }}>{last}</span>
+        </h2>
+      </At>
+
+      <At l={-60} t={head ? 402 : 348} w={620} h={2} z={2} anim="none">
+        <div className="span-x" style={{ width:'100%', height:2, background:`linear-gradient(90deg, transparent, ${e.color})`, boxShadow:`0 0 16px ${e.color}88`, ...dly(3) }} />
+      </At>
+
+      <At l={100} t={head ? 440 : 386} w={660} d={4} z={3}>
+        <p style={{ fontSize:19, color:WD, fontStyle:'italic', lineHeight:1.62, margin:0, fontWeight:300 }}>{e.desc}</p>
+      </At>
+
+      {/* El recorrido del bloque: una línea de texto, no ocho píldoras */}
+      <At l={100} t={640} w={720} d={7} z={3}>
+        <p className="font-mono" style={{ fontSize:10.5, color:`${e.color}b0`, letterSpacing:'0.14em', lineHeight:2, margin:0, textTransform:'uppercase' }}>
+          {tags.map((s,i) => (
+            <span key={i}>
+              <span style={{ opacity:0.5 }}>{i+1}.</span> {s}
+              {i < tags.length-1 && <span style={{ opacity:0.3, margin:'0 10px' }}>·</span>}
+            </span>
+          ))}
+        </p>
+      </At>
     </div>
   )
 }
 
-function SlideIntro({ ei }: { ei:number }) {
+function SlideIntroQue({ ei }: { ei:number }) {
   const e = EQUIPOS[ei]
   return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'26px 48px 16px', display:'flex', flexDirection:'column' }}>
-      <SlideH num="01" label="Introducción y función clínica" color={e.color} />
-      <div style={{ display:'grid', gridTemplateColumns:'1.4fr 0.6fr', gap:30, flex:1, minHeight:0 }}>
-        <div style={{ position:'relative', display:'flex', flexDirection:'column', justifyContent:'center', minHeight:0, overflow:'auto' }}>
-          <span style={{ position:'absolute', top:-46, left:-10, fontFamily:'Playfair Display,serif', fontWeight:900, fontSize:'11rem', lineHeight:1, color:`${e.color}10`, userSelect:'none', pointerEvents:'none', zIndex:0 }}>01</span>
-          <span style={{ position:'absolute', bottom:-10, right:6, fontSize:'6.5rem', lineHeight:1, opacity:0.08, filter:`drop-shadow(0 0 30px ${e.color})`, userSelect:'none', pointerEvents:'none', zIndex:0 }}>{e.icon}</span>
-          <div style={{ position:'relative', zIndex:1 }}>
-            <h3 style={{ fontFamily:'JetBrains Mono,monospace', color:e.color, fontSize:'0.68rem', letterSpacing:'0.2em', marginBottom:10, animation:'elemFadeRight 0.4s 0.05s both' }}>¿QUÉ ES?</h3>
-            <p style={{ color:C.white, fontSize:'1.08rem', fontWeight:300, lineHeight:1.85, marginBottom:26, maxWidth:660, animation:'elemFadeUp 0.5s 0.1s both' }}>{e.intro.que}</p>
-            <h3 style={{ fontFamily:'JetBrains Mono,monospace', color:e.color, fontSize:'0.68rem', letterSpacing:'0.2em', marginBottom:8, animation:'elemFadeRight 0.4s 0.16s both' }}>FUNCIONES PRINCIPALES</h3>
-            <div style={{ display:'flex', flexDirection:'column' }}>
-              {e.intro.funciones.map((f,i,a)=><DotRow key={i} text={f} last={i===a.length-1} color={e.color} animIdx={i} />)}
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="01" side="right" size={480} top={190} opacity={0.028} color={e.color} font="mono" />
+      <Halo x={1140} y={300} size={780} color={`${e.color}22`} />
+      <Halo x={160} y={740} size={620} color="rgba(124,58,237,0.16)" />
+
+      <At l={100} t={92} anim="none">
+        <Head num="01" label="Introducción y función clínica" color={e.color} />
+      </At>
+
+      <At l={94} t={148} w={900} anim="none">
+        <h2 className="font-display wipe" style={{ fontSize:56, lineHeight:1.06, color:WH, margin:0, fontWeight:800, ...dly(1) }}>
+          ¿Qué es <span style={{ color:e.color, textShadow:`0 0 50px ${e.color}55` }}>{e.name.toLowerCase()}</span>?
+        </h2>
+      </At>
+
+      <At l={-70} t={292} w={640} h={2} z={1} anim="none">
+        <div className="span-x" style={{ width:'100%', height:2, background:`linear-gradient(90deg, transparent, ${e.color})`, boxShadow:`0 0 16px ${e.color}66`, ...dly(3) }} />
+      </At>
+
+      <At l={98} t={336} w={1180} d={4}>
+        <p style={{ fontSize:24, color:WD, lineHeight:1.76, margin:0, fontWeight:300 }}>{e.intro.que}</p>
+      </At>
+
+      <span style={{
+        position:'absolute', right:110, bottom:40, fontSize:150, lineHeight:1, opacity:0.06, zIndex:0,
+        filter:`drop-shadow(0 0 40px ${e.color})`, userSelect:'none', pointerEvents:'none',
+      }}>{e.icon}</span>
+    </div>
+  )
+}
+
+function SlideIntroFunc({ ei }: { ei:number }) {
+  const e = EQUIPOS[ei]
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="Función" side="left" size={190} top={-4} opacity={0.024} />
+      <Halo x={240} y={300} size={720} color={`${e.color}20`} />
+      <Halo x={1120} y={660} size={680} color="rgba(124,58,237,0.2)" />
+
+      <At l={100} t={92} anim="none">
+        <Head num="01" label="Funciones y aplicaciones" color={e.color} />
+      </At>
+
+      <TwoStreams
+        a={{ label:'Funciones principales', items:e.intro.funciones }}
+        b={{ label:'Aplicaciones clínicas', items:e.intro.apps }}
+        accentA={e.color}
+        accentB={VI}
+        top={168}
+      />
+    </div>
+  )
+}
+
+function SlidePrincipioConcepto({ ei }: { ei:number }) {
+  const e = EQUIPOS[ei]
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="02" side="right" size={470} top={430} opacity={0.026} color={e.color} font="mono" />
+      <Halo x={280} y={280} size={760} color={`${e.color}20`} />
+      <Halo x={1140} y={680} size={660} color="rgba(0,212,255,0.14)" />
+
+      <At l={100} t={92} anim="none">
+        <Head num="02" label="Principio de funcionamiento" color={e.color} />
+      </At>
+
+      <At l={98} t={148} w={620} d={1}>
+        <p style={{ fontSize:17.5, color:WD, lineHeight:1.68, margin:0, fontWeight:300 }}>{e.principio.concepto}</p>
+      </At>
+
+      {/* La cadena de bloques desciende en diagonal, unida por una hairline */}
+      <At l={0} t={0} w={1440} h={810} z={0} anim="none" style={{ pointerEvents:'none' }}>
+        <div className="span-x" style={{
+          position:'absolute', left:790, top:190, width:520, height:1,
+          background:`linear-gradient(90deg, ${e.color}88, ${e.color}18, transparent)`,
+          transform:'rotate(72deg)', transformOrigin:'left center', ...dly(3),
+        }} />
+      </At>
+
+      {/* La cadena en flujo, con la sangría creciendo bloque a bloque. El
+          ancho se encoge al mismo ritmo que crece la sangría —si no, el
+          último bloque se sale por la derecha— y el hueco se cierra cuando
+          el equipo tiene más de cinco, para no salirse por abajo. */}
+      <At l={786} t={168} w={534} d={3} anim="none">
+        <div style={{ display:'flex', flexDirection:'column', gap: e.principio.bloques.length > 5 ? 22 : 34 }}>
+          {e.principio.bloques.map((b,i) => (
+            <div key={i} className="drift-r" style={{
+              display:'flex', alignItems:'baseline', gap:18,
+              marginLeft: i * 22, width: 534 - i * 22, ...dly(3 + i),
+            }}>
+              <span className="font-mono" style={{ fontSize:12, color:e.color, opacity:0.55, flexShrink:0, width:28 }}>
+                {String(i+1).padStart(2,'0')}
+              </span>
+              <span style={{ fontSize: e.principio.bloques.length > 5 ? 16.5 : 18, color:WH, lineHeight:1.5, fontWeight:400 }}>{b}</span>
             </div>
-          </div>
+          ))}
         </div>
-        <div style={{ position:'relative', borderLeft:`1px solid ${e.color}25`, paddingLeft:24, display:'flex', flexDirection:'column', justifyContent:'center', minHeight:0, overflow:'auto' }}>
-          <h3 style={{ fontFamily:'JetBrains Mono,monospace', color:'#c4a9f0', fontSize:'0.68rem', letterSpacing:'0.2em', marginBottom:16 }}>APLICACIONES CLÍNICAS</h3>
-          <div style={{ display:'flex', flexDirection:'column', flex:1, justifyContent:'space-evenly', maxHeight:'100%' }}>
-            {e.intro.apps.map((a,i,arr)=>(
-              <div key={i} style={{ padding:'9px 0', borderBottom:i===arr.length-1?'none':'1px solid rgba(139,92,246,0.15)', color:'#c4a9f0', fontSize:'0.85rem', lineHeight:1.45, animation:`tagBounce 0.42s ${0.28+i*0.08}s both` }}>{a}</div>
-            ))}
-          </div>
-        </div>
-      </div>
+      </At>
     </div>
   )
 }
 
-function SlidePrincipio({ ei }: { ei:number }) {
+function SlidePrincipioPpios({ ei }: { ei:number }) {
   const e = EQUIPOS[ei]
+  const ps = e.principio.principios
   return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'22px 44px 14px', display:'flex', flexDirection:'column' }}>
-      <SlideH num="02" label="Principio de funcionamiento" color={e.color} />
-      <div style={{ display:'grid', gridTemplateColumns:'1.15fr 0.85fr', gap:14, flex:1, overflow:'auto' }}>
-        <Card title="Diagrama de bloques" color={e.color} animIdx={0} style={{ display:'flex', flexDirection:'column' }}>
-          <p style={{ color:'rgba(232,244,255,0.7)', fontSize:'0.82rem', marginBottom:14, lineHeight:1.55 }}>{e.principio.concepto}</p>
-          <div style={{ position:'relative', flex:1, display:'flex', flexDirection:'column', justifyContent:'space-evenly', gap:8, minHeight:0 }}>
-            <div style={{ position:'absolute', left:'50%', top:4, bottom:4, width:1, background:`linear-gradient(to bottom, ${e.color}00, ${e.color}45, ${e.color}00)`, transform:'translateX(-50%)', zIndex:0 }} />
-            {e.principio.bloques.map((b,i)=>{
-              const rightSide = i%2===1
-              return (
-                <div key={i} style={{ position:'relative', zIndex:1, display:'flex', justifyContent: rightSide?'flex-end':'flex-start' }}>
-                  <div style={{ width:'84%', background:`${e.color}0c`, border:`1px solid ${e.color}30`, borderRadius:7, padding:'8px 14px', color:e.color, fontWeight:600, fontSize:'0.8rem', lineHeight:1.4, animation:`blockPop 0.38s ${0.12+i*0.08}s both` }}>{b}</div>
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="Principios" side="right" size={180} top={-4} opacity={0.024} />
+      <Halo x={220} y={260} size={700} color={`${e.color}1e`} />
+      <Halo x={1160} y={680} size={680} color="rgba(124,58,237,0.2)" />
+
+      <At l={100} t={88} anim="none">
+        <Head num="02" label="Principios involucrados" color={e.color} />
+      </At>
+
+      {/* En flujo, no una posición fija por principio: el largo de estos
+          textos varía muchísimo entre equipos (la torre de endoscopía tiene
+          los más largos) y con un paso fijo el último se salía por abajo.
+          La escalera se conserva con la sangría de cada bloque. */}
+      <At l={100} t={148} w={1240} d={1} anim="none">
+        <div style={{ display:'flex', flexDirection:'column', gap: ps.length > 3 ? 24 : 34 }}>
+          {ps.map(([t,d],i) => {
+            const c = i % 2 === 0 ? e.color : VI
+            return (
+              <div key={i} className="drift" style={{ marginLeft: i * 28, ...dly(1 + i * 2) }}>
+                <h3 style={{ fontSize: ps.length > 3 ? 22 : 25, color:c, margin:'0 0 9px', fontWeight:600, lineHeight:1.25 }}>{t}</h3>
+                <div style={{ display:'flex', alignItems:'stretch', gap:18 }}>
+                  <span className="span-y" style={{
+                    width:2, flexShrink:0,
+                    background:`linear-gradient(180deg, ${c}, transparent)`, ...dly(2 + i * 2),
+                  }} />
+                  <p style={{
+                    fontSize: ps.length > 3 ? 15 : 16.5, color:WD, lineHeight:1.58, margin:0,
+                    fontWeight:300, maxWidth: 1090 - i * 28,
+                  }}>{d}</p>
                 </div>
-              )
-            })}
-          </div>
-        </Card>
-        <Card title="Principios involucrados" color="#8b5cf6" animIdx={1} style={{ display:'flex', flexDirection:'column' }}>
-          <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'space-evenly', minHeight:0 }}>
-            {e.principio.principios.map(([t,d],i,a)=>(
-              <div key={i} style={{ padding:'8px 0', borderBottom:i<a.length-1?'1px solid rgba(255,255,255,0.04)':'none' }}>
-                <div style={{ color:'#c4a9f0', fontWeight:700, fontSize:'0.83rem', marginBottom:4 }}>{t}</div>
-                <div style={{ color:'rgba(232,244,255,0.68)', fontSize:'0.8rem', lineHeight:1.55 }}>{d}</div>
               </div>
-            ))}
-          </div>
-        </Card>
-      </div>
+            )
+          })}
+        </div>
+      </At>
     </div>
   )
-}
-
-// Fotos reales de referencia (manual del fabricante) — solo disponibles para Máquina de Anestesia por ahora
-const COMPONENT_PHOTOS: Record<number, { src:string; label:string }[]> = {
-  0: [
-    { src: imgAnestesiaCircuito, label: 'Bolsa reservorio, absorbedor de CO₂ y vaporizador' },
-    { src: imgAnestesiaConector, label: 'Conexión de cilindro — Yugo / PISS' },
-  ],
 }
 
 function SlideComponentes({ ei }: { ei:number }) {
   const e = EQUIPOS[ei]
-  const photos = COMPONENT_PHOTOS[ei]
+  const n = e.componentes.length
+  /* El registro se aprieta cuando hay muchos componentes, para que entre
+     entero entre el rótulo y el borde inferior. No basta con cerrar el
+     hueco: con nueve o diez entradas hay que bajar también el cuerpo y
+     estrechar la columna del nombre, o las descripciones largas parten en
+     tres líneas y el último renglón se sale del escenario. */
+  const dense = n >= 9
+  const gap = dense ? 10 : n > 6 ? 20 : 26
+  const fs = dense ? 13.5 : 15
+  const nameW = dense ? 250 : 290
+  const rule = dense ? 8 : 12
   return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'22px 44px 14px', display:'flex', flexDirection:'column' }}>
-      <SlideH num="03" label="Componentes principales" color={e.color} />
-      <div style={{ display:'grid', gridTemplateColumns: photos ? '1.75fr 1fr' : '1fr', gap:14, flex:1, overflow:'auto' }}>
-        <div style={{ display:'grid', gridTemplateColumns: photos ? 'repeat(2,1fr)' : 'repeat(3,1fr)', gridAutoRows:'1fr', gap:14, overflow:'auto' }}>
-          {e.componentes.map(([name,desc],i)=>(
-            <div key={i} className="glow-card" style={{
-              position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:'center',
-              background:'linear-gradient(135deg,rgba(5,15,45,0.88) 0%,rgba(8,22,60,0.72) 100%)',
-              backdropFilter:'blur(20px)', border:`1px solid ${e.color}1e`, borderRadius:14,
-              padding: photos ? '14px 16px' : '20px 24px', boxShadow:'0 8px 24px rgba(0,0,0,0.35)',
-              animation:`elemFadeUp 0.45s ${0.05+i*0.06}s both`,
-              // @ts-expect-error custom css vars for hover glow
-              '--accent': e.color, '--accent-glow': `${e.color}59`,
-            }}>
-              <span style={{ position:'absolute', right:8, top:-20, fontFamily:'Playfair Display,serif', fontWeight:900, fontSize: photos ? '4rem' : '5.2rem', lineHeight:1, color:`${e.color}16`, userSelect:'none', pointerEvents:'none' }}>{String(i+1).padStart(2,'0')}</span>
-              <div style={{ position:'relative', color:e.color, fontWeight:700, fontSize: photos ? '0.85rem' : '1rem', marginBottom:6, maxWidth:'88%' }}>{name}</div>
-              <div style={{ position:'relative', color:'rgba(232,244,255,0.72)', fontSize: photos ? '0.73rem' : '0.82rem', lineHeight:1.5 }}>{desc}</div>
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="03" side="right" size={500} top={220} opacity={0.026} color={e.color} font="mono" />
+      <Halo x={180} y={240} size={680} color={`${e.color}1e`} />
+      <Halo x={1180} y={700} size={660} color="rgba(0,212,255,0.13)" />
+
+      <At l={100} t={82} anim="none">
+        <Head num="03" label="Componentes principales" color={e.color} />
+      </At>
+
+      <At l={100} t={138} w={1240} d={1} anim="none">
+        <div style={{ display:'flex', flexDirection:'column', gap }}>
+          {e.componentes.map(([name,desc],i) => (
+            <div key={i} className="drift" style={dly(1 + i)}>
+              <div style={{ display:'flex', alignItems:'baseline', gap:22 }}>
+                <span className="font-mono" style={{ fontSize:12, color:e.color, opacity:0.45, flexShrink:0, width:30 }}>
+                  {String(i+1).padStart(2,'0')}
+                </span>
+                <span style={{ width:nameW, flexShrink:0, fontSize:fs + 1.5, color:e.color, fontWeight:600, lineHeight:1.35 }}>{name}</span>
+                <span style={{ flex:1, fontSize:fs, color:WD, lineHeight:1.5, fontWeight:300 }}>{desc}</span>
+              </div>
+              <div className="span-x" style={{
+                width:1180, height:1, marginTop:rule, marginLeft:52,
+                background:`linear-gradient(90deg, ${e.color}22, transparent)`, ...dly(2 + i),
+              }} />
             </div>
           ))}
         </div>
-        {photos && (
-          <Card title="Foto de referencia" color={e.color} animIdx={1} style={{ overflow:'auto' }}>
-            <div style={{ display:'grid', gridTemplateColumns:`repeat(${photos.length},1fr)`, gap:10 }}>
-              {photos.map((p,i) => (
-                <div key={i} style={{ animation:`elemFadeUp 0.45s ${0.15+i*0.1}s both` }}>
-                  <ZoomableImg src={p.src} alt={p.label} style={{ borderRadius:12, overflow:'hidden', border:`1px solid ${e.color}25`, background:'#000' }} imgStyle={{ objectFit:'cover', aspectRatio:'1/1' }} />
-                  <p style={{ color:C.muted, fontSize:'0.66rem', marginTop:6, lineHeight:1.35, fontStyle:'italic' }}>{p.label}</p>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
-      </div>
+      </At>
     </div>
   )
 }
 
-function SlideManejo({ ei }: { ei:number }) {
+function SlideComponentesFotos({ ei }: { ei:number }) {
   const e = EQUIPOS[ei]
-  const stages = [
-    { label:'Antes', color:e.color, items:e.manejo.antes },
-    { label:'Durante', color:'#5b8fff', items:e.manejo.durante },
-    { label:'Después', color:'#8b5cf6', items:e.manejo.despues },
-  ]
+  const photos = COMPONENT_PHOTOS[ei] ?? []
   return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'22px 44px 14px', display:'flex', flexDirection:'column' }}>
-      <SlideH num="04" label="Manejo básico" color={e.color} />
-      {/* timeline rail */}
-      <div style={{ position:'relative', display:'flex', justifyContent:'space-around', alignItems:'center', margin:'10px 20px 26px' }}>
-        <div style={{ position:'absolute', left:'8%', right:'8%', top:'50%', height:1, background:`linear-gradient(to right, ${stages[0].color}70, ${stages[1].color}70, ${stages[2].color}70)`, transform:'translateY(-50%)' }} />
-        {stages.map((s,i)=>(
-          <div key={i} style={{ position:'relative', width:28, height:28, borderRadius:'50%', background:C.bg, border:`2px solid ${s.color}`, display:'flex', alignItems:'center', justifyContent:'center', color:s.color, fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'0.72rem', boxShadow:`0 0 14px ${s.color}70`, animation:`tagBounce 0.4s ${0.05+i*0.1}s both` }}>{i+1}</div>
-        ))}
-      </div>
-      <div style={{ position:'relative', display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:20, flex:1, minHeight:0 }}>
-        <span style={{ position:'absolute', bottom:-10, right:'6%', fontSize:'7.5rem', lineHeight:1, opacity:0.06, filter:`drop-shadow(0 0 30px ${e.color})`, userSelect:'none', pointerEvents:'none', zIndex:0 }}>{e.icon}</span>
-        {stages.map((s,i)=>(
-          <div key={i} style={{ position:'relative', zIndex:1, transform: i===1 ? 'translateY(-14px)' : 'none', display:'flex', flexDirection:'column', minHeight:0, overflow:'auto' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
-              <span style={{ width:8, height:8, borderRadius:'50%', background:s.color, boxShadow:`0 0 8px ${s.color}`, flexShrink:0 }} />
-              <h3 style={{ color:s.color, fontWeight:700, fontSize:'0.8rem', letterSpacing:'0.09em', textTransform:'uppercase', margin:0 }}>{s.label}</h3>
-            </div>
-            <div style={{ borderLeft:`2px dashed ${s.color}35`, paddingLeft:14, flex:1, display:'flex', flexDirection:'column', justifyContent:'space-evenly', gap:2 }}>
-              {s.items.map((t,ti,a)=><DotRow key={ti} text={t} last={ti===a.length-1} color={s.color} animIdx={ti} />)}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="Real" side="left" size={230} top={-6} opacity={0.024} />
+      <Halo x={720} y={400} size={980} color={`${e.color}24`} />
+
+      <At l={100} t={92} anim="none">
+        <Head num="03" label="Fotos de referencia — manual del fabricante" color={e.color} />
+      </At>
+
+      {photos.map((p,i) => (
+        <At key={i} l={190 + i * 560} t={200 + i * 54} w={470} d={2 + i * 2} anim="none">
+          <Plate src={p.src} alt={p.label} size={420} color={e.color} d={2 + i * 2} />
+          <p className="rise" style={{
+            fontSize:14, color:WF, marginTop:22, lineHeight:1.5, fontStyle:'italic', maxWidth:400, ...dly(4 + i * 2),
+          }}>{p.label}</p>
+        </At>
+      ))}
+
+      <At l={100} b={64} d={8}>
+        <span className="font-mono" style={{ fontSize:9.5, color:WG, letterSpacing:'0.2em' }}>
+          CLIC EN UNA FOTO PARA VERLA A PANTALLA COMPLETA
+        </span>
+      </At>
+    </div>
+  )
+}
+
+function SlideManejoAntes({ ei }: { ei:number }) {
+  const e = EQUIPOS[ei]
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="Antes" side="right" size={250} top={-8} opacity={0.026} color={e.color} />
+      <Halo x={240} y={340} size={820} color={`${e.color}24`} />
+      <Halo x={1180} y={720} size={620} color="rgba(0,212,255,0.12)" />
+
+      <At l={100} t={92} anim="none">
+        <Head num="04" label="Manejo básico · antes del procedimiento" color={e.color} />
+      </At>
+
+      <At l={94} t={148} w={860} anim="none">
+        <h2 className="font-display wipe" style={{ fontSize:52, lineHeight:1.06, color:WH, margin:0, fontWeight:800, ...dly(1) }}>
+          Lo que se verifica <span style={{ color:e.color, textShadow:`0 0 44px ${e.color}55` }}>antes</span>
+        </h2>
+      </At>
+
+      <At l={100} t={252} w={1220} d={3} anim="none">
+        <Hang items={e.manejo.antes} color={e.color} d={3} marker="num" size={18} w={1120} gap={17} />
+      </At>
+
+      <span style={{
+        position:'absolute', right:120, bottom:60, fontSize:140, lineHeight:1, opacity:0.05, zIndex:0,
+        filter:`drop-shadow(0 0 36px ${e.color})`, userSelect:'none', pointerEvents:'none',
+      }}>{e.icon}</span>
+    </div>
+  )
+}
+
+function SlideManejoDurante({ ei }: { ei:number }) {
+  const e = EQUIPOS[ei]
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="Después" side="left" size={190} top={-4} opacity={0.024} />
+      <Halo x={260} y={300} size={720} color="rgba(91,143,255,0.2)" />
+      <Halo x={1140} y={680} size={700} color="rgba(124,58,237,0.22)" />
+
+      <At l={100} t={92} anim="none">
+        <Head num="04" label="Manejo básico · durante y después" color={e.color} />
+      </At>
+
+      <TwoStreams
+        a={{ label:'Durante el procedimiento', items:e.manejo.durante }}
+        b={{ label:'Después del procedimiento', items:e.manejo.despues }}
+        accentA="#5b8fff"
+        accentB="#a78bfa"
+        top={168}
+      />
     </div>
   )
 }
 
 function SlideMarcas({ ei }: { ei:number }) {
   const e = EQUIPOS[ei]
+  const { headers, rows } = e.marcas
+  const cols = [300, 300, 320, 320]
   return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'22px 44px 14px', display:'flex', flexDirection:'column' }}>
-      <SlideH num="05" label="Marcas y gama de equipos" color={e.color} />
-      <Card title="Comparación de marcas" color={e.color} animIdx={0} style={{ flex:1, overflow:'auto' }}>
-        <DataTable headers={e.marcas.headers} rows={e.marcas.rows} />
-      </Card>
-    </div>
-  )
-}
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="05" side="right" size={470} top={250} opacity={0.026} color={e.color} font="mono" />
+      <Halo x={200} y={260} size={680} color={`${e.color}1e`} />
+      <Halo x={1180} y={700} size={640} color="rgba(0,212,255,0.13)" />
 
-function SlideMantenimiento({ ei }: { ei:number }) {
-  const e = EQUIPOS[ei]
-  const prev = e.mantenimiento.preventivo
-  return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'20px 40px 14px', display:'flex', flexDirection:'column' }}>
-      <SlideH num="06" label="Mantenimiento y limpieza" color={e.color} />
-      <div style={{ position:'relative', flex:'1.3 1 0', display:'flex', flexDirection:'column', justifyContent:'center', padding:'10px 4px', marginBottom:14, minHeight:0 }}>
-        <span style={{ position:'absolute', top:'-6%', right:'2%', fontSize:'7rem', lineHeight:1, opacity:0.06, filter:`drop-shadow(0 0 30px ${e.color})`, userSelect:'none', pointerEvents:'none' }}>{e.icon}</span>
-        <div style={{ position:'absolute', left:0, right:0, top:'50%', height:1, background:`linear-gradient(to right, transparent, ${e.color}45 8%, ${e.color}45 92%, transparent)`, transform:'translateY(-1px)' }} />
-        <div style={{ display:'flex', gap:8 }}>
-          {prev.map(([freq,act],i)=>{
-            const up = i%2===0
-            const box = (
-              <div title={act} style={{ background:`${e.color}0c`, border:`1px solid ${e.color}28`, borderRadius:10, padding:'9px 10px', fontSize:'0.7rem', color:'rgba(232,244,255,0.8)', lineHeight:1.4, textAlign:'center', display:'-webkit-box', WebkitLineClamp:6, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{act}</div>
-            )
-            return (
-              <div key={i} style={{ flex:1, position:'relative', display:'flex', flexDirection:'column', alignItems:'center', transform:`translateY(${up?-30:30}px)`, animation:`elemFadeUp 0.45s ${0.06+i*0.09}s both` }}>
-                {up && <div style={{ marginBottom:11, width:'100%' }}>{box}</div>}
-                <div style={{ width:11, height:11, borderRadius:'50%', background:e.color, boxShadow:`0 0 10px ${e.color}`, border:`2px solid ${C.bg}`, flexShrink:0 }} />
-                <div style={{ fontFamily:'JetBrains Mono,monospace', color:e.color, fontSize:'0.63rem', fontWeight:700, marginTop:6, textAlign:'center', letterSpacing:'0.02em' }}>{freq}</div>
-                {!up && <div style={{ marginTop:11, width:'100%' }}>{box}</div>}
+      <At l={100} t={82} anim="none">
+        <Head num="05" label="Marcas y gama de equipos" color={e.color} />
+      </At>
+
+      {/* Encabezados sueltos sobre las columnas — sin barra ni fondo */}
+      <At l={100} t={140} w={1240} d={1}>
+        <div style={{ display:'flex', gap:16 }}>
+          {headers.map((h,i) => (
+            <span key={i} className="font-mono" style={{
+              width:cols[i], flexShrink:0, fontSize:9.5, letterSpacing:'0.2em', textTransform:'uppercase',
+              color: i === 0 ? WG : `${e.color}c0`,
+            }}>{h}</span>
+          ))}
+        </div>
+      </At>
+
+      <At l={100} t={180} w={1240} d={2} anim="none">
+        <div style={{ display:'flex', flexDirection:'column', gap: rows.length > 7 ? 14 : 20 }}>
+          {rows.map((row,ri) => (
+            <div key={ri} className="drift" style={dly(2 + ri)}>
+              <div style={{ display:'flex', gap:16, alignItems:'baseline' }}>
+                {row.map((cell,ci) => (
+                  <span key={ci} style={{
+                    width:cols[ci], flexShrink:0, lineHeight:1.45,
+                    fontSize: ci === 0 ? 15 : 14.5,
+                    color: ci === 0 ? e.color : WD,
+                    fontWeight: ci === 0 ? 600 : 300,
+                  }}>{cell}</span>
+                ))}
               </div>
-            )
-          })}
+              <div className="span-x" style={{
+                width:1200, height:1, marginTop:11,
+                background:'linear-gradient(90deg, rgba(238,246,255,0.09), transparent)', ...dly(3 + ri),
+              }} />
+            </div>
+          ))}
         </div>
-      </div>
-      <Card title="Limpieza — qué hacer / evitar" color={C.cyan} animIdx={1} style={{ flex:'1 1 0', overflow:'auto' }}>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 22px' }}>
-          <div>{e.mantenimiento.realizar.map((t,i,a)=><DotRow key={i} text={`✓ ${t}`} last={i===a.length-1} color={C.cyan} animIdx={i} />)}</div>
-          <div>{e.mantenimiento.evitar.map((t,i,a)=><DotRow key={i} text={`✕ ${t}`} last={i===a.length-1} color="#f87171" animIdx={i} />)}</div>
-        </div>
-      </Card>
+      </At>
     </div>
   )
 }
 
-function SlideFallas({ ei }: { ei:number }) {
+function SlideMantCalendario({ ei }: { ei:number }) {
   const e = EQUIPOS[ei]
   return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'22px 44px 14px', display:'flex', flexDirection:'column' }}>
-      <SlideH num="07" label="Fallas comunes y riesgos" color={e.color} />
-      <div style={{ display:'grid', gridTemplateColumns:'1.3fr 1fr', gap:14, flex:1, overflow:'auto' }}>
-        <Card title="Fallas comunes" color="#f87171" animIdx={0} style={{ overflow:'auto' }}><DataTable headers={['Falla','Causa']} rows={e.fallas.tabla} ac={0} aColor="#fca5a5" /></Card>
-        <div style={{ display:'flex', flexDirection:'column', gap:10, overflow:'auto' }}>
-          <Card title="Riesgos — paciente" color="#f87171" animIdx={1}>{e.fallas.paciente.map((t,i,a)=><DotRow key={i} text={t} last={i===a.length-1} color="#f87171" animIdx={i} />)}</Card>
-          <Card title="Riesgos — biomédico" color="#fbbf24" animIdx={2}>{e.fallas.biomedico.map((t,i,a)=><DotRow key={i} text={t} last={i===a.length-1} color="#fbbf24" animIdx={i} />)}</Card>
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="06" side="right" size={480} top={230} opacity={0.026} color={e.color} font="mono" />
+      <Halo x={200} y={280} size={700} color={`${e.color}20`} />
+      <Halo x={1160} y={700} size={660} color="rgba(0,212,255,0.13)" />
+
+      <At l={100} t={88} anim="none">
+        <Head num="06" label="Mantenimiento preventivo · calendario" color={e.color} />
+      </At>
+
+      {/* La espina del calendario baja por el margen */}
+      <At l={266} t={158} w={2} h={520} z={1} anim="none">
+        <div className="span-y" style={{
+          width:2, height:'100%',
+          background:`linear-gradient(180deg, ${e.color}, ${C.purple})`,
+          boxShadow:`0 0 12px ${e.color}66`, ...dly(1),
+        }} />
+      </At>
+
+      <At l={100} t={150} w={1240} d={2} anim="none">
+        <div style={{ display:'flex', flexDirection:'column', gap: e.mantenimiento.preventivo.length > 6 ? 26 : 34 }}>
+          {e.mantenimiento.preventivo.map(([freq,act],i) => (
+            <div key={i} className="drift" style={{ display:'flex', alignItems:'baseline', gap:20, ...dly(2 + i) }}>
+              <span className="font-mono" style={{
+                width:146, textAlign:'right', flexShrink:0, fontSize:12.5, color:e.color,
+                fontWeight:700, letterSpacing:'0.04em', lineHeight:1.4,
+              }}>{freq}</span>
+              <span style={{
+                width:10, height:10, borderRadius:'50%', flexShrink:0, background:e.color,
+                boxShadow:`0 0 12px ${e.color}`, transform:'translateY(-3px)',
+              }} />
+              <span style={{ flex:1, fontSize:17, color:WD, lineHeight:1.55, fontWeight:300, maxWidth:1000 }}>{act}</span>
+            </div>
+          ))}
         </div>
-      </div>
+      </At>
     </div>
   )
 }
 
-function SlideConclusion({ ei }: { ei:number }) {
+function SlideMantPruebas({ ei }: { ei:number }) {
   const e = EQUIPOS[ei]
   return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'22px 44px 14px', display:'flex', flexDirection:'column' }}>
-      <SlideH num="08" label="Caso real y conclusión" color={e.color} />
-      <div style={{ display:'grid', gridTemplateColumns:'1.3fr 1fr', gap:24, flex:1, overflow:'auto' }}>
-        <div style={{ position:'relative', display:'flex', flexDirection:'column' }}>
-          <div style={{ position:'relative', background:'linear-gradient(135deg,rgba(38,26,4,0.55),rgba(8,22,60,0.68))', border:'1px solid rgba(251,191,36,0.25)', borderRadius:16, padding:'24px 24px 32px', overflow:'hidden', animation:'elemFadeUp 0.5s 0.05s both' }}>
-            <span style={{ position:'absolute', top:-20, left:8, fontFamily:'Playfair Display,serif', fontWeight:900, fontSize:'5.5rem', color:'rgba(251,191,36,0.16)', lineHeight:1, userSelect:'none' }}>&ldquo;</span>
-            <h3 style={{ position:'relative', color:'#fbbf24', fontWeight:700, fontSize:'0.7rem', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:10 }}>Caso real</h3>
-            <p style={{ position:'relative', color:C.white, fontWeight:600, fontSize:'0.9rem', fontStyle:'italic', lineHeight:1.68, margin:0 }}>{e.conclusion.caso}</p>
-          </div>
-          <div className="glow-card" style={{
-            position:'relative', marginTop:-18, marginLeft:28, marginRight:-6, zIndex:2,
-            background:'linear-gradient(135deg,rgba(5,15,45,0.95) 0%,rgba(8,22,60,0.88) 100%)',
-            border:`1px solid ${e.color}30`, borderRadius:14, padding:'14px 18px 12px',
-            boxShadow:'0 16px 44px rgba(0,0,0,0.5)', animation:'elemFadeUp 0.5s 0.22s both',
-            // @ts-expect-error custom css vars for hover glow
-            '--accent': e.color, '--accent-glow': `${e.color}59`,
-          }}>
-            <h3 style={{ color:e.color, fontWeight:700, fontSize:'0.7rem', letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:8 }}>Lecciones aprendidas</h3>
-            {e.conclusion.lecciones.map((t,i,a)=><DotRow key={i} text={t} last={i===a.length-1} color={e.color} animIdx={i} />)}
-          </div>
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="Pruebas" side="left" size={200} top={-4} opacity={0.024} />
+      <Halo x={1120} y={300} size={780} color={`${e.color}22`} />
+      <Halo x={200} y={720} size={620} color="rgba(0,212,255,0.13)" />
+
+      <At l={100} t={92} anim="none">
+        <Head num="06" label="Mantenimiento · pruebas de verificación" color={e.color} />
+      </At>
+
+      <At l={94} t={148} w={900} anim="none">
+        <h2 className="font-display wipe" style={{ fontSize:50, lineHeight:1.06, color:WH, margin:0, fontWeight:800, ...dly(1) }}>
+          Lo que hay que <span style={{ color:e.color, textShadow:`0 0 44px ${e.color}55` }}>medir</span>, no solo mirar
+        </h2>
+      </At>
+
+      <At l={-70} t={272} w={620} h={2} z={1} anim="none">
+        <div className="span-x" style={{ width:'100%', height:2, background:`linear-gradient(90deg, transparent, ${e.color})`, boxShadow:`0 0 16px ${e.color}66`, ...dly(3) }} />
+      </At>
+
+      <At l={100} t={318} w={1240} d={4} anim="none">
+        <Hang items={e.mantenimiento.pruebas} color={e.color} d={4} marker="num" size={19} w={1140} gap={20} />
+      </At>
+    </div>
+  )
+}
+
+function SlideMantLimpieza({ ei }: { ei:number }) {
+  const e = EQUIPOS[ei]
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="✕" side="right" size={420} top={330} opacity={0.03} color={RE} />
+      <Halo x={260} y={300} size={720} color="rgba(0,212,255,0.16)" />
+      <Halo x={1140} y={680} size={700} color="rgba(248,113,113,0.16)" />
+
+      <At l={100} t={92} anim="none">
+        <Head num="06" label="Limpieza · qué hacer y qué evitar" color={e.color} />
+      </At>
+
+      <At l={100} t={176} w={560} d={1} anim="drift">
+        <p className="font-mono" style={{ fontSize:11, color:C.cyan, letterSpacing:'0.24em', textTransform:'uppercase', margin:'0 0 14px' }}>
+          ✓ Qué hacer
+        </p>
+        <div className="span-x" style={{ width:300, height:1, background:`linear-gradient(90deg, ${C.cyan}, transparent)`, marginBottom:24, ...dly(2) }} />
+        <Hang items={e.mantenimiento.realizar} color={C.cyan} d={3} marker="tick" size={16.5} w={520} gap={18} />
+      </At>
+
+      <At l={790} t={264} w={560} d={5} anim="drift-r">
+        <p className="font-mono" style={{ fontSize:11, color:RE, letterSpacing:'0.24em', textTransform:'uppercase', margin:'0 0 14px' }}>
+          ✕ Qué evitar
+        </p>
+        <div className="span-x" style={{ width:300, height:1, background:`linear-gradient(90deg, ${RE}, transparent)`, marginBottom:24, ...dly(6) }} />
+        <Hang items={e.mantenimiento.evitar} color={RE} d={7} marker="tick" size={16.5} w={520} gap={18} />
+      </At>
+    </div>
+  )
+}
+
+function SlideFallasTabla({ ei }: { ei:number }) {
+  const e = EQUIPOS[ei]
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="07" side="right" size={470} top={250} opacity={0.026} color={RE} font="mono" />
+      <Halo x={220} y={280} size={720} color="rgba(248,113,113,0.16)" />
+      <Halo x={1160} y={700} size={640} color={`${e.color}18`} />
+
+      <At l={100} t={88} anim="none">
+        <Head num="07" label="Fallas comunes" color={RE} />
+      </At>
+
+      <At l={100} t={148} w={1240} d={1}>
+        <div style={{ display:'flex', gap:26 }}>
+          <span className="font-mono" style={{ width:440, flexShrink:0, fontSize:9.5, color:'rgba(252,165,165,0.8)', letterSpacing:'0.2em', textTransform:'uppercase' }}>Falla</span>
+          <span className="font-mono" style={{ fontSize:9.5, color:WG, letterSpacing:'0.2em', textTransform:'uppercase' }}>Causa probable</span>
         </div>
-        <div style={{ position:'relative', borderLeft:'1px solid rgba(139,92,246,0.2)', paddingLeft:24, display:'flex', flexDirection:'column', justifyContent:'center', minHeight:0, overflow:'auto' }}>
-          <span style={{ position:'absolute', bottom:-6, right:2, fontFamily:'Playfair Display,serif', fontWeight:900, fontSize:'7rem', lineHeight:1, color:'rgba(139,92,246,0.08)', userSelect:'none', pointerEvents:'none' }}>§</span>
-          <h3 style={{ fontFamily:'JetBrains Mono,monospace', color:'#c4a9f0', fontSize:'0.68rem', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:16 }}>Normativas relacionadas</h3>
-          <div style={{ display:'flex', flexDirection:'column', flex:1, justifyContent:'space-evenly', maxHeight:'100%' }}>
-            {e.conclusion.normas.map(([id,desc],i,a)=>(
-              <div key={i} style={{ padding:'8px 0', borderBottom:i<a.length-1?'1px solid rgba(255,255,255,0.05)':'none', position:'relative', zIndex:1, animation:`rowFadeIn 0.38s ${0.12+i*0.07}s both` }}>
-                <div style={{ fontFamily:'JetBrains Mono,monospace', color:'#c4a9f0', fontWeight:700, fontSize:'0.7rem', marginBottom:3 }}>{id}</div>
-                <div style={{ color:'rgba(232,244,255,0.7)', fontSize:'0.8rem', lineHeight:1.45 }}>{desc}</div>
+      </At>
+
+      {/* Un solo contenedor en flujo, no una fila por posición absoluta: el
+          largo de la causa varía mucho entre equipos y con filas fijas las
+          últimas se salían del escenario por abajo. */}
+      <At l={100} t={188} w={1240} d={2} anim="none">
+        <div style={{ display:'flex', flexDirection:'column', gap: e.fallas.tabla.length > 6 ? 14 : 20 }}>
+          {e.fallas.tabla.map(([falla,causa],i) => (
+            <div key={i} className="drift" style={dly(2 + i)}>
+              <div style={{ display:'flex', gap:26, alignItems:'baseline' }}>
+                <span style={{ width:440, flexShrink:0, fontSize:17, color:'#fca5a5', fontWeight:600, lineHeight:1.4 }}>{falla}</span>
+                <span style={{ flex:1, fontSize:15, color:WD, lineHeight:1.5, fontWeight:300 }}>{causa}</span>
               </div>
-            ))}
-          </div>
+              <div className="span-x" style={{
+                width:1200, height:1, marginTop: e.fallas.tabla.length > 6 ? 12 : 16,
+                background:'linear-gradient(90deg, rgba(248,113,113,0.2), transparent)', ...dly(3 + i),
+              }} />
+            </div>
+          ))}
         </div>
-      </div>
+      </At>
+    </div>
+  )
+}
+
+function SlideFallasRiesgos({ ei }: { ei:number }) {
+  const e = EQUIPOS[ei]
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="Riesgo" side="left" size={210} top={-4} opacity={0.026} color={RE} />
+      <Halo x={250} y={300} size={740} color="rgba(248,113,113,0.18)" />
+      <Halo x={1150} y={680} size={700} color="rgba(251,191,36,0.16)" />
+
+      <At l={100} t={92} anim="none">
+        <Head num="07" label="Riesgos asociados" color={RE} />
+      </At>
+
+      <TwoStreams
+        a={{ label:'Riesgos — paciente', items:e.fallas.paciente }}
+        b={{ label:'Riesgos — biomédico', items:e.fallas.biomedico }}
+        accentA={RE}
+        accentB={GO}
+        top={168}
+      />
+    </div>
+  )
+}
+
+function SlideConclusionCaso({ ei }: { ei:number }) {
+  const e = EQUIPOS[ei]
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="&ldquo;" side="right" size={620} top={90} opacity={0.04} color={GO} />
+      <Halo x={300} y={340} size={900} color="rgba(251,191,36,0.16)" />
+      <Halo x={1140} y={730} size={620} color={`${e.color}1c`} />
+
+      <At l={100} t={92} anim="none">
+        <Head num="08" label="Caso real" color={GO} />
+      </At>
+
+      <At l={-70} t={158} w={620} h={2} z={1} anim="none">
+        <div className="span-x" style={{ width:'100%', height:2, background:`linear-gradient(90deg, transparent, ${GO})`, boxShadow:`0 0 16px ${GO}66`, ...dly(1) }} />
+      </At>
+
+      <At l={98} t={200} w={1220} d={2}>
+        <p style={{ fontSize:20, color:WH, lineHeight:1.78, margin:0, fontWeight:300, fontStyle:'italic' }}>
+          {e.conclusion.caso}
+        </p>
+      </At>
+    </div>
+  )
+}
+
+function SlideConclusionCierre({ ei }: { ei:number }) {
+  const e = EQUIPOS[ei]
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="§" side="right" size={520} top={210} opacity={0.028} color={VI} />
+      <Halo x={240} y={280} size={740} color={`${e.color}22`} />
+      <Halo x={1160} y={690} size={700} color="rgba(124,58,237,0.22)" />
+
+      <At l={100} t={92} anim="none">
+        <Head num="08" label="Lecciones y normativas" color={e.color} />
+      </At>
+
+      <At l={100} t={168} w={620} d={1} anim="drift">
+        <p className="font-mono" style={{ fontSize:11, color:e.color, letterSpacing:'0.24em', textTransform:'uppercase', margin:'0 0 14px' }}>
+          Lecciones aprendidas
+        </p>
+        <div className="span-x" style={{ width:300, height:1, background:`linear-gradient(90deg, ${e.color}, transparent)`, marginBottom:24, ...dly(2) }} />
+        <Hang items={e.conclusion.lecciones} color={e.color} d={3} marker="tick" size={16} w={560} gap={20} />
+      </At>
+
+      <At l={790} t={244} w={560} d={5} anim="drift-r">
+        <p className="font-mono" style={{ fontSize:11, color:VI, letterSpacing:'0.24em', textTransform:'uppercase', margin:'0 0 14px' }}>
+          Normativas relacionadas
+        </p>
+        <div className="span-x" style={{ width:300, height:1, background:`linear-gradient(90deg, ${VI}, transparent)`, marginBottom:22, ...dly(6) }} />
+        {e.conclusion.normas.map(([id,desc],i) => (
+          <div key={i} className="rise" style={{ marginBottom:16, ...dly(7 + i) }}>
+            <span className="font-mono" style={{ fontSize:13, color:VI, fontWeight:700, letterSpacing:'0.04em' }}>{id}</span>
+            <p style={{ fontSize:14, color:WD, lineHeight:1.5, margin:'5px 0 0', fontWeight:300, maxWidth:540 }}>{desc}</p>
+          </div>
+        ))}
+      </At>
     </div>
   )
 }
@@ -1711,33 +2171,53 @@ function SlideVideo({ ei }: { ei:number }) {
   const skip = (s: number) => { const v = videoRef.current; if (v) v.currentTime = Math.max(0, Math.min(v.duration||Infinity, v.currentTime + s)) }
   const togglePlay = () => { const v = videoRef.current; if (!v) return; if (v.paused) v.play(); else v.pause() }
   return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'20px 44px 16px', display:'flex', flexDirection:'column', alignItems:'center' }}>
-      <SlideH num="▶" label={`Video demostrativo — ${e.name}`} color={e.color} />
-      <div style={{ flex:1, width:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:14, minHeight:0 }}>
-        <div style={{
-          position:'relative', maxWidth:'min(100%, 860px)', width:'100%', flex:'0 1 auto', minHeight:0,
-          borderRadius:16, overflow:'hidden', border:`1px solid ${e.color}35`,
-          boxShadow:`0 12px 44px rgba(0,0,0,0.55), 0 0 50px ${e.color}25`,
-          background:'#000', animation:'elemFadeUp 0.5s 0.08s both',
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="▶" side="left" size={330} top={330} opacity={0.03} color={e.color} />
+      <Halo x={760} y={400} size={1000} color={`${e.color}26`} />
+
+      <At l={100} t={80} anim="none">
+        <Head num="▶" label={`Video demostrativo — ${e.name}`} color={e.color} />
+      </At>
+
+      {/* El video sin marco: solo su propia sombra y el halo detrás */}
+      <At l={310} t={136} w={820} z={3} d={1} anim="none">
+        <div className="plate" style={{
+          borderRadius:6, overflow:'hidden', background:'#000',
+          boxShadow:`0 24px 70px rgba(0,0,0,0.7), 0 0 70px ${e.color}30`, ...dly(1),
         }}>
           <video
             ref={videoRef}
             src={e.video}
             controls
-            style={{ display:'block', width:'100%', maxHeight:'56vh', background:'#000' }}
+            style={{ display:'block', width:'100%', maxHeight:462, background:'#000' }}
             onPlay={()=>setPlaying(true)}
             onPause={()=>setPlaying(false)}
           />
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:10, animation:'elemFadeUp 0.5s 0.2s both' }}>
-          <button onClick={()=>skip(-10)} title="Retroceder 10s" style={{ display:'flex', alignItems:'center', gap:6, background:`${e.color}0f`, border:`1px solid ${e.color}35`, color:e.color, borderRadius:10, padding:'8px 16px', fontSize:'0.78rem', fontFamily:'JetBrains Mono,monospace', cursor:'pointer' }}>◀◀ 10s</button>
-          <button onClick={togglePlay} title={playing?'Pausar':'Reproducir'} style={{ display:'flex', alignItems:'center', gap:6, background:e.color, border:'none', color:'#03080f', borderRadius:10, padding:'9px 22px', fontSize:'0.82rem', fontWeight:700, fontFamily:'JetBrains Mono,monospace', cursor:'pointer', boxShadow:`0 0 20px ${e.color}70` }}>{playing ? '❚❚ Pausar' : '▶ Reproducir'}</button>
-          <button onClick={()=>skip(10)} title="Adelantar 10s" style={{ display:'flex', alignItems:'center', gap:6, background:`${e.color}0f`, border:`1px solid ${e.color}35`, color:e.color, borderRadius:10, padding:'8px 16px', fontSize:'0.78rem', fontFamily:'JetBrains Mono,monospace', cursor:'pointer' }}>10s ▶▶</button>
+      </At>
+
+      <At l={310} t={628} w={820} z={3} d={4}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12 }}>
+          <button onClick={()=>skip(-10)} title="Retroceder 10s" className="font-mono" style={{
+            background:'none', border:'none', color:`${e.color}c0`, fontSize:13, cursor:'pointer',
+            letterSpacing:'0.1em', padding:'8px 12px',
+          }}>◀◀ 10s</button>
+          <button onClick={togglePlay} title={playing?'Pausar':'Reproducir'} className="font-mono" style={{
+            background:e.color, border:'none', color:'#03080f', borderRadius:999, padding:'11px 30px',
+            fontSize:14, fontWeight:700, cursor:'pointer', boxShadow:`0 0 26px ${e.color}80`,
+          }}>{playing ? '❚❚ Pausar' : '▶ Reproducir'}</button>
+          <button onClick={()=>skip(10)} title="Adelantar 10s" className="font-mono" style={{
+            background:'none', border:'none', color:`${e.color}c0`, fontSize:13, cursor:'pointer',
+            letterSpacing:'0.1em', padding:'8px 12px',
+          }}>10s ▶▶</button>
         </div>
-        <p style={{ color:C.muted, fontSize:'0.78rem', fontStyle:'italic', textAlign:'center', maxWidth:600, animation:'coverSub 0.5s 0.3s both' }}>
+      </At>
+
+      <At l={310} t={700} w={820} z={3} d={6}>
+        <p style={{ fontSize:15, color:WF, fontStyle:'italic', textAlign:'center', margin:0, lineHeight:1.5 }}>
           Muestra al grupo el funcionamiento real del equipo antes de continuar con el siguiente.
         </p>
-      </div>
+      </At>
     </div>
   )
 }
@@ -1752,67 +2232,83 @@ const CUADRO_ROWS = [
 ]
 
 function SlideCuadro() {
+  const cols = [330, 330, 300, 280]
   return (
-    <div style={{ height:'100%', position:'relative', zIndex:5, padding:'22px 44px 20px', display:'flex', flexDirection:'column' }}>
-      <SlideH num="FIN" label="Cuadro comparativo de equipos" />
-      <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center' }}>
-        <div style={{ background:'linear-gradient(135deg,rgba(5,15,45,0.9),rgba(8,22,60,0.75))', backdropFilter:'blur(20px)', border:'1px solid rgba(0,212,255,0.12)', borderRadius:18, overflow:'hidden', animation:'elemFadeUp 0.5s 0.08s both' }}>
-          {/* Header row */}
-          <div style={{ display:'grid', gridTemplateColumns:'1.6fr 1.5fr 1.4fr 1.2fr', background:'rgba(0,212,255,0.06)', borderBottom:'1px solid rgba(0,212,255,0.15)', padding:'12px 20px' }}>
-            {['Equipo','Energía principal','Variable controlada','Riesgo principal'].map((h,i) => (
-              <span key={i} style={{ fontFamily:'JetBrains Mono,monospace', color:'rgba(0,212,255,0.75)', fontSize:'0.67rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.09em', animation:`rowFadeIn 0.35s ${0.1+i*0.06}s both` }}>{h}</span>
-            ))}
-          </div>
-          {/* Data rows */}
-          {CUADRO_ROWS.map(([equipo, energia, variable, riesgo, color], ri) => (
-            <div key={ri} style={{ display:'grid', gridTemplateColumns:'1.6fr 1.5fr 1.4fr 1.2fr', padding:'0 20px', borderBottom:ri<CUADRO_ROWS.length-1?'1px solid rgba(255,255,255,0.05)':'none', animation:`rowFadeIn 0.42s ${0.18+ri*0.09}s both`, transition:'background 0.2s' }}
-              onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background=`${color}0a`}
-              onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background='transparent'}>
-              {/* Equipo name with color accent */}
-              <div style={{ display:'flex', alignItems:'center', gap:10, padding:'14px 0' }}>
-                <span style={{ width:3, height:28, borderRadius:2, background:color, flexShrink:0, boxShadow:`0 0 8px ${color}60` }} />
-                <span style={{ color:C.white, fontWeight:600, fontSize:'0.84rem' }}>{equipo}</span>
-              </div>
-              {/* Energía */}
-              <div style={{ display:'flex', alignItems:'center', padding:'14px 0' }}>
-                <span style={{ background:`${color}10`, border:`1px solid ${color}28`, color, borderRadius:6, padding:'3px 10px', fontSize:'0.76rem', fontFamily:'JetBrains Mono,monospace' }}>{energia}</span>
-              </div>
-              {/* Variable */}
-              <div style={{ display:'flex', alignItems:'center', padding:'14px 0' }}>
-                <span style={{ color:'rgba(232,244,255,0.78)', fontSize:'0.83rem' }}>{variable}</span>
-              </div>
-              {/* Riesgo */}
-              <div style={{ display:'flex', alignItems:'center', padding:'14px 0' }}>
-                <span style={{ background:'rgba(248,113,113,0.08)', border:'1px solid rgba(248,113,113,0.22)', color:'#fca5a5', borderRadius:6, padding:'3px 10px', fontSize:'0.76rem' }}>{riesgo}</span>
-              </div>
-            </div>
+    <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+      <Ghost text="06" side="right" size={520} top={200} opacity={0.026} font="mono" />
+      <Halo x={220} y={260} size={720} color="rgba(0,212,255,0.16)" />
+      <Halo x={1180} y={700} size={680} color="rgba(124,58,237,0.2)" />
+
+      <At l={100} t={82} anim="none">
+        <Head num="FIN" label="Cuadro comparativo de equipos" color={C.cyan} />
+      </At>
+
+      <At l={100} t={148} w={1240} d={1}>
+        <div style={{ display:'flex', gap:16 }}>
+          {['Equipo','Energía principal','Variable controlada','Riesgo principal'].map((h,i) => (
+            <span key={i} className="font-mono" style={{
+              width:cols[i], flexShrink:0, fontSize:9.5, letterSpacing:'0.2em', textTransform:'uppercase',
+              color: i === 3 ? 'rgba(252,165,165,0.75)' : 'rgba(0,212,255,0.7)',
+            }}>{h}</span>
           ))}
         </div>
-        <p style={{ textAlign:'center', color:C.muted, fontSize:'0.72rem', fontFamily:'JetBrains Mono,monospace', letterSpacing:'0.08em', marginTop:18, animation:'coverSub 0.5s 0.8s both' }}>
+      </At>
+
+      <At l={100} t={198} w={1240} d={2} anim="none">
+        <div style={{ display:'flex', flexDirection:'column', gap:30 }}>
+      {CUADRO_ROWS.map(([equipo, energia, variable, riesgo, color], ri) => (
+        <div key={ri} className="drift" style={dly(2 + ri)}>
+          <div style={{ display:'flex', gap:16, alignItems:'baseline' }}>
+            <span style={{ width:cols[0], flexShrink:0, display:'flex', alignItems:'baseline', gap:14 }}>
+              <span style={{ width:3, height:22, borderRadius:2, background:color, boxShadow:`0 0 10px ${color}90`, flexShrink:0, transform:'translateY(4px)' }} />
+              <span style={{ fontSize:19, color:WH, fontWeight:600, lineHeight:1.3 }}>{equipo}</span>
+            </span>
+            <span className="font-mono" style={{ width:cols[1], flexShrink:0, fontSize:13.5, color, lineHeight:1.45 }}>{energia}</span>
+            <span style={{ width:cols[2], flexShrink:0, fontSize:15, color:WD, lineHeight:1.45, fontWeight:300 }}>{variable}</span>
+            <span style={{ width:cols[3], flexShrink:0, fontSize:15, color:'#fca5a5', lineHeight:1.45, fontWeight:400 }}>{riesgo}</span>
+          </div>
+          <div className="span-x" style={{
+            width:1200, height:1, marginTop:14,
+            background:`linear-gradient(90deg, ${color}33, transparent)`, ...dly(3 + ri),
+          }} />
+        </div>
+      ))}
+        </div>
+      </At>
+
+      <At l={100} b={64} d={10}>
+        <span className="font-mono" style={{ fontSize:9.5, color:WG, letterSpacing:'0.2em' }}>
           EQUIPOS DE SALÓN DE OPERACIONES — EQUIPOS MÉDICOS I · UDELAS
-        </p>
-      </div>
+        </span>
+      </At>
     </div>
   )
 }
 
 function RenderContent({ slide, onJump }: { slide:SEntry; onJump:(i:number)=>void }) {
   const ei = slide.ei ?? 0
-  const e = ei < EQUIPOS.length ? EQUIPOS[ei] : EQUIPOS[0]
   switch (slide.type) {
-    case 'cover':              return <SlideCover color={C.cyan} />
-    case 'index':              return <SlideIndex onJump={onJump} />
-    case 'equipo-cover':       return <SlideEquipoCover ei={ei} />
-    case 'intro':              return <SlideIntro ei={ei} />
-    case 'principio':          return <SlidePrincipio ei={ei} />
-    case 'componentes':        return <SlideComponentes ei={ei} />
-    case 'manejo':             return <SlideManejo ei={ei} />
-    case 'marcas':             return <SlideMarcas ei={ei} />
-    case 'mantenimiento':      return <SlideMantenimiento ei={ei} />
-    case 'fallas':             return <SlideFallas ei={ei} />
-    case 'conclusion':         return <SlideConclusion ei={ei} />
-    case 'video':              return <SlideVideo ei={ei} />
-    case 'cuadro':             return <SlideCuadro />
+    case 'cover':               return <SlideCover />
+    case 'index':               return <SlideIndex onJump={onJump} />
+    case 'equipo-cover':        return <SlideEquipoCover ei={ei} />
+    case 'intro-que':           return <SlideIntroQue ei={ei} />
+    case 'intro-func':          return <SlideIntroFunc ei={ei} />
+    case 'principio-concepto':  return <SlidePrincipioConcepto ei={ei} />
+    case 'principio-ppios':     return <SlidePrincipioPpios ei={ei} />
+    case 'componentes':         return <SlideComponentes ei={ei} />
+    case 'componentes-fotos':   return <SlideComponentesFotos ei={ei} />
+    case 'manejo-antes':        return <SlideManejoAntes ei={ei} />
+    case 'manejo-durante':      return <SlideManejoDurante ei={ei} />
+    case 'marcas':              return <SlideMarcas ei={ei} />
+    case 'mant-calendario':     return <SlideMantCalendario ei={ei} />
+    case 'mant-pruebas':        return <SlideMantPruebas ei={ei} />
+    case 'mant-limpieza':       return <SlideMantLimpieza ei={ei} />
+    case 'fallas-tabla':        return <SlideFallasTabla ei={ei} />
+    case 'fallas-riesgos':      return <SlideFallasRiesgos ei={ei} />
+    case 'conclusion-caso':     return <SlideConclusionCaso ei={ei} />
+    case 'conclusion-cierre':   return <SlideConclusionCierre ei={ei} />
+    case 'video':               return <SlideVideo ei={ei} />
+    case 'cuadro':              return <SlideCuadro />
     default: return null
   }
 }
@@ -1820,7 +2316,31 @@ function RenderContent({ slide, onJump }: { slide:SEntry; onJump:(i:number)=>voi
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 const TRANSITION_MS = 480
 
+// Escenario de diseño fijo: el deck se compone contra esta resolución y luego
+// se escala uniformemente. 1440×810 es 16:9 EXACTO —la proporción de todo
+// proyector—, así que a 1920×1080 escala ×1.333 y llena la pantalla sin
+// franjas negras. Antes el deck era fluido con tipografía en clamp(): la
+// composición cambiaba de una pantalla a otra y no se podía componer nada.
+const CANVAS_W = 1440
+const CANVAS_H = 810
+
+function useStageScale() {
+  const [k, setK] = useState(1)
+  useEffect(() => {
+    const fit = () => setK(Math.min(window.innerWidth / CANVAS_W, window.innerHeight / CANVAS_H))
+    fit()
+    window.addEventListener('resize', fit)
+    document.addEventListener('fullscreenchange', fit)
+    return () => {
+      window.removeEventListener('resize', fit)
+      document.removeEventListener('fullscreenchange', fit)
+    }
+  }, [])
+  return k
+}
+
 export default function App() {
+  const scale = useStageScale()
   const [cur, setCur] = useState(0)
   const [slides, setSlides] = useState<TSlide[]>([{ id:0, slideIdx:0, phase:'active', dir:1 }])
   const idRef = useRef(1)
@@ -1923,29 +2443,39 @@ export default function App() {
 
   return (
     <ImageZoomCtx.Provider value={openImage}>
-      <div ref={rootRef} style={{ width:'100vw', height:'100dvh', background:C.bg, display:'flex', flexDirection:'column', overflow:'hidden', fontFamily:'Outfit,sans-serif', position:'relative' }}>
+      <div ref={rootRef} style={{ width:'100vw', height:'100dvh', background:C.bg, display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', fontFamily:'Outfit,sans-serif', position:'relative' }}>
         <style>{CSS}</style>
 
-        {/* Persistent animated background */}
+        {/* El fondo animado vive fuera del lienzo y cubre todo el viewport:
+            en pantallas más anchas que 16:9 sigue habiendo atmósfera hasta
+            los bordes, aunque la lámina esté escalada al centro. */}
         <AnimatedBg key={bgTheme} accentColor={accentColor} theme={bgTheme} />
 
-        <Header idx={cur} isFullscreen={isFullscreen} onToggleFullscreen={toggleFullscreen} />
+        {/* Lienzo de diseño fijo, escalado para llenar el viewport */}
+        <div style={{
+          width:CANVAS_W, height:CANVAS_H, flexShrink:0,
+          transform:`scale(${scale})`, transformOrigin:'center center',
+          position:'relative', overflow:'hidden', zIndex:2,
+        }}>
+          <TopChrome idx={cur} isFullscreen={isFullscreen} onToggleFullscreen={toggleFullscreen} />
 
-        {/* Slide stack */}
-        <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
-          {slides.map(s => (
-            <div key={s.id} style={{
-              position:'absolute', inset:0, overflow:'hidden',
-              animation: getAnim(s.phase, s.dir, s.slideIdx),
-              zIndex: s.phase === 'enter' ? 2 : 1,
-              willChange:'transform,opacity,filter',
-            }}>
-              <RenderContent slide={ALL_SLIDES[s.slideIdx]} onJump={jump} />
-            </div>
-          ))}
+          {/* Escenario: ocupa el lienzo entero, para que algo pueda salirse
+              por cualquiera de los cuatro bordes */}
+          <div data-stage="slide" style={{ position:'absolute', inset:0, overflow:'hidden', zIndex:5 }}>
+            {slides.map(s => (
+              <div key={s.id} style={{
+                position:'absolute', inset:0, overflow:'hidden',
+                animation: getAnim(s.phase, s.dir, s.slideIdx),
+                zIndex: s.phase === 'enter' ? 2 : 1,
+                willChange:'transform,opacity,filter',
+              }}>
+                <RenderContent slide={ALL_SLIDES[s.slideIdx]} onJump={jump} />
+              </div>
+            ))}
+          </div>
+
+          <BottomChrome cur={cur} onPrev={()=>go(-1)} onNext={()=>go(1)} onJump={jump} />
         </div>
-
-        <Footer cur={cur} onPrev={()=>go(-1)} onNext={()=>go(1)} onJump={jump} />
 
         {zoomImage && <Lightbox src={zoomImage.src} alt={zoomImage.alt} onClose={()=>setZoomImage(null)} />}
       </div>
