@@ -200,6 +200,105 @@ body {
   animation: fadeSlideLeft 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* ─── COMPOSICIÓN EDITORIAL ──────────────────────────────────
+   Las láminas se componen en absoluto sobre un escenario de
+   1280×800: nada está contenido en tarjetas, así que la entrada
+   de cada elemento es lo único que ordena la lectura. Una sola
+   entrada fuerte por lámina (el título); el resto llega detrás,
+   con 50 ms de separación, para que la escena se lea de una vez
+   y no se vea "armarse" pieza por pieza.
+─────────────────────────────────────────────────────────── */
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(26px); filter: blur(7px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+@keyframes driftIn {
+  from { opacity: 0; transform: translateX(-34px); filter: blur(7px); }
+  to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
+}
+@keyframes driftInRight {
+  from { opacity: 0; transform: translateX(34px); filter: blur(7px); }
+  to   { opacity: 1; transform: translateX(0);    filter: blur(0); }
+}
+/* El título: se descubre de izquierda a derecha, como un rótulo
+   que se ilumina. Es el único gesto ruidoso que se permite. */
+@keyframes wipeIn {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateY(14px); }
+  to   { opacity: 1; clip-path: inset(0 -12% 0 0); transform: translateY(0); }
+}
+@keyframes bloomIn {
+  from { opacity: 0; transform: scale(1.06); filter: blur(14px); }
+  to   { opacity: 1; transform: scale(1);    filter: blur(0); }
+}
+/* Las fotos entran creciendo un poco: la escena "respira" hacia
+   el espectador en vez de aparecer plana. */
+@keyframes plateIn {
+  from { opacity: 0; transform: scale(1.09); }
+  to   { opacity: 1; transform: scale(1); }
+}
+/* Una regla no aparece: se traza. */
+@keyframes spanIn {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes spanInY {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes strokeIn {
+  from { stroke-dashoffset: var(--len, 1200); }
+  to   { stroke-dashoffset: 0; }
+}
+/* La palabra fantasma sube hasta SU propia opacidad, no hasta 1.
+   Una animación CSS gana sobre el estilo en línea, así que un
+   `to { opacity: 1 }` dejaba el numeral gigante del fondo a plena
+   luz y se comía la lámina. El destino viaja en --ghost-o. */
+@keyframes ghostIn {
+  from { opacity: 0;                 transform: translateY(40px) scale(1.04); }
+  to   { opacity: var(--ghost-o, 1); transform: translateY(0)    scale(1); }
+}
+/* Deriva perpetua de las masas de fondo: el negro nunca se lee
+   como pintura plana. */
+@keyframes driftLoop {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(-22px, 16px) scale(1.05); }
+  66%      { transform: translate(18px, -14px) scale(0.97); }
+}
+
+.rise    { opacity: 0; animation: riseIn       0.62s cubic-bezier(0.22,1,0.36,1) both; }
+.drift   { opacity: 0; animation: driftIn      0.62s cubic-bezier(0.22,1,0.36,1) both; }
+.drift-r { opacity: 0; animation: driftInRight 0.62s cubic-bezier(0.22,1,0.36,1) both; }
+.wipe    { opacity: 0; animation: wipeIn       0.85s cubic-bezier(0.22,1,0.36,1) both; }
+.bloom   { opacity: 0; animation: bloomIn      0.75s cubic-bezier(0.22,1,0.36,1) both; }
+.plate   { opacity: 0; animation: plateIn      1.10s cubic-bezier(0.22,1,0.36,1) both; }
+.ghost-in{ opacity: 0; animation: ghostIn      1.20s cubic-bezier(0.22,1,0.36,1) both; }
+.span-x  { transform-origin: left center; animation: spanIn  0.75s cubic-bezier(0.22,1,0.36,1) both; }
+.span-y  { transform-origin: top center;  animation: spanInY 0.85s cubic-bezier(0.22,1,0.36,1) both; }
+.stroke-in { animation: strokeIn 1.4s cubic-bezier(0.22,1,0.36,1) both; }
+.drift-loop { animation: driftLoop 16s ease-in-out infinite; }
+
+/* Una foto a sangre no lleva marco: se disuelve en el fondo por
+   el lado que da a la composición. */
+.fade-l { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%);
+                  mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%); }
+.fade-r { -webkit-mask-image: linear-gradient(270deg, transparent 0%, #000 26%, #000 100%);
+                  mask-image: linear-gradient(270deg, transparent 0%, #000 26%, #000 100%); }
+.fade-lb { -webkit-mask-image: linear-gradient(75deg, transparent 0%, #000 34%, #000 100%);
+                   mask-image: linear-gradient(75deg, transparent 0%, #000 34%, #000 100%); }
+.fade-rb { -webkit-mask-image: linear-gradient(285deg, transparent 0%, #000 34%, #000 100%);
+                   mask-image: linear-gradient(285deg, transparent 0%, #000 34%, #000 100%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .drift, .drift-r, .wipe, .bloom, .plate, .ghost-in,
+  .span-x, .span-y, .stroke-in {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+  }
+  .drift-loop, .animate-float, .animate-float-slow, .animate-pulse-glow,
+  .animate-spin-slow, .animate-blink { animation: none !important; }
+}
+
 /* Scrollbars */
 .slide-scroll { overflow-y: auto; }
 .slide-scroll::-webkit-scrollbar { width: 3px; }

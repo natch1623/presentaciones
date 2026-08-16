@@ -10,12 +10,17 @@ type Direction = 'forward' | 'back'
 
 const TRANSITION_MS = 380
 
-// Fixed design canvas — the whole deck is authored against this resolution,
-// then uniformly scaled to fill whatever viewport it's shown in (including
-// real fullscreen on large/ultrawide displays) so nothing looks tiny with
-// oversized margins. Same technique as PowerPoint/Reveal.js presenter mode.
-const CANVAS_W = 1280
-const CANVAS_H = 800
+// Escenario de diseño fijo: el deck entero se compone contra esta resolución
+// y luego se escala uniformemente para llenar el viewport (incluida la
+// pantalla completa real en monitores grandes), así nada se ve diminuto con
+// márgenes enormes. Misma técnica que el modo presentador de PowerPoint.
+//
+// 1440×810 es 16:9 EXACTO — que es la proporción de todo proyector y todo
+// televisor de salón. Con el 1280×800 anterior (16:10) la lámina se escalaba
+// por el alto y dejaba una franja negra a cada lado en pantalla completa.
+// A 1920×1080 esto escala ×1.333 y llena el panel sin recorte.
+const CANVAS_W = 1440
+const CANVAS_H = 810
 
 // Identifica el deck en el almacenamiento del navegador. Si se clona esta
 // presentación para otro módulo, cambiar este id evita que las dos compartan
@@ -231,9 +236,8 @@ function Deck() {
           flexShrink: 0,
           transform: `scale(${scale})`,
           transformOrigin: 'center center',
-          display: 'flex',
-          flexDirection: 'column',
           position: 'relative',
+          overflow: 'hidden',
           zIndex: 2,
         }}
       >
@@ -254,76 +258,71 @@ function Deck() {
         />
       )}
 
-      {/* ── Header ── */}
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '10px 28px',
-          borderBottom: '1px solid var(--border)',
-          background: 'rgba(2,7,26,0.85)',
-          backdropFilter: 'blur(16px)',
-          flexShrink: 0,
-          zIndex: 10,
-          position: 'relative',
-        }}
-      >
-        {/* Left: blinking status dot + module label */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ position: 'relative', width: 10, height: 10 }}>
-            <div
-              style={{
-                width: 10, height: 10, borderRadius: '50%',
-                background: 'var(--cyan-bright)',
-                boxShadow: '0 0 10px var(--cyan-bright)',
-              }}
-            />
-            <div
-              className="animate-pulse-glow"
-              style={{
-                position: 'absolute', inset: -4, borderRadius: '50%',
-                background: 'rgba(0,212,255,0.2)',
-              }}
-            />
-          </div>
-          <span
-            className="font-mono"
-            style={{ fontSize: 10, color: 'var(--cyan-mid)', letterSpacing: '0.12em' }}
-          >
-            MÓDULO N°1 — EQUIPOS DE SALÓN DE OPERACIONES
-          </span>
-        </div>
+      {/* ── Chrome flotante ──
+          Ni cabecera ni pie: barras con borde y fondo propio
+          convertían el escenario en una ventana de navegador. Lo
+          que queda son marcas sueltas sobre la escena, tan tenues
+          que la lámina puede sangrar por debajo de ellas. */}
 
-        {/* Right: author + counter */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <span className="font-mono" style={{ fontSize: 10, color: 'var(--white-faint)', letterSpacing: '0.06em' }}>
-            Ing. Bryan Rodríguez S. · UDELAS
-          </span>
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              padding: '4px 10px',
-              background: 'rgba(0,212,255,0.08)',
-              border: '1px solid rgba(0,212,255,0.25)',
-              borderRadius: 6,
-            }}
-          >
-            <span className="font-mono" style={{ fontSize: 12, color: 'var(--cyan-bright)', fontWeight: 700 }}>
-              {String(current + 1).padStart(2, '0')}
-            </span>
-            <span className="font-mono" style={{ fontSize: 10, color: 'var(--white-faint)' }}>
-              / {String(visibleSlides.length).padStart(2, '0')}
-            </span>
-          </div>
-        </div>
-      </header>
+      {/* Hilo de progreso, pegado al borde superior */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, zIndex: 40, pointerEvents: 'none' }}>
+        <div
+          style={{
+            height: '100%',
+            width: `${progress}%`,
+            background: 'linear-gradient(90deg, rgba(37,99,235,0), #2563eb 30%, #00d4ff)',
+            transition: 'width 0.55s cubic-bezier(0.22,1,0.36,1)',
+            boxShadow: '0 0 14px rgba(0,212,255,0.7)',
+          }}
+        />
+      </div>
 
-      {/* ── Slide viewport ── */}
+      {/* Rótulo del módulo, arriba a la izquierda */}
       <div
         style={{
-          flex: 1,
-          position: 'relative',
+          position: 'absolute', top: 26, left: 46, zIndex: 40,
+          display: 'flex', alignItems: 'center', gap: 10, pointerEvents: 'none',
+        }}
+      >
+        <span
+          style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: 'var(--cyan-bright)', boxShadow: '0 0 10px var(--cyan-bright)',
+          }}
+        />
+        <span
+          className="font-mono"
+          style={{ fontSize: 9.5, color: 'rgba(56,189,248,0.6)', letterSpacing: '0.24em', textTransform: 'uppercase' }}
+        >
+          Módulo N°1 · Equipos de Salón de Operaciones
+        </span>
+      </div>
+
+      {/* Contador y pantalla completa, arriba a la derecha */}
+      <div
+        style={{
+          position: 'absolute', top: 20, right: 44, zIndex: 40,
+          display: 'flex', alignItems: 'center', gap: 18,
+        }}
+      >
+        <span className="font-mono" style={{ fontSize: 9.5, color: 'rgba(240,249,255,0.26)', letterSpacing: '0.16em' }}>
+          Ing. Bryan Rodríguez S. · UDELAS
+        </span>
+        <span className="font-mono" style={{ fontSize: 12, color: 'var(--cyan-bright)', letterSpacing: '0.1em' }}>
+          {String(current + 1).padStart(2, '0')}
+          <span style={{ color: 'rgba(240,249,255,0.22)' }}> / {String(visibleSlides.length).padStart(2, '0')}</span>
+        </span>
+        <NavBtn onClick={toggleFullscreen} disabled={false} label={isFullscreen ? '⤡' : '⤢'} title={isFullscreen ? 'Salir de pantalla completa (Esc)' : 'Pantalla completa (F)'} />
+      </div>
+
+      {/* ── Escenario ──
+          Ocupa el canvas entero: una escena tiene que poder tocar
+          los cuatro bordes para que algo pueda salirse por ellos. */}
+      <div
+        data-stage="slide"
+        style={{
+          position: 'absolute',
+          inset: 0,
           overflow: 'hidden',
           zIndex: 5,
           perspective: '1200px',
@@ -347,82 +346,45 @@ function Deck() {
         </div>
       </div>
 
-      {/* ── Footer ── */}
-      <footer
+      {/* Navegación por puntos, centrada abajo y sin suelo bajo ella */}
+      <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          padding: '10px 28px',
-          borderTop: '1px solid var(--border)',
-          background: 'rgba(2,7,26,0.85)',
-          backdropFilter: 'blur(16px)',
-          flexShrink: 0,
-          zIndex: 10,
-          position: 'relative',
+          position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', gap: 4, alignItems: 'center', zIndex: 40,
         }}
       >
-        {/* Progress bar */}
-        <div style={{ flex: 1, height: 3, background: 'rgba(0,212,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
-          <div
+        {visibleSlides.map((s, i) => (
+          <button
+            key={s.key}
+            onClick={() => !isAnimating && goTo(i, i > current ? 'forward' : 'back')}
+            onMouseEnter={() => setHoveredDot(i)}
+            onMouseLeave={() => setHoveredDot(null)}
+            title={`${i + 1}. ${s.label}`}
             style={{
-              height: '100%',
-              width: `${progress}%`,
-              background: 'linear-gradient(90deg, #2563eb, #00d4ff)',
-              borderRadius: 3,
-              transition: 'width 0.5s cubic-bezier(0.22,1,0.36,1)',
-              boxShadow: '0 0 12px rgba(0,212,255,0.8), 0 0 4px rgba(0,212,255,1)',
-              position: 'relative',
+              width: i === current ? 22 : hoveredDot === i ? 9 : 4,
+              height: 4,
+              borderRadius: 2,
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
+              background:
+                i === current
+                  ? 'linear-gradient(90deg, #2563eb, #00d4ff)'
+                  : i < current
+                  ? 'rgba(0,212,255,0.4)'
+                  : 'rgba(240,249,255,0.13)',
+              boxShadow: i === current ? '0 0 10px rgba(0,212,255,0.8)' : 'none',
             }}
-          >
-            {/* Shimmer on bar */}
-            <div
-              style={{
-                position: 'absolute', inset: 0,
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
-                backgroundSize: '200% 100%',
-                animation: 'shimmerSweep 2s linear infinite',
-              }}
-            />
-          </div>
-        </div>
+          />
+        ))}
+      </div>
 
-        {/* Dot nav */}
-        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-          {visibleSlides.map((s, i) => (
-            <button
-              key={s.key}
-              onClick={() => !isAnimating && goTo(i, i > current ? 'forward' : 'back')}
-              onMouseEnter={() => setHoveredDot(i)}
-              onMouseLeave={() => setHoveredDot(null)}
-              title={`${i + 1}. ${s.label}`}
-              style={{
-                width: i === current ? 20 : hoveredDot === i ? 10 : 5,
-                height: 5,
-                borderRadius: 3,
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0,
-                transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
-                background:
-                  i === current
-                    ? 'linear-gradient(90deg, #2563eb, #00d4ff)'
-                    : i < current
-                    ? 'rgba(0,212,255,0.45)'
-                    : 'rgba(240,249,255,0.15)',
-                boxShadow: i === current ? '0 0 8px rgba(0,212,255,0.8)' : 'none',
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Arrow buttons */}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <NavBtn onClick={toggleFullscreen} disabled={false} label={isFullscreen ? '⤡' : '⤢'} title={isFullscreen ? 'Salir de pantalla completa (Esc)' : 'Pantalla completa (F)'} />
-          <NavBtn onClick={prev} disabled={current === 0 || isAnimating} label="←" />
-          <NavBtn onClick={next} disabled={current === visibleSlides.length - 1 || isAnimating} label="→" />
-        </div>
-      </footer>
+      {/* Flechas, abajo a la derecha */}
+      <div style={{ position: 'absolute', bottom: 18, right: 44, display: 'flex', gap: 8, zIndex: 40 }}>
+        <NavBtn onClick={prev} disabled={current === 0 || isAnimating} label="←" />
+        <NavBtn onClick={next} disabled={current === visibleSlides.length - 1 || isAnimating} label="→" />
+      </div>
       </div>
 
       <EditorPanel current={current} onGoTo={jump} />
@@ -439,19 +401,21 @@ function NavBtn({ onClick, disabled, label, title }: { onClick: () => void; disa
       title={title}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      /* Sin caja: un botón con borde en la esquina reintroduce
+         justamente el rectángulo que la composición evita. Queda
+         el glifo, y el disco de acento solo aparece al pasar. */
       style={{
-        width: 34, height: 34,
-        borderRadius: 8,
-        border: '1px solid',
-        borderColor: disabled ? 'rgba(0,212,255,0.1)' : hover ? 'rgba(0,212,255,0.7)' : 'rgba(0,212,255,0.3)',
-        background: disabled ? 'transparent' : hover ? 'rgba(0,212,255,0.15)' : 'rgba(0,212,255,0.06)',
-        color: disabled ? 'rgba(240,249,255,0.2)' : 'var(--cyan-bright)',
-        cursor: disabled ? 'not-allowed' : 'pointer',
+        width: 30, height: 30,
+        borderRadius: '50%',
+        border: 'none',
+        background: !disabled && hover ? 'rgba(0,212,255,0.14)' : 'transparent',
+        color: disabled ? 'rgba(240,249,255,0.14)' : hover ? 'var(--cyan-bright)' : 'rgba(0,212,255,0.55)',
+        cursor: disabled ? 'default' : 'pointer',
         fontSize: 14,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'all 0.2s ease',
+        transition: 'all 0.22s ease',
         fontFamily: 'inherit',
-        boxShadow: !disabled && hover ? '0 0 16px rgba(0,212,255,0.3)' : 'none',
+        textShadow: !disabled && hover ? '0 0 12px rgba(0,212,255,0.8)' : 'none',
       }}
     >
       {label}
