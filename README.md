@@ -86,6 +86,27 @@ carpetas — nunca hay que tocar el HTML de un nivel superior.
 Con `"estado": "pendiente"` la tarjeta aparece atenuada y sin enlace — útil
 para anunciar una presentación antes de terminarla.
 
+## Navegación
+
+Cada nivel tiene que poder salir del que está. Son dos mecanismos:
+
+- **En el hub** (portada, institución, curso), una miga de pan `.miga` arriba
+  del encabezado: `Presentaciones / UTP / Teoría Electromagnética I`. La
+  portada no lleva porque es la raíz.
+- **Dentro de una presentación**, un enlace al curso arriba a la izquierda,
+  más `Esc`. Los decks viven en `<curso>/modulo-N/<deck>/`, así que el destino
+  es siempre `../../`.
+
+`Esc` sólo sale del deck **cuando no está en pantalla completa**: en fullscreen
+el navegador se queda con el primer `Esc`, y robárselo sacaría al expositor del
+proyector y de la presentación de un solo golpe.
+
+Los decks de los módulos 2 y 3 de TEM I traen el enlace en `deck.tsx` (prop
+`backLabel`). Los otros siete lo llevan en su `index.html`, fuera del `#root`:
+cada uno tiene su propia arquitectura interna — algunos son un `App.tsx` de
+2500 líneas — y el enlace no debe depender de ninguna. Al agregar un deck
+nuevo, comprobar que tenga una de las dos.
+
 ## Cómo está armado un deck
 
 Los decks del módulo 1 de TEM I son un solo `src/App.tsx` de ~2500 líneas. A

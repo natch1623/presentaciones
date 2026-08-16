@@ -615,9 +615,16 @@ export interface DeckConfig {
   actNumeral: (s: SD) => string | null
   /* which of the five rooms this deck stands in */
   theme: DeckTheme
+  /* the way back to the course. Decks live at <curso>/modulo-N/parte-X/,
+     so two levels up is the course index in every case. */
+  backHref?: string
+  backLabel?: string
 }
 
-export function Deck({ slides: SLIDES, accentFor, actLabel, actNumeral, theme }: DeckConfig) {
+export function Deck({
+  slides: SLIDES, accentFor, actLabel, actNumeral, theme,
+  backHref = '../../', backLabel = 'Volver al curso',
+}: DeckConfig) {
   const [cur, setCur] = useState(0)
   const [animCls, setAnimCls] = useState<string>('zoom-enter-fwd')
   const [slideKey, setSlideKey] = useState(0)
@@ -648,10 +655,15 @@ export function Deck({ slides: SLIDES, accentFor, actLabel, actNumeral, theme }:
       if (e.key === 'Home') goTo(0)
       if (e.key === 'End') goTo(SLIDES.length - 1)
       if (e.key === 'f' || e.key === 'F') toggleFs()
+      /* Esc leaves the deck — but only once it is no longer leaving
+         fullscreen. In fullscreen the browser consumes the first Esc
+         itself, and stealing it would drop the presenter out of the
+         projector and out of the deck in one keystroke. */
+      if (e.key === 'Escape' && !document.fullscreenElement) window.location.href = backHref
     }
     window.addEventListener('keydown', h)
     return () => window.removeEventListener('keydown', h)
-  }, [goTo, cur, toggleFs])
+  }, [goTo, cur, toggleFs, backHref])
 
   const slide = SLIDES[cur]
   const accent = accentFor(slide)
@@ -734,24 +746,39 @@ export function Deck({ slides: SLIDES, accentFor, actLabel, actNumeral, theme }:
           </div>
         )}
 
-        {/* Section pill */}
-        {slide.section && (
-          <div key={slide.section} className="absolute z-40 rise flex items-center gap-2"
-            style={{ top: 26, left: 64 }}>
-            <span style={{
-              background: `${accent}22`, color: accent,
-              fontSize: 11, fontWeight: 600, letterSpacing: '.22em',
-              textTransform: 'uppercase', padding: '4px 11px', borderRadius: 3,
-            }}>
-              {slide.section}
-            </span>
-            {act && (
-              <span style={{ color: 'rgba(220,238,248,.32)', fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase' }}>
-                {act}
+        {/* Top-left rail: the way out, then where you are.
+
+            A deck opened from the course page used to be a dead end —
+            no link back, and Esc only left fullscreen. The way out comes
+            first in the row because that is where a reader looks for it. */}
+        <div className="absolute z-40 flex items-center" style={{ top: 24, left: 64, gap: 12 }}
+          onClick={e => e.stopPropagation()}>
+          <a href={backHref} className="back-link rise" style={{ ...dly(0) }}
+            title={`${backLabel} (Esc)`} aria-label={`Volver a ${backLabel}`}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+            <span>{backLabel}</span>
+          </a>
+
+          {slide.section && (
+            <div key={slide.section} className="rise flex items-center gap-2" style={{ ...dly(1) }}>
+              <span style={{ width: 1, height: 13, background: 'rgba(160,200,232,.2)' }}/>
+              <span style={{
+                color: accent, fontSize: 11, fontWeight: 600,
+                letterSpacing: '.22em', textTransform: 'uppercase',
+              }}>
+                {slide.section}
               </span>
-            )}
-          </div>
-        )}
+              {act && (
+                <span style={{ color: 'rgba(220,238,248,.32)', fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase' }}>
+                  {act}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Counter + fullscreen toggle */}
         <div className="absolute z-40 flex items-center gap-4" style={{ top: 20, right: 56 }}

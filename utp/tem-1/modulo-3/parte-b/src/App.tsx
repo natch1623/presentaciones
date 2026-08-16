@@ -758,5 +758,5 @@ function actNumeral(s: SD): string | null {
 }
 
 export default function App() {
-  return <Deck slides={SLIDES} accentFor={accentFor} actLabel={actLabel} actNumeral={actNumeral} theme={THEMES.dielectrico}/>
+  return <Deck slides={SLIDES} accentFor={accentFor} actLabel={actLabel} actNumeral={actNumeral} theme={THEMES.dielectrico} backLabel="Teoría Electromagnética I"/>
 }
