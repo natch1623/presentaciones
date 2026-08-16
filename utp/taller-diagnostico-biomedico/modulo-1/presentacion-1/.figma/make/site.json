@@ -1,0 +1,11 @@
+{
+  "title": "Taller de Diagnóstico Biomédico — UTP Panamá Oeste",
+  "description": "Clases 1 y 2 (teoría): fundamentos y modos de falla, bloques funcionales, metodología del diagnóstico, técnicas, instrumentos de prueba, seguridad eléctrica IEC 60601-1, fallas por familia de equipo y documentación. Prof. Ing. Bryan Rodríguez.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

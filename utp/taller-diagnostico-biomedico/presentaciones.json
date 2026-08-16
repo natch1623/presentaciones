@@ -1,0 +1,26 @@
+{
+  "curso": "Taller de Diagnóstico Biomédico",
+  "institucion": "Universidad Tecnológica de Panamá · Panamá Oeste",
+  "carrera": "Taller de extensión",
+  "_comentario": "Para agregar una presentación: crea la carpeta (p. ej. modulo-1/presentacion-2) con su app de Vite y añade su entrada aquí. El workflow compila toda carpeta modulo-*/*/ que tenga package.json; esta lista sólo controla qué se muestra en el menú y cómo.",
+  "modulos": [
+    {
+      "id": "modulo-1",
+      "numero": "I",
+      "titulo": "Clases 1 y 2 — Teoría",
+      "descripcion": "Fundamentos y modos de falla, bloques funcionales, metodología del diagnóstico, técnicas, instrumentos de prueba, seguridad eléctrica IEC 60601-1, fallas por familia de equipo y documentación.",
+      "acento": "#60a5fa",
+      "presentaciones": [
+        {
+          "id": "presentacion-1",
+          "etiqueta": "Teoría",
+          "titulo": "Diagnóstico Biomédico",
+          "descripcion": "Los ocho bloques del taller: de los fundamentos y modos de falla a la documentación del diagnóstico, con seguridad eléctrica IEC 60601-1.",
+          "referencia": "Ing. Bryan Rodríguez S. · Taller de Diagnóstico Biomédico",
+          "laminas": 57,
+          "estado": "disponible"
+        }
+      ]
+    }
+  ]
+}

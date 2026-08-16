@@ -13,9 +13,9 @@
     {
       "id": "taller-diagnostico-biomedico",
       "nombre": "Taller de Diagnóstico Biomédico",
-      "descripcion": "Aún en preparación — por ahora solo existe el material fuente, sin presentación interactiva.",
+      "descripcion": "Clases 1 y 2 (teoría) — de los fundamentos y modos de falla a la documentación del diagnóstico, con seguridad eléctrica IEC 60601-1.",
       "acento": "#60a5fa",
-      "estado": "pendiente"
+      "estado": "disponible"
     }
   ]
 }

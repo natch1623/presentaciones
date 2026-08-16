@@ -1,0 +1,455 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap');
+@import 'tailwindcss';
+
+/* ═══════════════════════════════════════════════════════════════
+   COLUMBINA — lenguaje visual
+   "Un conocimiento presentado como un fenómeno celestial."
+
+   El deck ocurre dentro de un dominio lunar: azul noche profundo,
+   halos de luz, agua abstracta, alas y gravedad. Las variables se
+   agrupan por rol —no por color— para que ajustar la paleta no
+   obligue a tocar cada diapositiva.
+
+   Reparto de intensidad (regla de la guía):
+     50 % azul oscuro · 20 % azul medio · 15 % luz · 8 % violeta
+      5 % hydro · 2 % cian y rosa
+   El azul oscuro domina; el cian y el rosa son destellos, no fondos.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Fondos: del vacío exterior al cristal lunar ── */
+  --night:       #080d24;
+  --night-2:     #101936;
+  --panel:       #17244a;
+  --panel-soft:  rgba(23, 36, 74, 0.62);
+  --panel-deep:  rgba(8, 13, 36, 0.88);
+
+  /* ── Luz lunar: el blanco de sus alas ── */
+  --moon:        #f5f7ff;
+  --moon-dim:    rgba(245, 247, 255, 0.74);
+  --moon-faint:  rgba(245, 247, 255, 0.40);
+  --moon-ghost:  rgba(245, 247, 255, 0.13);
+
+  /* ── Hydro: el azul celestial, su elemento ── */
+  --hydro:       #72c7ff;
+  --hydro-soft:  #b8e7ff;
+  --hydro-deep:  #3d8fd0;
+  --hydro-glow:  rgba(114, 199, 255, 0.20);
+
+  /* ── Cian: el brillo del cristal. Sólo destellos. ── */
+  --cyan:        #bdf8ff;
+  --cyan-glow:   rgba(189, 248, 255, 0.22);
+
+  /* ── Violeta y lila: energía lunar, lo mágico ── */
+  --violet:      #8d82e8;
+  --lilac:       #c7b5ff;
+  --violet-glow: rgba(141, 130, 232, 0.22);
+
+  /* ── Rosa: el detalle delicado. Casi nunca. ── */
+  --rose:        #e5b8e8;
+  --rose-glow:   rgba(229, 184, 232, 0.18);
+
+  /* ── Texto secundario ── */
+  --text-2:      #aab8d6;
+
+  /* ── Acentos funcionales ──
+     El taller es técnico: hace falta distinguir "peligro real" de
+     "buena práctica". Se toman del extremo cálido del mismo dominio
+     para no romper la atmósfera, y se usan muy poco. */
+  --alert:       #ff8fa8;   /* riesgo eléctrico, fibrilación, quemadura */
+  --alert-glow:  rgba(255, 143, 168, 0.18);
+  --ember:       #f3c98b;   /* advertencia, error frecuente del método */
+  --ember-glow:  rgba(243, 201, 139, 0.16);
+  --verdant:     #8fe3c8;   /* dentro de tolerancia, apto para uso */
+  --verdant-glow: rgba(143, 227, 200, 0.16);
+
+  /* ── Filos ── */
+  --edge:        rgba(184, 231, 255, 0.16);
+  --edge-bright: rgba(184, 231, 255, 0.42);
+  --edge-violet: rgba(199, 181, 255, 0.30);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--night);
+  color: var(--moon);
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-rune    { font-family: 'Cinzel', serif; }
+.font-display { font-family: 'Cormorant Garamond', serif; }
+.font-mono    { font-family: 'JetBrains Mono', monospace; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TRANSICIONES ENTRE DIAPOSITIVAS
+   Avanzar — HYDRO RIPPLE: la lámina se disuelve en agua mientras una
+   onda circular se expande desde el centro; la siguiente asciende
+   desde abajo, como si emergiera del reflejo.
+   Retroceder — ECLIPSE: la lámina se apaga tras un disco oscuro y la
+   anterior desciende de vuelta a su sitio.
+
+   Ninguna supera 0,8 s: la guía pide lentitud, no espera.
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes hydroDissolve {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0) brightness(1);
+  }
+  30% {
+    /* el instante en que la superficie se tensa antes de romperse */
+    opacity: 0.94;
+    transform: scale(1.006) translateY(-3px);
+    filter: blur(1px) brightness(1.18);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.035) translateY(-16px);
+    filter: blur(13px) brightness(0.7);
+  }
+}
+
+@keyframes moonRise {
+  0% {
+    opacity: 0;
+    transform: scale(0.985) translateY(26px);
+    filter: blur(11px) brightness(1.5);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(2px) brightness(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0) brightness(1);
+  }
+}
+
+@keyframes eclipseOut {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0) brightness(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.988) translateY(14px);
+    filter: blur(10px) brightness(0.55);
+  }
+}
+
+@keyframes eclipseIn {
+  0% {
+    opacity: 0;
+    transform: scale(1.012) translateY(-20px);
+    filter: blur(10px) brightness(1.35);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0) brightness(1);
+  }
+}
+
+.anim-hydro-out   { animation: hydroDissolve 0.46s cubic-bezier(0.5, 0, 0.75, 0.4) both; }
+.anim-moon-in     { animation: moonRise      0.86s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.anim-eclipse-out { animation: eclipseOut    0.40s cubic-bezier(0.5, 0, 0.75, 0.4) both; }
+.anim-eclipse-in  { animation: eclipseIn     0.72s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* ── La onda que revela la escena siguiente ── */
+@keyframes rippleExpand {
+  0%   { opacity: 0;    transform: scale(0.04); }
+  14%  { opacity: 0.85; }
+  100% { opacity: 0;    transform: scale(2.6); }
+}
+.ripple-ring {
+  animation: rippleExpand var(--rd, 0.95s) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--rdel, 0s);
+}
+
+/* ── Plumas y partículas que cruzan el corte ── */
+@keyframes featherCross {
+  0%   { opacity: 0;    transform: translate(0, 0) rotate(0deg) scale(0.7); }
+  16%  { opacity: 0.9; }
+  100% {
+    opacity: 0;
+    transform: translate(var(--fx), var(--fy)) rotate(var(--fr)) scale(var(--fs));
+  }
+}
+.feather-cross {
+  animation: featherCross var(--fd, 0.9s) cubic-bezier(0.22, 0.72, 0.3, 1) both;
+  animation-delay: var(--fdel, 0s);
+}
+
+/* ── Gravedad: al retroceder las partículas convergen al centro ── */
+@keyframes featherGather {
+  0%   { opacity: 0;   transform: translate(var(--fx), var(--fy)) rotate(var(--fr)) scale(var(--fs)); }
+  32%  { opacity: 0.75; }
+  100% { opacity: 0;   transform: translate(0, 0) rotate(0deg) scale(0.5); }
+}
+.feather-gather {
+  animation: featherGather var(--fd, 0.9s) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--fdel, 0s);
+}
+
+/* ── El disco del eclipse que barre la pantalla al retroceder ── */
+@keyframes eclipseSweep {
+  0%   { opacity: 0;    transform: scale(2.2); }
+  35%  { opacity: 0.92; transform: scale(1); }
+  100% { opacity: 0;    transform: scale(0.15); }
+}
+.eclipse-disc { animation: eclipseSweep 0.78s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ENTRADA DE CONTENIDO
+   0,6–1,2 s, desplazamiento corto, easing de salida. Nada rebota.
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes veilRise {
+  from { opacity: 0; transform: translateY(16px); filter: blur(5px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+@keyframes glideIn {
+  from { opacity: 0; transform: translateX(-20px); filter: blur(3px); }
+  to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
+}
+/* El título no entra: se condensa, como luz que toma forma. */
+@keyframes moonReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 48px rgba(184, 231, 255, 0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: normal;
+    text-shadow: 0 0 28px rgba(184, 231, 255, 0.18);
+  }
+}
+@keyframes crystalIn {
+  from { opacity: 0; transform: scale(0.9) rotate(-1.5deg); filter: blur(7px); }
+  to   { opacity: 1; transform: scale(1)   rotate(0deg);    filter: blur(0); }
+}
+/* Gravedad: el elemento cae hacia el centro en vez de aparecer. */
+@keyframes gravityPull {
+  from { opacity: 0; transform: translateY(-26px) scale(1.04); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0)     scale(1);    filter: blur(0); }
+}
+
+.stagger-item {
+  opacity: 0;
+  animation: veilRise 0.78s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.stagger-item:nth-child(1)  { animation-delay: 0.08s; }
+.stagger-item:nth-child(2)  { animation-delay: 0.16s; }
+.stagger-item:nth-child(3)  { animation-delay: 0.24s; }
+.stagger-item:nth-child(4)  { animation-delay: 0.32s; }
+.stagger-item:nth-child(5)  { animation-delay: 0.40s; }
+.stagger-item:nth-child(6)  { animation-delay: 0.48s; }
+.stagger-item:nth-child(7)  { animation-delay: 0.56s; }
+.stagger-item:nth-child(8)  { animation-delay: 0.64s; }
+.stagger-item:nth-child(9)  { animation-delay: 0.72s; }
+.stagger-item:nth-child(10) { animation-delay: 0.80s; }
+.stagger-item:nth-child(11) { animation-delay: 0.88s; }
+.stagger-item:nth-child(12) { animation-delay: 0.96s; }
+
+.title-reveal   { opacity: 0; animation: moonReveal  0.98s cubic-bezier(0.22, 1, 0.36, 1) 0.06s forwards; }
+.tag-reveal     { opacity: 0; animation: glideIn     0.66s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.crystal-in     { opacity: 0; animation: crystalIn   0.86s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.gravity-in     { opacity: 0; animation: gravityPull 0.94s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+/* ── Constelaciones ──
+   Las líneas se trazan como si alguien uniera las estrellas, y cada
+   nodo se enciende justo cuando la línea llega a él. */
+@keyframes constellationDraw {
+  from { stroke-dashoffset: 400; opacity: 0; }
+  to   { stroke-dashoffset: 0;   opacity: 1; }
+}
+@keyframes constellationPop {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Aparición de las alas ──
+   El guion de la guía, en cinco tiempos: chispas (0,3–0,9 s), la
+   estructura de cada pluma (0,6–1,4 s), la expansión (0,5–2,1 s),
+   el brillo (1,6–2,4 s) y la flotación permanente a partir de 2,4 s. */
+@keyframes wingSpark {
+  0%   { opacity: 0;    transform: scale(0.2); }
+  45%  { opacity: 0.95; transform: scale(1); }
+  100% { opacity: 0;    transform: scale(0.35); }
+}
+@keyframes wingForm {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes wingExpand {
+  0%   { opacity: 0.2; transform: scale(0.52, 0.78); }
+  100% { opacity: 1;   transform: scale(1, 1); }
+}
+@keyframes wingGlowIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.wing-spark  { opacity: 0; animation: wingSpark 0.9s ease-out both; transform-origin: center; }
+.wing-feather { opacity: 0; animation: wingForm 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.wing-expand { animation: wingExpand 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both; }
+.wing-glow   { opacity: 0; animation: wingGlowIn 0.9s ease-out 1.6s both; }
+.wing-float  { animation: featherDrift 8s ease-in-out 2.4s infinite; transform-origin: center; }
+
+/* ═══════════════════════════════════════════════════════════════
+   AMBIENTE — 3–8 s, movimiento diminuto.
+   Nunca debe robarle la atención al contenido.
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes haloBreathe {
+  0%, 100% { opacity: 0.34; transform: scale(1); }
+  50%      { opacity: 0.72; transform: scale(1.05); }
+}
+/* Tres derivas distintas: si todas las partículas se movieran igual
+   el campo se leería como una textura, no como profundidad. */
+@keyframes motePulse {
+  0%, 100% { opacity: 0.18; transform: translateY(0) scale(1); }
+  50%      { opacity: 0.95; transform: translateY(-4px) scale(1.25); }
+}
+@keyframes moteSink {
+  0%   { opacity: 0;    transform: translateY(-8px); }
+  35%  { opacity: 0.85; }
+  100% { opacity: 0;    transform: translateY(16px); }
+}
+@keyframes moteOrbit {
+  0%   { transform: rotate(0deg)   translateX(var(--orb, 14px)) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(var(--orb, 14px)) rotate(-360deg); }
+}
+@keyframes featherDrift {
+  0%, 100% { transform: translateY(0)    rotate(0deg); }
+  50%      { transform: translateY(-9px) rotate(2.5deg); }
+}
+@keyframes ringSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes waveShift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-64px); }
+}
+@keyframes edgeShimmer {
+  0%, 100% { box-shadow: 0 0 12px rgba(114, 199, 255, 0.10), inset 0 0 18px rgba(114, 199, 255, 0.03); }
+  50%      { box-shadow: 0 0 30px rgba(114, 199, 255, 0.26), inset 0 0 30px rgba(114, 199, 255, 0.07); }
+}
+@keyframes sheen {
+  0%   { background-position: -200% center; }
+  100% { background-position:  300% center; }
+}
+
+.animate-halo    { animation: haloBreathe 6.5s ease-in-out infinite; }
+.animate-mote    { animation: motePulse   4.5s ease-in-out infinite; }
+.animate-sink    { animation: moteSink    7s   ease-in-out infinite; }
+.animate-orbit   { animation: moteOrbit   14s  linear infinite; }
+.animate-drift   { animation: featherDrift 7s  ease-in-out infinite; }
+.animate-drift-s { animation: featherDrift 5s  ease-in-out infinite; }
+.animate-ring    { animation: ringSpin    46s  linear infinite; }
+.animate-ring-r  { animation: ringSpin    62s  linear infinite reverse; }
+.animate-shimmer { animation: edgeShimmer 5.5s ease-in-out infinite; }
+
+.glow-hydro  { text-shadow: 0 0 24px rgba(114, 199, 255, 0.45); }
+.glow-moon   { text-shadow: 0 0 30px rgba(245, 247, 255, 0.55), 0 0 70px rgba(141, 130, 232, 0.30); }
+.glow-violet { text-shadow: 0 0 26px rgba(199, 181, 255, 0.60); }
+
+/* ═══════════════════════════════════════════════════════════════
+   PIEZAS REUTILIZABLES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Fragmento de cristal lunar: transparencia, filo de 1 px, halo
+   difuso y esquinas apenas redondeadas. Nunca una tarjeta blanca. */
+.moon-panel {
+  position: relative;
+  background: linear-gradient(152deg, rgba(23, 36, 74, 0.70) 0%, rgba(8, 13, 36, 0.86) 100%);
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(245, 247, 255, 0.05), 0 8px 34px rgba(4, 7, 22, 0.45);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.5s ease,
+              box-shadow 0.5s ease;
+}
+.moon-panel:hover {
+  transform: translateY(-2px);
+  border-color: var(--edge-bright);
+  box-shadow: inset 0 1px 0 rgba(245, 247, 255, 0.07), 0 12px 44px rgba(141, 130, 232, 0.18);
+}
+
+/* Filo lunar vertical: la luz que se apoya en el borde del panel */
+.moon-edge { position: relative; }
+.moon-edge::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10%; bottom: 10%;
+  width: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, transparent, var(--hydro) 24%, var(--cyan) 50%, var(--hydro) 76%, transparent);
+  box-shadow: 0 0 10px rgba(114, 199, 255, 0.65);
+}
+
+/* Separador: una línea orbital, no una regla */
+.orbit-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--edge-violet) 18%, var(--edge-bright) 50%, var(--edge-violet) 82%, transparent);
+}
+
+/* Barra de progreso con un reflejo recorriéndola */
+.sheen-bar {
+  background: linear-gradient(90deg, transparent 0%, rgba(245, 247, 255, 0.45) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: sheen 3.2s linear infinite;
+}
+
+/* Rejilla de fondo: casi invisible, sólo da escala al vacío */
+.astral-grid {
+  background-image:
+    linear-gradient(rgba(114, 199, 255, 0.020) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(114, 199, 255, 0.020) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Ondas hydro al pie de una composición */
+.hydro-wave { animation: waveShift 9s linear infinite; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL INTERNO (diapositivas densas)
+   ═══════════════════════════════════════════════════════════════ */
+.slide-scroll { scrollbar-width: thin; scrollbar-color: rgba(114, 199, 255, 0.28) transparent; }
+.slide-scroll::-webkit-scrollbar { width: 6px; }
+.slide-scroll::-webkit-scrollbar-track { background: transparent; }
+.slide-scroll::-webkit-scrollbar-thumb {
+  background: rgba(114, 199, 255, 0.26);
+  border-radius: 3px;
+}
+.slide-scroll::-webkit-scrollbar-thumb:hover { background: rgba(114, 199, 255, 0.48); }
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESIBILIDAD — quien pida menos movimiento, recibe cortes secos
+   ═══════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

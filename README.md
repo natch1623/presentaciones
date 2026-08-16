@@ -34,12 +34,17 @@ Vite + React + TypeScript.
 ├── utp/
 │   ├── index.html
 │   ├── cursos.json
-│   └── tem-1/                       Teoría Electromagnética I
+│   ├── tem-1/                       Teoría Electromagnética I
+│   │   ├── index.html
+│   │   ├── presentaciones.json
+│   │   └── modulo-1/
+│   │       ├── parte-a/
+│   │       └── parte-b/
+│   └── taller-diagnostico-biomedico/  Taller de Diagnóstico Biomédico
 │       ├── index.html
 │       ├── presentaciones.json
 │       └── modulo-1/
-│           ├── parte-a/
-│           └── parte-b/
+│           └── presentacion-1/
 └── .github/workflows/                compila todo y publica en Pages
 ```
 
