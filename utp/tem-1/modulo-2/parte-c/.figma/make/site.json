@@ -1,0 +1,11 @@
+{
+  "title": "Potencial y Energía · Teoría Electromagnética I",
+  "description": "Trabajo e integral de línea, diferencia de potencial, el campo potencial de cargas puntuales y distribuciones, la circulación y la segunda ecuación de Maxwell, la relación E = −∇V, el dipolo eléctrico y la energía almacenada en el campo electrostático.",
+  "robots": {
+    "index": true
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

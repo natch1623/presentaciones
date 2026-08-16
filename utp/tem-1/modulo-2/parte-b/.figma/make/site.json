@@ -1,0 +1,11 @@
+{
+  "title": "La Ley de Gauss · Teoría Electromagnética I",
+  "description": "Flujo eléctrico y densidad de flujo D, la ley de Gauss en forma integral, la elección de la superficie gaussiana según la simetría, la forma puntual y la primera ecuación de Maxwell, y la fuerza eléctrica sobre líneas, placas y volúmenes de carga.",
+  "robots": {
+    "index": true
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

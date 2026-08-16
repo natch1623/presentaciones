@@ -1,0 +1,11 @@
+{
+  "title": "Campos Electrostáticos · Teoría Electromagnética I",
+  "description": "Fuentes de campo electrostático, densidades de carga, ley de Coulomb, intensidad de campo eléctrico y las configuraciones clásicas: carga puntual, línea infinita y lámina de carga, con el trazado de las líneas de campo.",
+  "robots": {
+    "index": true
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

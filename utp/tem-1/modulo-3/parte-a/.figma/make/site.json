@@ -1,0 +1,11 @@
+{
+  "title": "Conductores y Corriente · Teoría Electromagnética I",
+  "description": "Clasificación de los materiales eléctricos, corriente y densidad de corriente, corriente de convección y de conducción, conductividad y resistividad, la ley de Ohm en forma puntual, la ecuación de continuidad y las condiciones de frontera en la superficie de un conductor.",
+  "robots": {
+    "index": true
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

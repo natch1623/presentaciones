@@ -1,0 +1,11 @@
+{
+  "title": "Dieléctricos y Capacitores · Teoría Electromagnética I",
+  "description": "El dipolo eléctrico y el vector de polarización P, las cargas de polarización, la relación D = ε₀E + P y la permitividad relativa, la ley de Gauss en dieléctricos, las condiciones de frontera entre medios, la capacitancia de las geometrías clásicas y las ecuaciones de Poisson y Laplace.",
+  "robots": {
+    "index": true
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

@@ -36,16 +36,63 @@
       "numero": "II",
       "titulo": "Campos Electrostáticos",
       "descripcion": "Fuentes de campo, ley de Coulomb, ley de Gauss, potencial eléctrico y energía electrostática.",
-      "acento": "#60a5fa",
-      "presentaciones": []
+      "acento": "#7fc8e8",
+      "presentaciones": [
+        {
+          "id": "parte-a",
+          "etiqueta": "Parte A",
+          "titulo": "Fuentes y Ley de Coulomb",
+          "descripcion": "La carga eléctrica estática y las densidades ρ_L, ρ_S y ρ_v; la ley de Coulomb y su forma vectorial; el campo E de cargas puntuales, distribuciones discretas y continuas; la línea y la lámina infinitas, y el trazado de las líneas de campo.",
+          "referencia": "Hayt & Buck · cap. 2 · §2.1 – 2.6",
+          "laminas": 27,
+          "estado": "disponible"
+        },
+        {
+          "id": "parte-b",
+          "etiqueta": "Parte B",
+          "titulo": "La Ley de Gauss",
+          "descripcion": "Flujo eléctrico y densidad de flujo D; la ley de Gauss en forma integral y la elección de la superficie gaussiana según la simetría; la forma puntual y la primera ecuación de Maxwell; la fuerza eléctrica sobre líneas, placas y volúmenes de carga.",
+          "referencia": "Hayt & Buck · cap. 3 · §3.1 – 3.6",
+          "laminas": 26,
+          "estado": "disponible"
+        },
+        {
+          "id": "parte-c",
+          "etiqueta": "Parte C",
+          "titulo": "Potencial y Energía",
+          "descripcion": "Trabajo e integral de línea, diferencia de potencial, el campo potencial de cargas y distribuciones, la circulación y la segunda ecuación de Maxwell, la relación E = −∇V, el dipolo y la energía almacenada en el campo.",
+          "referencia": "Hayt & Buck · cap. 4 · §4.1 – 4.8",
+          "laminas": 25,
+          "estado": "disponible"
+        }
+      ]
     },
     {
       "id": "modulo-3",
       "numero": "III",
-      "titulo": "Por definir",
-      "descripcion": "Contenido del tercer módulo del programa.",
-      "acento": "#4ade80",
-      "presentaciones": []
+      "titulo": "Materiales Eléctricos",
+      "descripcion": "Conductores y corriente, la ecuación de continuidad, dieléctricos y polarización, capacitancia y las ecuaciones de Poisson y Laplace.",
+      "acento": "#a88be0",
+      "presentaciones": [
+        {
+          "id": "parte-a",
+          "etiqueta": "Parte A",
+          "titulo": "Conductores y Corriente",
+          "descripcion": "Clasificación de los materiales eléctricos; corriente y densidad de corriente; convección y conducción; conductividad, resistividad y la ley de Ohm en forma puntual; la ecuación de continuidad y las condiciones de frontera de un conductor.",
+          "referencia": "Hayt & Buck · cap. 5 · §5.1 – 5.5",
+          "laminas": 24,
+          "estado": "disponible"
+        },
+        {
+          "id": "parte-b",
+          "etiqueta": "Parte B",
+          "titulo": "Dieléctricos y Capacitores",
+          "descripcion": "El dipolo y el vector de polarización P; las cargas de polarización; D = ε₀E + P y la permitividad relativa; la ley de Gauss en dieléctricos y las condiciones de frontera; la capacitancia de las geometrías clásicas, y las ecuaciones de Poisson y Laplace.",
+          "referencia": "Hayt & Buck · §5.7 – 5.10 · cap. 6",
+          "laminas": 22,
+          "estado": "disponible"
+        }
+      ]
     }
   ]
 }

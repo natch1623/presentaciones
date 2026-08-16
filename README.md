@@ -37,7 +37,14 @@ Vite + React + TypeScript.
 │   ├── tem-1/                       Teoría Electromagnética I
 │   │   ├── index.html
 │   │   ├── presentaciones.json
-│   │   └── modulo-1/
+│   │   ├── modulo-1/                Fundamentos matemáticos
+│   │   │   ├── parte-a/
+│   │   │   └── parte-b/
+│   │   ├── modulo-2/                Campos Electrostáticos
+│   │   │   ├── parte-a/
+│   │   │   ├── parte-b/
+│   │   │   └── parte-c/
+│   │   └── modulo-3/                Materiales Eléctricos
 │   │       ├── parte-a/
 │   │       └── parte-b/
 │   └── taller-diagnostico-biomedico/  Taller de Diagnóstico Biomédico
@@ -78,6 +85,86 @@ carpetas — nunca hay que tocar el HTML de un nivel superior.
 
 Con `"estado": "pendiente"` la tarjeta aparece atenuada y sin enlace — útil
 para anunciar una presentación antes de terminarla.
+
+## Cómo está armado un deck
+
+Los decks del módulo 1 de TEM I son un solo `src/App.tsx` de ~2500 líneas. A
+partir del módulo 2 están partidos en dos archivos, y conviene mantenerlo así:
+
+- **`src/theme.tsx`** — las cinco salas: paletas, los fondos animados en canvas,
+  los telones a pantalla completa y el adorno de cada título.
+- **`src/deck.tsx`** — el motor: el renderizador de fórmulas `Fx`, el tablero de
+  300×300 de los diagramas, la capa de composición y el componente `<Deck>` con
+  la navegación y los atajos de teclado.
+- **`src/App.tsx`** — sólo lo propio del deck: sus diagramas SVG, el arreglo
+  `SLIDES`, las tres funciones que dicen de qué acto es cada lámina
+  (`accentFor`, `actLabel`, `actNumeral`) y qué tema usa.
+
+Para un deck nuevo, copiar una carpeta del módulo 2 o 3 y reescribir **sólo**
+`App.tsx`. Si hay que tocar el motor, el cambio se replica a los otros cuatro
+copiando `deck.tsx`, `theme.tsx` e `index.css` — son copias independientes a
+propósito, para que un ajuste de estilo en un módulo no altere los decks ya
+dictados.
+
+### La estética
+
+Cada deck tiene su propia sala, construida con su propio tema — no es un
+recoloreado del anterior. `src/theme.tsx` define las cinco:
+
+| Deck | Tema | La sala | Los títulos |
+|---|---|---|---|
+| M2·A | `coulomb` | esquirlas de hielo alineadas a un campo quieto | cristalizan |
+| M2·B | `gauss` | cascarones de flujo saliendo de sus fuentes | se expanden |
+| M2·C | `potencial` | un mapa de curvas de nivel que respira | suben |
+| M3·A | `corriente` | una red cristalina por la que derivan portadores | derivan |
+| M3·B | `dielectrico` | dipolos que se alinean y se relajan | se alinean |
+
+El tema también decide el fondo a pantalla completa, la familia de transición
+(el deck de potencial *sube* entre láminas, el de corriente se desliza), el
+adorno que cierra la regla de cada título y la silueta de las superficies.
+
+Tres reglas que no conviene romper:
+
+- **El código de signo es la paleta.** Naranja `#E4572E` es carga positiva y
+  nada más; cian `#7FC8E8` es carga negativa. Es lo único que no cambia entre
+  temas — si el naranja se usa de adorno, los diagramas dejan de poder leerse
+  de un vistazo.
+- **La atmósfera va al fondo y tenue.** Un diagrama de campo tiene que leerse
+  desde la última fila del salón; ninguna sala compite con él.
+- **Un solo elemento con entrada fuerte por lámina: el título.** Todo lo demás
+  llega en silencio, con 45 ms de separación entre ítems. Una lámina que anima
+  ocho viñetas en secuencia es una lámina que todavía no se puede leer.
+
+### La composición
+
+Las láminas son escenas, no páginas. No hay tarjetas, ni paneles con borde, ni
+grids: la estructura la dan la tipografía, las reglas de un pelo y el espacio
+negativo. En concreto:
+
+- El diagrama **sangra** fuera del escenario y se disuelve con una máscara en
+  vez de terminar en un marco (`<Bleed>`).
+- La composición es asimétrica y **alterna de lado según el número de lámina**,
+  para que dos consecutivas nunca rimen (`lean()`).
+- Los actos de la agenda son una escalera, no un cuadro de cuatro tarjetas.
+- La profundidad viene por capas: numeral fantasma al fondo (`<Ghost>`),
+  diagrama en medio, tipografía adelante.
+
+### El mini-lenguaje de las fórmulas
+
+Todo texto que pase por `<Fx>`, `MLabel`, `RLabel`, `FxHtml` o los campos
+`formulas` / `items` de una lámina acepta:
+
+| Marca | Efecto |
+|---|---|
+| `_x` `_{enc}` | subíndice |
+| `^2` `^{-1}` | superíndice |
+| `*A*` | negrita (cantidad vectorial, según el convenio de Hayt) |
+| `@{num}{den}` | fracción apilada |
+
+Sin llaves, `_` y `^` toman **un solo carácter**: `Q_enc` se ve como *Qₑnc*.
+Para subíndices de más de una letra hay que escribir `Q_{enc}`. Un `<text>` de
+SVG escrito a mano no pasa por el renderizador — hay que envolverlo en
+`fxTspans(...)` o los asteriscos salen impresos.
 
 ## Agregar un curso nuevo
 
