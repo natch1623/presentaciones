@@ -25,10 +25,20 @@
     {
       "id": "modulo-2",
       "numero": "II",
-      "titulo": "Por definir",
-      "descripcion": "Contenido del segundo módulo del programa.",
+      "titulo": "Tomografía Computarizada",
+      "descripcion": "Del haz en abanico al número de Hounsfield: generaciones, control de la radiación, detectores, reconstrucción y escala HU.",
       "acento": "#a81428",
-      "presentaciones": []
+      "presentaciones": [
+        {
+          "id": "presentacion-1",
+          "etiqueta": "Presentación 1",
+          "titulo": "Tomografía Computarizada",
+          "descripcion": "Generalidades, radiación emitida, detectores y métodos de escaneo, retroproyección filtrada calculada en vivo y escala de Hounsfield.",
+          "referencia": "Ing. Bryan Rodríguez S. · Equipos Médicos III",
+          "laminas": 31,
+          "estado": "disponible"
+        }
+      ]
     },
     {
       "id": "modulo-3",

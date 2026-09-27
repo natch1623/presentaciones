@@ -24,8 +24,10 @@ Vite + React + TypeScript.
 │   ├── equipos-medicos-3/           Equipos de Radiodiagnóstico
 │   │   ├── index.html
 │   │   ├── presentaciones.json
-│   │   └── modulo-1/
-│   │       └── presentacion-1/
+│   │   ├── modulo-1/
+│   │   │   └── presentacion-1/
+│   │   └── modulo-2/                Tomografía computarizada
+│   │       └── presentacion-1/      (HTML + SVG + Canvas con Vite, sin React)
 │   └── mantenimiento-equipos/       Mantenimiento en equipos de laboratorio clínico
 │       ├── index.html
 │       ├── presentaciones.json

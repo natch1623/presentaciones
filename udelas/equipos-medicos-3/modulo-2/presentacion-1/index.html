@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tomografía Computarizada — Equipos Médicos III</title>
+<meta name="description" content="Equipos Médicos III · Módulo II · Presentación 1: generalidades, radiación emitida, detectores, métodos de escaneo, reconstrucción y escala de Hounsfield.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<main class="stage" id="stage" data-mood="origin">
+
+  <!-- ============ 01 · Portada · cinemático ============ -->
+  <section class="slide hero" id="s01" data-mood="origin" data-anchor="1420 540"
+    data-title="Tomografía computarizada" data-ref="Módulo II · Presentación 1">
+    <svg class="sigil" viewBox="0 0 1100 1100" aria-hidden="true">
+      <defs>
+        <radialGradient id="sg" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#8fe3ff" stop-opacity=".3"/>
+          <stop offset=".5" stop-color="#5b3fd6" stop-opacity=".1"/>
+          <stop offset="1" stop-color="#07060f" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="fan-g" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f4f1ff" stop-opacity=".55"/>
+          <stop offset=".35" stop-color="#8fe3ff" stop-opacity=".22"/>
+          <stop offset="1" stop-color="#8fe3ff" stop-opacity=".05"/>
+        </linearGradient>
+      </defs>
+      <circle class="sg-glow" cx="550" cy="550" r="520" fill="url(#sg)"/>
+      <g fill="none" stroke="#a58bff" stroke-opacity=".38">
+        <circle class="sg-ring" style="--sd:150ms" cx="550" cy="550" r="470" stroke-dasharray="2 14"/>
+        <circle class="sg-draw" style="--sd:250ms" pathLength="1" cx="550" cy="550" r="400" stroke-width="2"/>
+        <circle class="sg-draw" style="--sd:450ms" pathLength="1" cx="550" cy="550" r="385" stroke-opacity=".2"/>
+      </g>
+      <!-- Paciente (fijo) -->
+      <g class="sg-pat" style="--sd:900ms">
+        <ellipse cx="550" cy="560" rx="170" ry="120" fill="rgba(143,227,255,.05)" stroke="#8fe3ff" stroke-opacity=".5"/>
+        <ellipse cx="480" cy="555" rx="55" ry="72" fill="rgba(7,6,15,.6)" stroke="#8fe3ff" stroke-opacity=".3"/>
+        <ellipse cx="622" cy="555" rx="52" ry="70" fill="rgba(7,6,15,.6)" stroke="#8fe3ff" stroke-opacity=".3"/>
+        <circle cx="550" cy="640" r="20" fill="#f4f1ff" fill-opacity=".55"/>
+        <rect x="360" y="690" width="380" height="10" fill="#a58bff" fill-opacity=".25"/>
+      </g>
+      <!-- Tubo, abanico y arco de detectores: giran juntos (3.ª generación) -->
+      <g class="spin-gantry">
+        <path class="fan" d="M550 190 L740 858 A362 362 0 0 1 360 858 Z" fill="url(#fan-g)"/>
+        <g class="det-arc" stroke="#c9b8ff" stroke-opacity=".7"></g>
+        <rect x="514" y="148" width="72" height="40" rx="3" fill="#110d24" stroke="#c9b8ff" stroke-opacity=".8"/>
+        <circle class="core" cx="550" cy="190" r="7" fill="#f4f1ff"/>
+      </g>
+    </svg>
+    <p class="kicker rv">Equipos Médicos III · Módulo II · Presentación 1</p>
+    <h1>
+      <span class="w"><span>Tomografía</span></span><br>
+      <span class="w"><span class="accent">Computarizada</span></span>
+    </h1>
+    <p class="hero-lead rv">Del haz en abanico al número de Hounsfield.</p>
+    <div class="meta rv">
+      <div><b>Temas 1 · 2</b>Generalidades y radiación emitida</div>
+      <div><b>Tema 3</b>Detectores y métodos de escaneo</div>
+      <div><b>Temas 4 · 5</b>Reconstrucción y escala HU</div>
+    </div>
+    <div class="team rv">
+      <span>Ing. Bryan Rodríguez S.</span><span>UDELAS · Ingeniería Biomédica</span><span>II Semestre 2026</span>
+    </div>
+    <aside class="notes">
+      <p>Enlazar con el Módulo I: ya sabemos producir y atenuar rayos X. La radiografía proyecta; la TC mide y calcula.</p>
+      <p><em>"Hoy vamos a ver cómo un equipo convierte ~un millón de mediciones de atenuación en un mapa de números."</em></p>
+    </aside>
+  </section>
+
+  <!-- ============ 02 · Ruta ============ -->
+  <section class="slide" id="s02" data-mood="origin" data-tx="rift" data-anchor="960 640"
+    data-title="Ruta de la presentación" data-ref="Programa · Módulo II">
+    <p class="kicker rv">Ruta de la presentación</p>
+    <h2 class="title rv">Cinco estaciones, <span class="thin">una sola pregunta:</span><br><em>¿cuánto atenúa cada vóxel?</em></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-hidden="true">
+      <defs>
+        <linearGradient id="route-g" x1="150" y1="0" x2="1770" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#a58bff"/><stop offset=".45" stop-color="#8fe3ff"/><stop offset=".75" stop-color="#5ef0c8"/><stop offset="1" stop-color="#f4f1ff"/>
+        </linearGradient>
+      </defs>
+      <path class="draw route-line" pathLength="1" d="M150 666 H1770" stroke="url(#route-g)" style="--pd:300ms"/>
+    </svg>
+    <div class="route">
+      <div class="st rv" style="left:250px" data-c="maint"><div class="n">I</div><i class="dot"></i><h3>Generalidades</h3><p>Concepto, componentes y generaciones.</p><div class="i">TEMA 1</div></div>
+      <div class="st rv" style="left:605px" data-c="ice"><div class="n">II</div><i class="dot"></i><h3>Radiación emitida</h3><p>Tubo, filtros, colimación y modulación.</p><div class="i">TEMA 2</div></div>
+      <div class="st rv" style="left:960px" data-c="ice"><div class="n">III</div><i class="dot"></i><h3>Detección y escaneo</h3><p>Detectores, axial, helicoidal y pitch.</p><div class="i">TEMA 3</div></div>
+      <div class="st rv" style="left:1315px" data-c="ctrl"><div class="n">IV</div><i class="dot"></i><h3>Reconstrucción</h3><p>Retroproyección y convolución.</p><div class="i">TEMA 4</div></div>
+      <div class="st rv" style="left:1670px" data-c="star"><div class="n">V</div><i class="dot"></i><h3>Hounsfield</h3><p>Coeficiente μ, escala y ventanas.</p><div class="i">TEMA 5</div></div>
+    </div>
+    <aside class="notes">
+      <p>Los temas 6–9 del programa (resolución, dosimetría y control de calidad, normativas, aplicaciones) van en la Presentación 2.</p>
+      <p>El color tiene significado en toda la presentación: violeta = equipo, azul hielo = haz y datos, verde = imagen reconstruida y control, carmesí = dosis o artefacto.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 03 · El límite de la proyección ============ -->
+  <section class="slide" id="s03" data-states="1" data-mood="origin" data-tx="sweep" data-anchor="1420 520"
+    data-title="El límite de la proyección" data-block="I · Generalidades" data-ref="Tema 1 · Concepto">
+    <p class="kicker rv">Tema 1 · Por qué existe la TC</p>
+    <h2 class="title rv">La radiografía <em>aplasta</em> un volumen <span class="thin">en un plano</span></h2>
+    <blockquote class="q a rv" style="left:150px; top:420px; width:820px">Todo lo que el haz atraviesa termina en <b class="hl">la misma sombra</b>. La TC mide la atenuación desde cientos de ángulos y calcula dónde está cada cosa.<cite>G. N. HOUNSFIELD · A. M. CORMACK · NOBEL 1979</cite></blockquote>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Proyección frente a corte tomográfico">
+      <g data-only="0">
+        <path d="M1090 540 L1740 330 L1740 750 Z" fill="rgba(143,227,255,.06)"/>
+        <path class="beam-l" d="M1090 540 L1740 330 M1090 540 L1740 750 M1090 540 H1740"/>
+        <circle class="src" cx="1090" cy="540" r="9"/>
+        <text class="tick-s" x="1060" y="600">FOCO</text>
+        <circle class="obj o1" cx="1320" cy="530" r="52"/>
+        <rect class="obj o2" x="1400" y="470" width="96" height="96"/>
+        <path class="obj o3" d="M1590 470 L1650 580 L1530 580 Z"/>
+        <line class="det-bar" x1="1740" y1="320" x2="1740" y2="760"/>
+        <path class="shadow" d="M1740 450 C1714 462 1704 505 1702 540 C1704 575 1714 618 1740 630 Z"/>
+        <text class="tick-s" x="1740" y="800" text-anchor="end">UNA SOLA SOMBRA · ¿QUÉ ESTÁ DELANTE?</text>
+      </g>
+      <g data-only="1">
+        <rect class="fov" x="1180" y="300" width="560" height="460"/>
+        <g class="pix"></g>
+        <circle class="obj o1" cx="1300" cy="410" r="52"/>
+        <rect class="obj o2" x="1540" y="360" width="96" height="96"/>
+        <path class="obj o3" d="M1440 580 L1500 690 L1380 690 Z"/>
+        <text class="mu-l" x="1286" y="418">μ₁</text><text class="mu-l" x="1574" y="418">μ₂</text><text class="mu-l" x="1428" y="668">μ₃</text>
+        <text class="tick-s" x="1180" y="800">CORTE AXIAL · CADA ESTRUCTURA EN SU LUGAR</text>
+      </g>
+    </svg>
+    <div class="vs a" style="left:150px; top:700px; width:820px">
+      <div class="lose rv"><h4>Radiografía</h4><p>Superposición en 2D</p><p>Contraste ≈ 2–5 %</p><p>Sin profundidad</p></div>
+      <div class="win rv"><h4>Tomografía</h4><p>Cortes sin superposición</p><p>Contraste ≈ 0,5 %</p><p>Volumen 3D</p></div>
+    </div>
+    <aside class="notes">
+      <p>Estado 1: pasar del haz proyectado al corte. La radiografía distingue diferencias de atenuación de pocos por ciento; la TC resuelve ~0,5 % (≈ 5 HU) porque elimina la superposición y rechaza casi toda la dispersa con colimación estrecha.</p>
+      <p>Recordar del Módulo I: "la TC nace para resolver la limitación proyectiva".</p>
+    </aside>
+  </section>
+
+  <!-- ============ 04 · Qué mide ============ -->
+  <section class="slide" id="s04" data-states="2" data-mood="origin" data-tx="dissolve" data-anchor="600 520"
+    data-title="Qué mide un tomógrafo" data-block="I · Generalidades" data-ref="Tema 1 · Principio físico">
+    <p class="kicker rv">Tema 1 · Principio físico</p>
+    <h2 class="title rv">Un tomógrafo no toma fotos: <em>resuelve ecuaciones</em></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Un rayo atraviesa una fila de vóxeles">
+      <g class="ray-row"></g>
+    </svg>
+    <div class="a rv eq-stack" style="left:150px; top:700px; width:900px">
+      <div class="tex d" data-tex="I = I_0\, e^{-(\mu_1+\mu_2+\cdots+\mu_n)\,\Delta x}"></div>
+      <div class="tex d eq-key" data-tex="p = \ln\frac{I_0}{I} = \sum_{i=1}^{n} \mu_i\,\Delta x"></div>
+    </div>
+    <div class="a side" style="left:1200px; top:360px; width:570px">
+      <div class="rv">
+        <p class="mono-lbl">Definición</p>
+        <p class="body">La TC mide la atenuación a lo largo de <b>cientos de miles de trayectorias</b> alrededor del paciente y calcula el coeficiente <b>μ</b> de cada vóxel. Después lo expresa en <b>unidades Hounsfield</b>.</p>
+      </div>
+      <div class="stack">
+        <div class="side-b" data-only="1">
+          <p class="mono-lbl c-ice">Cada lectura es una ecuación</p>
+          <p class="body">El detector no ve μ₁, μ₂… por separado: solo su <b>suma</b>, la proyección <b>p</b>. Tomar el logaritmo convierte la exponencial en una ecuación <b>lineal</b>.</p>
+        </div>
+        <div class="side-b mono-n" data-only="2">
+          <div class="pair"><div class="big">262 144</div><div class="lbl"><b>Incógnitas</b>μ por corte en una matriz de 512 × 512</div></div>
+          <div class="pair"><div class="big c-ice">≈ 10<small>6</small></div><div class="lbl"><b>Mediciones</b>≈ 1000 vistas × ≈ 900 canales, por giro y por fila</div></div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>Es la misma ley de Beer-Lambert del Módulo I, aplicada a un medio no homogéneo: la atenuación total es la suma de las atenuaciones de cada tramo.</p>
+      <p>Estado 2: hay más mediciones que incógnitas, así que el sistema se puede resolver. El cómo (retroproyección filtrada) es el Tema 4.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 05 · Historia ============ -->
+  <section class="slide" id="s05" data-mood="origin" data-tx="sweep" data-anchor="960 620"
+    data-title="De Radon al conteo de fotones" data-block="I · Generalidades" data-ref="Tema 1 · Historia">
+    <p class="kicker rv">Tema 1 · Línea de tiempo</p>
+    <h2 class="title rv">De una integral de 1917 <span class="thin">a</span> <em>contar fotones</em></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-hidden="true"><g class="tl"></g></svg>
+    <div class="tl-labels"></div>
+    <p class="foot a" style="left:150px; top:960px">ESCALA NO LINEAL · EN AZUL, LOS SALTOS QUE CAMBIARON EL DISEÑO DEL EQUIPO</p>
+    <aside class="notes">
+      <p>Radon (1917) resolvió el problema matemático: una función queda determinada por todas sus integrales de línea. Cormack lo redescubrió para medicina; Hounsfield construyó el prototipo en los laboratorios de EMI.</p>
+      <p>Primer paciente: 1 de octubre de 1971, Hospital Atkinson Morley (Londres), matriz de 80 × 80.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 06 · Componentes ============ -->
+  <section class="slide" id="s06" data-mood="origin" data-tx="gantry" data-origin="620 640" data-anchor="620 640"
+    data-title="Qué hay dentro del gantry" data-block="I · Generalidades" data-ref="Tema 1 · Componentes">
+    <p class="kicker rv">Tema 1 · Componentes del sistema</p>
+    <h2 class="title rv" style="font-size:66px">Qué hay dentro del <em>gantry</em></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Corte del gantry con sus componentes"></svg>
+    <div class="detail a" style="left:1200px; top:360px; width:570px">
+      <div class="dn">01</div>
+      <h3 class="dh">Tubo de rayos X</h3>
+      <div class="dr">PARTE ROTATORIA</div>
+      <p class="dp"></p>
+    </div>
+    <p class="hint-local a" style="left:1200px; top:930px">SELECCIONA UN COMPONENTE</p>
+    <aside class="notes">
+      <p>Se puede hacer clic en cada componente. Distinguir parte rotatoria (tubo, generador, detectores, DAS) y parte fija (estator, mesa, consola), unidas por el anillo deslizante.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 07 · Generaciones 1–4 ============ -->
+  <section class="slide" id="s07" data-mood="origin" data-tx="gantry" data-origin="620 620" data-anchor="620 620"
+    data-title="Generaciones 1.ª a 4.ª" data-block="I · Generalidades" data-ref="Tema 1 · Generaciones">
+    <p class="kicker rv">Tema 1 · Diferentes generaciones</p>
+    <h2 class="title rv" style="font-size:66px">Cuatro geometrías, <span class="thin">un mismo objetivo:</span> <em>girar más rápido</em></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Geometría de cada generación"></svg>
+    <ol class="rail gens a" style="left:1200px; top:360px"><li>1.ª</li><li>2.ª</li><li>3.ª</li><li>4.ª</li></ol>
+    <div class="gen-d a" style="left:1200px; top:430px; width:570px"></div>
+    <aside class="notes">
+      <p>Cuatro estados. 1.ª y 2.ª: traslación–rotación (el conjunto barre y luego gira). 3.ª: rotación–rotación, tubo y arco de detectores giran solidarios: es la geometría de todos los equipos actuales. 4.ª: anillo fijo de detectores, solo gira el tubo.</p>
+      <p>Pregunta al grupo: ¿por qué la 3.ª generación produce artefactos en anillo y la 4.ª no? (Un canal descalibrado mide siempre el mismo radio respecto del isocentro.)</p>
+    </aside>
+  </section>
+
+  <!-- ============ 08 · Generaciones 5–7 ============ -->
+  <section class="slide" id="s08" data-mood="origin" data-tx="rift" data-anchor="1500 300"
+    data-title="Generaciones 5.ª a 7.ª" data-block="I · Generalidades" data-ref="Tema 1 · Generaciones">
+    <p class="kicker rv">Tema 1 · Lo que vino después</p>
+    <h2 class="title rv">Tres saltos <span class="thin">que ya no cambian la geometría,</span><br><em>sino el tiempo</em></h2>
+    <div class="gens-later">
+      <div class="g rv"><div class="gn">5.ª</div><h3>Haz de electrones · EBCT</h3><p>Un haz de electrones se desvía magnéticamente sobre anillos de tungsteno: <b>sin partes móviles</b>, ≈ 50 ms por corte. Cardiología (Imatron, 1983). Hoy obsoleto.</p></div>
+      <div class="g rv"><div class="gn c-ice">6.ª</div><h3>Helicoidal</h3><p>Anillo deslizante + mesa en movimiento continuo: el volumen se adquiere <b>en una sola apnea</b> (Kalender, 1989).</p></div>
+      <div class="g rv"><div class="gn c-ctrl">7.ª</div><h3>Multicorte</h3><p>Varias filas de detectores y haz en cono: 4 → 64 → 320 filas; hasta <b>16 cm por giro</b>.</p></div>
+    </div>
+    <p class="edge-line a rv" style="left:150px; top:820px; width:1620px">Todo tomógrafo clínico actual = <span>tercera generación</span> + <span>helicoidal</span> + <span>multicorte</span></p>
+    <aside class="notes">
+      <p>La numeración de 5.ª a 7.ª no es universal: algunos textos solo cuentan cuatro generaciones y llaman "helicoidal" y "multicorte" a técnicas, no a generaciones. Lo importante es la síntesis del final.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 09 · Portadilla II ============ -->
+  <section class="slide chapter" id="s09" data-mood="beam" data-tx="slash" data-anchor="1500 540"
+    data-title="Bloque II · Control de la radiación emitida" data-block="II · Radiación emitida" data-ref="Tema 2">
+    <div class="ch-n">II</div>
+    <p class="kicker rv">Bloque II · Tema 2</p>
+    <h2 class="ch-t rv">Control de la<br><span>radiación emitida</span></h2>
+    <p class="ch-s rv">Todo lo que ocurre entre el foco y la piel del paciente.</p>
+    <p class="ch-th rv">Tubo <i>·</i> Filtración <i>·</i> Filtro de moño <i>·</i> Colimación <i>·</i> Modulación de corriente</p>
+    <aside class="notes"><p>La dosis en TC se decide antes de que el haz toque al paciente: aquí están las perillas que el ingeniero debe conocer y verificar.</p></aside>
+  </section>
+
+  <!-- ============ 10 · El tubo de TC ============ -->
+  <section class="slide" id="s10" data-mood="beam" data-tx="rise" data-anchor="1500 300"
+    data-title="Un tubo que no descansa" data-block="II · Radiación emitida" data-ref="Tema 2 · Tubo de TC">
+    <p class="kicker rv">Tema 2 · El tubo de TC</p>
+    <h2 class="title rv">Un tubo que <em>no descansa</em></h2>
+    <p class="lead a rv" style="left:150px; top:330px; width:1250px">Mismo principio que en el Módulo I, otro régimen de trabajo: exposiciones <b>continuas</b> de segundos a decenas de segundos, girando a más de 3 vueltas por segundo.</p>
+    <div class="mono-n tube-n">
+      <div class="rv"><div class="big">80–140<small>kV</small></div><div class="lbl"><b>Tensión</b>70 y 150 kV en equipos recientes; conmutación rápida para energía dual</div></div>
+      <div class="rv"><div class="big">≤ 1000<small>mA</small></div><div class="lbl"><b>Corriente</b>Generador de alta frecuencia de 60–120 kW montado en el gantry</div></div>
+      <div class="rv"><div class="big">0,25<small>s</small></div><div class="lbl"><b>Por rotación</b>Fuerza centrífuga sobre el tubo de más de 30 g</div></div>
+      <div class="rv"><div class="big c-danger">5–8<small>MHU</small></div><div class="lbl"><b>Capacidad térmica</b>Del ánodo; los tubos con enfriamiento directo del ánodo equivalen a más de 30 MHU</div></div>
+    </div>
+    <p class="teaser a rv" style="left:150px; top:880px; width:1500px">El tubo es el mayor costo de mantenimiento del tomógrafo: su vida se mide en <b>rotaciones y segundos de exposición</b>.</p>
+    <aside class="notes">
+      <p>30 g: a 0,25 s por vuelta y ≈ 0,6 m de radio, a = ω²r ≈ (2π/0,25)² × 0,6 ≈ 380 m/s². Por eso los rodamientos del ánodo y el propio tubo se diseñan para cargas mecánicas enormes.</p>
+      <p>MHU = millones de unidades de calor. Conectar con la gestión térmica del Módulo I: aquí el enfriamiento es aceite + intercambiador en el gantry.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 11 · Filtración y moño ============ -->
+  <section class="slide" id="s11" data-states="2" data-mood="beam" data-tx="expand" data-origin="560 250" data-anchor="560 250"
+    data-title="Filtración y filtro de moño" data-block="II · Radiación emitida" data-ref="Tema 2 · Filtración">
+    <p class="kicker rv">Tema 2 · Filtración</p>
+    <h2 class="title rv" style="font-size:66px">Dar forma al haz <em>antes</em> del paciente</h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Haz en abanico con y sin filtro de moño"></svg>
+    <div class="a side" style="left:1150px; top:340px; width:620px">
+      <div class="rv">
+        <p class="mono-lbl">Filtración plana · Al, Cu</p>
+        <p class="body">Retira los fotones de baja energía que <b>solo aportan dosis</b> y reduce el endurecimiento del haz dentro del paciente.</p>
+      </div>
+      <div class="side-b" data-at="1">
+        <p class="mono-lbl c-ice">Filtro de moño · bowtie</p>
+        <p class="body">Más grueso en los bordes: el paciente es redondo y la periferia atenúa poco. Iguala la señal en el detector, <b>baja la dosis en piel</b> y uniforma el ruido. Hay uno por campo: cabeza, cuerpo, pediátrico.</p>
+      </div>
+      <div class="side-b warn-b" data-at="2">
+        <p class="mono-lbl c-danger">Error frecuente · centrado</p>
+        <p class="body">Si el paciente queda <b>fuera del isocentro</b>, el moño deja de coincidir con su cuerpo: sube la dosis en piel y el ruido. El láser de centrado también es un control de dosis.</p>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>Estado 1: entra el moño; mirar el perfil de intensidad en el detector: sin moño, bordes saturados y centro con pocos fotones (rango dinámico enorme). Con moño, perfil casi plano.</p>
+      <p>Estado 2: descentrar al paciente es uno de los errores de técnica más comunes; con modulación automática además distorsiona la estimación del tamaño.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 12 · Colimación ============ -->
+  <section class="slide" id="s12" data-states="2" data-mood="beam" data-tx="sweep" data-anchor="600 560"
+    data-title="Colimación" data-block="II · Radiación emitida" data-ref="Tema 2 · Colimación">
+    <p class="kicker rv">Tema 2 · Colimación · vista lateral (eje z)</p>
+    <h2 class="title rv" style="font-size:66px">El colimador decide <em>cuánto paciente</em> se irradia</h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Colimación del haz en el eje z"></svg>
+    <div class="a side" style="left:1150px; top:340px; width:620px">
+      <div class="rv">
+        <p class="mono-lbl">Colimación del haz = N × T</p>
+        <p class="body">N filas activas × ancho T de cada una. Ejemplo: <b>64 × 0,625 mm = 40 mm</b>. El colimador pre-paciente define ese ancho; el anti-dispersión junto al detector rechaza la radiación desviada.</p>
+      </div>
+      <div class="side-b warn-b" data-at="1">
+        <p class="mono-lbl c-danger">Sobre-haz · overbeaming</p>
+        <p class="body">La penumbra del foco cae fuera de las filas activas: <b>dosis que no forma imagen</b>. Pesa más cuanto más estrecho es el haz.</p>
+      </div>
+      <div class="side-b" data-at="2">
+        <p class="mono-lbl c-ctrl">Sobre-rango · overranging</p>
+        <p class="body">En helicoidal hace falta media vuelta extra al inicio y al final para interpolar. La <b>colimación adaptativa</b> cierra las mordazas en esos extremos.</p>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>Sobre-haz: con 4 filas era una fracción grande de la dosis; en equipos de 64 filas es mucho menor porque la penumbra es la misma y el haz es más ancho.</p>
+      <p>Sobre-rango: crece con el ancho del haz y con el pitch; por eso los equipos anchos incorporan mordazas dinámicas.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 13 · Modulación de corriente ============ -->
+  <section class="slide" id="s13" data-states="2" data-mood="beam" data-tx="rift" data-anchor="960 700"
+    data-title="Modulación automática de corriente" data-block="II · Radiación emitida" data-ref="Tema 2 · AEC">
+    <p class="kicker rv">Tema 2 · Control automático de exposición</p>
+    <h2 class="title rv" style="font-size:66px">El mA <em>sigue</em> al paciente</h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Topograma y curva de mA a lo largo del eje z"></svg>
+    <div class="a side" style="left:1250px; top:330px; width:520px">
+      <p class="body rv">El <b>topograma</b> estima cuánto atenúa cada nivel. El equipo ajusta la corriente para mantener un <b>ruido objetivo</b>.</p>
+      <div class="cap-states">
+        <p data-only="0"><b class="c-danger">mA constante:</b> el hombro y la pelvis reciben la misma corriente que el pulmón, que no la necesita.</p>
+        <p data-only="1"><b class="c-ctrl">Modulación en z:</b> más mA donde el cuerpo es más denso, menos en el tórax aireado.</p>
+        <p data-only="2"><b class="c-ctrl">Modulación angular:</b> además varía dentro de cada giro: el diámetro lateral atenúa más que el anteroposterior.</p>
+      </div>
+      <p class="small-n rv">Índice de ruido (GE) · mAs de referencia (Siemens) · DE objetivo (Canon)</p>
+    </div>
+    <aside class="notes">
+      <p>Reducciones de dosis de decenas de por ciento frente a mA fijo, con calidad más uniforme. Se complementa con la selección automática de kV y con la modulación sincronizada al ECG en cardiaco.</p>
+      <p>Un topograma mal centrado o con los brazos en el campo engaña al AEC.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 14 · Portadilla III ============ -->
+  <section class="slide chapter" id="s14" data-mood="detect" data-tx="slash" data-anchor="1500 540"
+    data-title="Bloque III · Detectores y métodos de escaneo" data-block="III · Detección y escaneo" data-ref="Tema 3">
+    <div class="ch-n">III</div>
+    <p class="kicker rv">Bloque III · Tema 3</p>
+    <h2 class="ch-t rv">Sistemas de detectores<br><span>y métodos de escaneo</span></h2>
+    <p class="ch-s rv">Convertir fotones en números, y decidir por dónde pasa el haz.</p>
+    <p class="ch-th rv">Cadena de detección <i>·</i> Conteo de fotones <i>·</i> Multicorte <i>·</i> Axial <i>·</i> Helicoidal <i>·</i> Pitch</p>
+    <aside class="notes"><p>Del haz que sale del paciente al dato digital, y de la trayectoria del tubo alrededor del paciente.</p></aside>
+  </section>
+
+  <!-- ============ 15 · Cadena de detección ============ -->
+  <section class="slide" id="s15" data-states="1" data-mood="detect" data-tx="sweep" data-anchor="960 470"
+    data-title="La cadena de detección" data-block="III · Detección y escaneo" data-ref="Tema 3 · Detectores">
+    <p class="kicker rv">Tema 3 · Del fotón al número</p>
+    <h2 class="title rv" style="font-size:66px">Cinco eslabones <span class="thin">entre el fotón y</span> <em>la proyección</em></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Cadena de detección"></svg>
+    <div class="chain-l"></div>
+    <div class="conseq a rv" style="left:150px; top:760px; width:1620px">
+      <div><b>Eficiencia</b>Cerámicos de centelleo absorben más del 90 % de los fotones.</div>
+      <div><b>Resplandor residual</b>Mínimo: a 0,25 s por vuelta, la vista anterior no puede "quedarse" en el cristal.</div>
+      <div><b>Rango dinámico</b>≈ 10⁶ : 1, del haz directo en aire a la sombra de un hueso.</div>
+      <div><b>Estabilidad</b>Un canal que deriva en 3.ª generación dibuja un <span class="c-danger">anillo</span>.</div>
+    </div>
+    <aside class="notes">
+      <p>Centelleadores actuales: oxisulfuro de gadolinio (GOS) cerámico, CdWO₄ y compuestos propietarios. Históricamente, cámaras de xenón a alta presión (≈ 60 % de eficiencia), ya en desuso.</p>
+      <p>Estado 1: un fotón recorre la cadena. El DAS integra, digitaliza y toma el logaritmo: lo que sale es p = ln(I₀/I).</p>
+    </aside>
+  </section>
+
+  <!-- ============ 16 · Indirecta vs directa ============ -->
+  <section class="slide" id="s16" data-states="1" data-mood="detect" data-tx="rift" data-anchor="960 560"
+    data-title="Conversión indirecta y conteo de fotones" data-block="III · Detección y escaneo" data-ref="Tema 3 · PCD">
+    <p class="kicker rv">Tema 3 · Dos maneras de detectar</p>
+    <h2 class="title rv" style="font-size:66px">Integrar luz <span class="thin">o</span> <em>contar fotones</em></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Detector de conversión indirecta frente a detector de conteo de fotones"></svg>
+    <div class="dual a" style="left:150px; top:760px; width:1620px">
+      <div class="rv"><p class="mono-lbl">Conversión indirecta · integración</p><p class="body">Rayos X → luz → carga. Suma la energía de todos los fotones: el ruido electrónico entra en la señal y los tabiques reflectores ocupan área muerta.</p></div>
+      <div class="rv"><p class="mono-lbl c-ctrl">Conversión directa · conteo</p><p class="body">CdTe o CZT: cada fotón produce un pulso proporcional a su energía. Umbrales eliminan el ruido electrónico, <b>sin tabiques</b> (píxeles ≈ 0,2 mm) y con <b>información espectral</b>.</p></div>
+    </div>
+    <aside class="notes">
+      <p>Primer equipo clínico de conteo de fotones aprobado: 2021. Ventajas: mayor resolución espacial, mejor relación contraste-ruido del yodo, imágenes espectrales en cada adquisición.</p>
+      <p>Estado 1: aparecen los umbrales de energía (bins).</p>
+    </aside>
+  </section>
+
+  <!-- ============ 17 · Multicorte ============ -->
+  <section class="slide" id="s17" data-states="3" data-mood="detect" data-tx="dissolve" data-anchor="700 600"
+    data-title="Arreglos multicorte" data-block="III · Detección y escaneo" data-ref="Tema 3 · Multicorte">
+    <p class="kicker rv">Tema 3 · Filas de detectores (eje z)</p>
+    <h2 class="title rv" style="font-size:66px">Más filas, <em>más cobertura</em> <span class="thin">por giro</span></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Matriz de detectores vista desde el foco"></svg>
+    <div class="mc-d a" style="left:1250px; top:360px; width:520px"></div>
+    <p class="teaser a rv" style="left:150px; top:900px; width:1620px">El grosor de corte se elige al reconstruir, pero <b>nunca más fino</b> que la fila adquirida.</p>
+    <aside class="notes">
+      <p>Cuatro estados: 1 fila → 16 × 1,25 mm → 64 × 0,625 mm → 320 × 0,5 mm. Con 16 cm de cobertura se adquiere el corazón o el cerebro completo en un solo giro, sin movimiento de mesa.</p>
+      <p>Las filas pueden agruparse electrónicamente (binning): 4 filas de 0,625 mm dan cortes de 2,5 mm.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 18 · Axial vs helicoidal ============ -->
+  <section class="slide" id="s18" data-states="1" data-mood="detect" data-tx="sweep" data-anchor="900 560"
+    data-title="Axial frente a helicoidal" data-block="III · Detección y escaneo" data-ref="Tema 3 · Métodos de escaneo">
+    <p class="kicker rv">Tema 3 · Métodos de escaneo</p>
+    <h2 class="title rv" style="font-size:66px">Parar y disparar, <span class="thin">o</span> <em>no parar nunca</em></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Trayectoria del tubo: axial y helicoidal"></svg>
+    <div class="rows mode-rows a" style="left:150px; top:760px; width:1620px">
+      <div class="row" data-m="0"><div class="h">Axial<span>paso y disparo</span></div><div class="d">La mesa queda quieta mientras el tubo gira; avanza entre giros. Hoy: cráneo, cardiaco prospectivo y volumétrico de 16 cm.</div></div>
+      <div class="row" data-m="1"><div class="h">Helicoidal<span>espiral</span></div><div class="d">La mesa avanza mientras el tubo gira sin detenerse (anillo deslizante). Todo el volumen en una apnea; los cortes planos se obtienen por <b>interpolación en z</b>.</div></div>
+    </div>
+    <aside class="notes">
+      <p>Antes de ambos: el topograma (scout), con el tubo fijo y la mesa en movimiento, para planificar y alimentar el AEC.</p>
+      <p>Estado 1: la trayectoria se convierte en hélice.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 19 · Pitch ============ -->
+  <section class="slide" id="s19" data-mood="detect" data-tx="expand" data-origin="700 520" data-anchor="700 520"
+    data-title="Pitch" data-block="III · Detección y escaneo" data-ref="Tema 3 · Pitch">
+    <p class="kicker rv">Tema 3 · Pitch</p>
+    <h2 class="title rv" style="font-size:66px">Cuánto avanza la mesa <em>en cada vuelta</em></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Hélice que cambia con el pitch"></svg>
+    <div class="a pitch-f rv" style="left:1180px; top:330px; width:590px">
+      <div class="tex d" data-tex="\text{pitch} = \frac{d}{N\cdot T}"></div>
+      <p class="small-n">d = avance de mesa por rotación · N·T = colimación del haz</p>
+    </div>
+    <div class="a ctl pitch-ctl rv" style="left:1180px; top:540px; width:590px">
+      <label for="pitch-in">PITCH <output id="pitch-out">1,0</output></label>
+      <input id="pitch-in" type="range" min="0.2" max="2" step="0.1" value="1">
+      <div class="pitch-read"></div>
+    </div>
+    <aside class="notes">
+      <p>Arrastrar el control. Pitch &lt; 1: vueltas solapadas (más dosis; cardiaco usa 0,2–0,3). Pitch = 1: contiguas. Pitch &gt; 1: huecos que rellena la interpolación (rápido; fuente dual llega a 3,2).</p>
+      <p>Matiz importante: con AEC muchos equipos mantienen el mAs efectivo (mAs/pitch) constante, subiendo el mA cuando sube el pitch; la dosis casi no cambia, lo que baja es el tiempo.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 20 · Portadilla IV ============ -->
+  <section class="slide chapter" id="s20" data-mood="recon" data-tx="slash" data-anchor="1500 540"
+    data-title="Bloque IV · Procesamiento de imagen" data-block="IV · Reconstrucción" data-ref="Tema 4">
+    <div class="ch-n">IV</div>
+    <p class="kicker rv">Bloque IV · Tema 4</p>
+    <h2 class="ch-t rv">Procesamiento de imagen<br><span>retroproyección y convolución</span></h2>
+    <p class="ch-s rv">Todas las imágenes de este bloque se calculan en vivo, en el navegador.</p>
+    <p class="ch-th rv">Perfil <i>·</i> Sinograma <i>·</i> Retroproyección <i>·</i> Filtro de rampa <i>·</i> Kernels</p>
+    <aside class="notes"><p>Nada de este bloque es una imagen pregrabada: el fantoma se proyecta con la transformada de Radon exacta y se reconstruye con el mismo algoritmo que usa un tomógrafo (FBP).</p></aside>
+  </section>
+
+  <!-- ============ 21 · Sinograma ============ -->
+  <section class="slide" id="s21" data-states="1" data-mood="recon" data-tx="scan" data-anchor="600 600"
+    data-title="Del perfil al sinograma" data-block="IV · Reconstrucción" data-ref="Tema 4 · Sinograma">
+    <p class="kicker rv">Tema 4 · Adquisición</p>
+    <h2 class="title rv" style="font-size:66px">Cada vista es un perfil; <em>todas juntas, un sinograma</em></h2>
+    <div class="a ct-pair" style="left:150px; top:340px">
+      <div class="ct-box"><canvas class="cv-obj" width="200" height="200"></canvas><svg class="ct-over" viewBox="-1 -1 2 2"></svg><p class="cap-l">OBJETO · FANTOMA DE CRÁNEO</p></div>
+      <div class="ct-box wide"><canvas class="cv-sino" width="229" height="180"></canvas><div class="sino-cursor"></div><p class="cap-l">SINOGRAMA · CANAL (t) × ÁNGULO (θ)</p></div>
+    </div>
+    <svg class="scene prof" viewBox="0 0 1920 1080" aria-hidden="true"></svg>
+    <div class="a side" style="left:1350px; top:360px; width:420px">
+      <p class="body rv">Cada vista entrega un <b>perfil de atenuación</b> p(t). Apiladas por ángulo θ forman el <b class="c-ice">sinograma</b>.</p>
+      <p class="body side-b" data-at="1">Cada punto del objeto dibuja una <b>sinusoide</b>: su distancia al isocentro vista desde cada ángulo. En <b class="c-danger">carmesí</b>, la del hematoma. El sinograma es el dato crudo que se reconstruye.</p>
+    </div>
+    <aside class="notes">
+      <p>Estado 1: el tubo gira 180° y el sinograma se llena columna a columna. La sinusoide en carmesí es la del hematoma: lejos del isocentro, oscila mucho; un punto en el centro sería una línea recta.</p>
+      <p>Si un canal falla, en el sinograma es una línea recta vertical… y en la imagen, un anillo.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 22 · Retroproyección simple ============ -->
+  <section class="slide" id="s22" data-states="4" data-mood="recon" data-tx="scan" data-anchor="560 600"
+    data-title="Retroproyección simple" data-block="IV · Reconstrucción" data-ref="Tema 4 · Retroproyección">
+    <p class="kicker rv">Tema 4 · Retroproyección</p>
+    <h2 class="title rv" style="font-size:66px">Devolver cada perfil <em>por donde vino</em></h2>
+    <div class="a ct-big" style="left:150px; top:330px"><canvas class="cv-bp" width="160" height="160"></canvas><p class="cap-l bp-read">1 VISTA</p></div>
+    <div class="a side" style="left:870px; top:340px; width:900px">
+      <p class="body rv">Se "unta" cada perfil de vuelta sobre la imagen a lo largo de su trayectoria y se suman todas las vistas.</p>
+      <div class="rv tex d" data-tex="f_b(x,y) = \int_0^{\pi} p(x\cos\theta + y\sin\theta,\ \theta)\, d\theta"></div>
+      <ol class="rail views rv"><li>1</li><li>2</li><li>4</li><li>16</li><li>180</li></ol>
+      <div class="side-b warn-b" data-at="4">
+        <p class="mono-lbl c-danger">El problema</p>
+        <p class="body">El objeto aparece, pero <b>borroso</b>: cada punto se convierte en una estrella con halo que decae como 1/r. La retroproyección sola no basta.</p>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>Cinco estados: 1, 2, 4, 16 y 180 vistas. Con pocas vistas se ven las "bandas" de cada perfil; con muchas, una imagen reconocible pero lavada.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 23 · Convolución ============ -->
+  <section class="slide" id="s23" data-states="2" data-mood="recon" data-tx="scan" data-anchor="560 600"
+    data-title="Retroproyección filtrada" data-block="IV · Reconstrucción" data-ref="Tema 4 · Convolución">
+    <p class="kicker rv">Tema 4 · Convolución</p>
+    <h2 class="title rv" style="font-size:66px">Filtrar primero, <em>retroproyectar después</em></h2>
+    <div class="a ct-big" style="left:150px; top:330px"><canvas class="cv-fbp" width="160" height="160"></canvas><p class="cap-l fbp-read">SIN FILTRAR</p></div>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Núcleo de convolución y perfil filtrado"></svg>
+    <div class="a side" style="left:870px; top:650px; width:900px">
+      <div class="rv tex d" data-tex="f(x,y) = \int_0^{\pi} \big[\,p(t,\theta) * h(t)\,\big]_{t=x\cos\theta+y\sin\theta} d\theta \qquad H(\omega)=|\omega|"></div>
+      <p class="body" data-only="0">Sin filtro: el halo 1/r de la lámina anterior.</p>
+      <p class="body" data-only="1">El núcleo <b>h(t)</b> tiene lóbulos <b class="c-danger">negativos</b>: al convolucionar, cada perfil gana bordes que <b>restan</b> el halo de sus vecinos.</p>
+      <p class="body" data-only="2">Resultado: <b class="c-ctrl">retroproyección filtrada (FBP)</b>. Los números de cada vóxel vuelven a ser HU correctos.</p>
+    </div>
+    <aside class="notes">
+      <p>En frecuencia, el filtro es una rampa |ω| (Ram-Lak), normalmente atenuada en altas frecuencias (Shepp-Logan, Hann) para no amplificar el ruido. En el espacio, es una convolución: de ahí el nombre del tema del programa.</p>
+      <p>FBP fue el estándar durante 40 años porque es rápida y exacta con datos completos y sin ruido.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 24 · Kernels ============ -->
+  <section class="slide" id="s24" data-mood="recon" data-tx="rift" data-anchor="960 560"
+    data-title="Kernels de reconstrucción" data-block="IV · Reconstrucción" data-ref="Tema 4 · Kernels">
+    <p class="kicker rv">Tema 4 · Mismos datos, distinto núcleo</p>
+    <h2 class="title rv" style="font-size:66px">El kernel reparte la dosis <span class="thin">entre</span> <em>nitidez</em> <span class="thin">y</span> <em class="c-danger">ruido</em></h2>
+    <div class="a kern" style="left:150px; top:340px">
+      <div class="ct-box"><canvas class="cv-soft" width="160" height="160"></canvas><p class="cap-l">BLANDO · TEJIDO BLANDO</p></div>
+      <div class="ct-box"><canvas class="cv-sharp" width="160" height="160"></canvas><p class="cap-l c-danger">DURO · HUESO / PULMÓN</p></div>
+    </div>
+    <div class="a side" style="left:1330px; top:350px; width:440px">
+      <p class="body rv"><b>Blando:</b> corta altas frecuencias → menos ruido, bordes suaves. Abdomen, cerebro.</p>
+      <p class="body rv"><b>Duro:</b> las realza → bordes finos, más ruido. Hueso, pulmón, oído.</p>
+      <p class="body rv">El kernel <b>no cambia la dosis</b> recibida: cambia cómo se ve.</p>
+    </div>
+    <p class="teaser a rv" style="left:150px; top:900px; width:1620px">Más allá de FBP: reconstrucción <b>iterativa</b> y por <b>aprendizaje profundo</b> modelan el ruido y permiten bajar la dosis con calidad similar.</p>
+    <aside class="notes">
+      <p>Las dos imágenes vienen del mismo sinograma con el mismo ruido simulado; solo cambia el núcleo de convolución.</p>
+      <p>Iterativa: reproyecta la imagen estimada, la compara con los datos medidos y corrige, varias veces. Nombres comerciales: ASiR, SAFIRE/ADMIRE, iDose, AIDR; con IA: TrueFidelity, AiCE.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 25 · Portadilla V ============ -->
+  <section class="slide chapter" id="s25" data-mood="hu" data-tx="slash" data-anchor="1500 540"
+    data-title="Bloque V · Coeficiente de absorción y escala de Hounsfield" data-block="V · Hounsfield" data-ref="Tema 5">
+    <div class="ch-n">V</div>
+    <p class="kicker rv">Bloque V · Tema 5</p>
+    <h2 class="ch-t rv">Coeficiente de absorción<br><span>y escala de Hounsfield</span></h2>
+    <p class="ch-s rv">El número que el radiólogo lee y el ingeniero calibra.</p>
+    <p class="ch-th rv">Coeficiente μ <i>·</i> Unidades HU <i>·</i> Tejidos <i>·</i> Ventana y nivel <i>·</i> Qué altera el número</p>
+    <aside class="notes"><p>Todo lo anterior produce un mapa de μ; este bloque lo convierte en algo comparable entre equipos y pacientes.</p></aside>
+  </section>
+
+  <!-- ============ 26 · μ y HU ============ -->
+  <section class="slide" id="s26" data-states="1" data-mood="hu" data-tx="expand" data-origin="560 560" data-anchor="560 560"
+    data-title="Del coeficiente μ al número CT" data-block="V · Hounsfield" data-ref="Tema 5 · Número CT">
+    <p class="kicker rv">Tema 5 · Coeficiente de absorción</p>
+    <h2 class="title rv" style="font-size:66px">μ depende de la energía; <em>el HU la neutraliza</em></h2>
+    <div class="a hu-f rv" style="left:150px; top:360px; width:900px">
+      <div class="tex d big-eq" data-tex="\mathrm{HU} = 1000 \times \frac{\mu - \mu_{\text{agua}}}{\mu_{\text{agua}} - \mu_{\text{aire}}}"></div>
+    </div>
+    <div class="rows hu-rows a" style="left:150px; top:600px; width:900px">
+      <div class="row rv"><div class="h">Agua</div><div class="v">0</div><div class="d">Por definición, a cualquier kV.</div></div>
+      <div class="row rv"><div class="h">Aire</div><div class="v">−1000</div><div class="d">μ del aire ≈ 0.</div></div>
+      <div class="row rv"><div class="h">Cada HU</div><div class="v">0,1 %</div><div class="d">de diferencia respecto al agua.</div></div>
+    </div>
+    <div class="a side" style="left:1200px; top:360px; width:570px">
+      <p class="body rv">μ crece con la densidad y con el número atómico (fotoeléctrico ∝ Z³/E³) y cae con la energía. El haz de 120 kV tiene una <b>energía efectiva</b> de ≈ 60–70 keV, donde μ<sub>agua</sub> ≈ 0,19 cm⁻¹.</p>
+      <div class="side-b" data-at="1">
+        <p class="mono-lbl c-ice">Ejemplo</p>
+        <p class="body">Tejido con μ = 0,200 cm⁻¹ y agua con 0,190 cm⁻¹:</p>
+        <div class="tex d" data-tex="\mathrm{HU} = 1000 \times \frac{0{,}200 - 0{,}190}{0{,}190} \approx +53"></div>
+        <p class="body">Un valor típico de <b>tejido blando</b> (hígado, músculo).</p>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>La escala original de EMI multiplicaba por 500 (±500); la escala actual por 1000 se llama así en honor a Hounsfield.</p>
+      <p>Agua y aire quedan fijos, pero el HU de cualquier otro material cambia con el kV y el filtrado: el hueso y el yodo suben al bajar el kV.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 27 · Escala de Hounsfield ============ -->
+  <section class="slide" id="s27" data-mood="hu" data-tx="rise" data-anchor="600 540"
+    data-title="La escala de Hounsfield" data-block="V · Hounsfield" data-ref="Tema 5 · Escala HU">
+    <p class="kicker rv">Tema 5 · Escala de Hounsfield</p>
+    <h2 class="title rv" style="font-size:66px">Del aire al metal, <em>un solo eje</em></h2>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-label="Escala de Hounsfield con tejidos"></svg>
+    <div class="detail hu-detail a" style="left:1230px; top:380px; width:540px">
+      <div class="dn">0</div>
+      <h3 class="dh">Agua</h3>
+      <div class="dr">HU</div>
+      <p class="dp"></p>
+    </div>
+    <p class="hint-local a" style="left:1230px; top:930px">SELECCIONA UN TEJIDO</p>
+    <aside class="notes">
+      <p>Rangos orientativos: varían con el kV, el kernel y el equipo. Útiles para reconocer: grasa negativa, líquido cerca de 0, sangre aguda más densa que el cerebro, hueso muy positivo.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 28 · Ventana ============ -->
+  <section class="slide" id="s28" data-mood="hu" data-tx="dissolve" data-anchor="560 560"
+    data-title="Ventana y nivel" data-block="V · Hounsfield" data-ref="Tema 5 · Ventanas">
+    <p class="kicker rv">Tema 5 · Visualización</p>
+    <h2 class="title rv" style="font-size:66px">4096 números, <span class="thin">256 grises:</span> <em>hay que elegir</em></h2>
+    <div class="a ct-big win-img" style="left:150px; top:330px"><canvas class="cv-win" width="200" height="200"></canvas></div>
+    <div class="a ctl win-ctl" style="left:870px; top:340px; width:900px">
+      <div class="seg" role="group" aria-label="Fantoma"><button data-ph="torax" class="on">Tórax</button><button data-ph="craneo">Cráneo</button></div>
+      <div class="presets"></div>
+      <label>ANCHO · W <output class="w-out">350</output></label>
+      <input class="w-in" type="range" min="10" max="2500" step="10" value="350">
+      <label>NIVEL · L <output class="l-out">50</output></label>
+      <input class="l-in" type="range" min="-1000" max="1200" step="5" value="50">
+    </div>
+    <svg class="scene" viewBox="0 0 1920 1080" aria-hidden="true"><g class="win-bar"></g></svg>
+    <aside class="notes">
+      <p>12 bits → valores de −1024 a +3071. El monitor muestra 256 grises y el ojo distingue muchos menos: se asigna la escala de grises solo al rango [L − W/2, L + W/2]; por debajo es negro, por encima blanco.</p>
+      <p>Probar: tórax en ventana de mediastino (el pulmón es negro) y luego de pulmón (aparecen vasos y el nódulo). Cráneo en ventana cerebral: el hematoma se ve; en ventana ósea, desaparece.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 29 · Qué altera el HU ============ -->
+  <section class="slide" id="s29" data-mood="hu" data-tx="sweep" data-anchor="1500 300"
+    data-title="Qué altera el número CT" data-block="V · Hounsfield" data-ref="Tema 5 · Exactitud">
+    <p class="kicker rv">Tema 5 · Exactitud del número CT</p>
+    <h2 class="title rv" style="font-size:66px">Un HU <em class="c-danger">no es absoluto</em></h2>
+    <ol class="alter a" style="left:150px; top:340px; width:1620px">
+      <li class="rv"><span>01</span><h4>Endurecimiento del haz</h4><p>El haz pierde sus fotones blandos al atravesar: el centro del paciente "parece" menos denso (<b>cupping</b>) y aparecen bandas oscuras entre huesos.</p></li>
+      <li class="rv"><span>02</span><h4>Volumen parcial</h4><p>Un vóxel que mezcla dos tejidos promedia sus HU. Estructuras menores que el corte quedan <b>subestimadas</b>.</p></li>
+      <li class="rv"><span>03</span><h4>Energía</h4><p>Salvo agua y aire, el HU cambia con el kV y la filtración. Comparar exámenes con protocolos distintos exige cuidado.</p></li>
+      <li class="rv"><span>04</span><h4>Metal y ruido</h4><p>Implantes dejan <b>rayas</b> por falta de fotones (photon starvation); con poca dosis, el ruido dispersa los HU alrededor del valor real.</p></li>
+      <li class="rv"><span>05</span><h4 class="c-ctrl">Calibración</h4><p>Por eso el control diario con <b>fantoma de agua</b>: número CT del agua cercano a 0 (ACR: dentro de ±7 HU), uniformidad y ruido.</p></li>
+    </ol>
+    <aside class="notes">
+      <p>El punto 05 conecta con la Presentación 2 (controles de calidad): el ingeniero verifica exactitud del número CT, uniformidad, ruido, linealidad con materiales conocidos y artefactos.</p>
+    </aside>
+  </section>
+
+  <!-- ============ 30 · Síntesis ============ -->
+  <section class="slide" id="s30" data-mood="calm" data-tx="rise" data-anchor="1500 300"
+    data-title="Síntesis" data-ref="Síntesis">
+    <p class="kicker rv">Síntesis</p>
+    <h2 class="title rv">Diez ideas <span class="thin">para llevarse</span></h2>
+    <ol class="ideas">
+      <li class="rv">La TC mide <b>integrales de μ</b> por trayectoria: p = ln(I₀/I).</li>
+      <li class="rv">Resuelve la <b>superposición</b> de la radiografía y distingue ≈ 0,5 % de contraste.</li>
+      <li class="rv">Todo equipo actual es <b>3.ª generación</b> + helicoidal + multicorte.</li>
+      <li class="rv">El tubo trabaja en régimen continuo: <b>calor y fuerza centrífuga</b> dominan su diseño.</li>
+      <li class="rv">Filtro de moño, colimación y AEC son <b class="c-ctrl">controles de dosis</b>; el centrado también.</li>
+      <li class="rv">Detector: centelleador + fotodiodo + <b>DAS</b>; un canal inestable dibuja un <b class="c-danger">anillo</b>.</li>
+      <li class="rv"><b>Pitch</b> = avance por vuelta / (N·T): &lt; 1 solapa, &gt; 1 separa.</li>
+      <li class="rv">Retroproyectar solo da <b>borrosidad 1/r</b>; el filtro de rampa la corrige: FBP.</li>
+      <li class="rv">El <b>kernel</b> reparte entre nitidez y ruido; no cambia la dosis.</li>
+      <li class="rv"><b>HU</b> = 1000 (μ − μ<sub>agua</sub>)/μ<sub>agua</sub>; agua 0 y aire −1000 por definición.</li>
+    </ol>
+    <aside class="notes"><p>Pedir a tres estudiantes que expliquen una idea cada uno con sus palabras antes de cerrar.</p></aside>
+  </section>
+
+  <!-- ============ 31 · Cierre ============ -->
+  <section class="slide closing" id="s31" data-mood="calm" data-tx="gantry" data-origin="960 540" data-anchor="960 540"
+    data-title="Lo que sigue" data-ref="Presentación 2">
+    <p class="kicker rv" style="justify-content:center">Presentación 2 · Módulo II</p>
+    <p class="ask rv">¿Por qué el mismo estudio puede costar <b class="c-ctrl">2 mSv</b> en un equipo y <b class="c-danger">20 mSv</b> en otro?</p>
+    <p class="next-l rv">Resolución espacial y de contraste <i>·</i> Dosimetría: CTDI<sub>vol</sub> y DLP <i>·</i> Controles de calidad <i>·</i> Especificaciones y normativas <i>·</i> Aplicaciones clínicas</p>
+    <p class="sign rv">Ing. Bryan Rodríguez S. · Equipos Médicos III · UDELAS</p>
+    <aside class="notes"><p>Dejar la pregunta abierta: la respuesta está en todo lo visto hoy (kV, mA, AEC, pitch, colimación, reconstrucción) y en cómo se mide la dosis, que es lo primero de la próxima sesión.</p></aside>
+  </section>
+
+  <!-- Borde de luz de las transiciones -->
+  <svg class="fx" id="fx" viewBox="0 0 1920 1080" aria-hidden="true">
+    <defs>
+      <linearGradient id="fxv-acc" gradientUnits="userSpaceOnUse" x1="0" y1="-40" x2="0" y2="1120">
+        <stop offset="0" style="stop-color:var(--acc);stop-opacity:0"/><stop offset=".18" style="stop-color:var(--acc)"/><stop offset=".82" style="stop-color:var(--acc)"/><stop offset="1" style="stop-color:var(--acc);stop-opacity:0"/>
+      </linearGradient>
+      <linearGradient id="fxv-star" gradientUnits="userSpaceOnUse" x1="0" y1="-40" x2="0" y2="1120">
+        <stop offset="0" stop-color="#f4f1ff" stop-opacity="0"/><stop offset=".18" stop-color="#f4f1ff"/><stop offset=".82" stop-color="#f4f1ff"/><stop offset="1" stop-color="#f4f1ff" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="fxh-acc" gradientUnits="userSpaceOnUse" x1="-40" y1="0" x2="1960" y2="0">
+        <stop offset="0" style="stop-color:var(--acc);stop-opacity:0"/><stop offset=".15" style="stop-color:var(--acc)"/><stop offset=".85" style="stop-color:var(--acc)"/><stop offset="1" style="stop-color:var(--acc);stop-opacity:0"/>
+      </linearGradient>
+      <linearGradient id="fxh-star" gradientUnits="userSpaceOnUse" x1="-40" y1="0" x2="1960" y2="0">
+        <stop offset="0" stop-color="#f4f1ff" stop-opacity="0"/><stop offset=".15" stop-color="#f4f1ff"/><stop offset=".85" stop-color="#f4f1ff"/><stop offset="1" stop-color="#f4f1ff" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <g id="fx-g"></g>
+  </svg>
+
+  <div class="chrome" aria-hidden="true">
+    <svg class="ruler" viewBox="0 0 1920 1080"></svg>
+    <div class="brand"><span class="sparkle">✦</span>EQUIPOS MÉDICOS III · TOMOGRAFÍA</div>
+    <div class="ref" id="c-ref"></div>
+    <div class="who" id="c-block"></div>
+    <div class="dots" id="c-dots"></div>
+    <div class="count" id="c-count"></div>
+    <div class="progress"><i id="c-prog"></i></div>
+  </div>
+</main>
+
+<a id="volver-al-curso" href="../../" title="Volver al curso (Esc)" aria-label="Volver al curso">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+  <span>Volver al curso</span>
+</a>
+
+<div class="overlay" id="menu" role="dialog" aria-label="Índice de escenas">
+  <div class="panel"><h2>Índice</h2><ul class="menu-list" id="menu-list"></ul></div>
+</div>
+<div class="overlay" id="help" role="dialog" aria-label="Atajos de teclado">
+  <div class="panel">
+    <h2>Controles</h2>
+    <div class="keys">
+      <kbd>→ · Espacio · Clic</kbd><span>Avanzar (primero recorre los estados de la escena)</span>
+      <kbd>← · Retroceso</kbd><span>Retroceder un estado o una escena</span>
+      <kbd>Inicio · Fin</kbd><span>Primera / última</span>
+      <kbd>M</kbd><span>Índice de escenas</span>
+      <kbd>N</kbd><span>Notas del docente</span>
+      <kbd>F</kbd><span>Pantalla completa</span>
+      <kbd>Esc</kbd><span>Cerrar paneles · volver al curso</span>
+      <kbd>? · H</kbd><span>Esta ayuda</span>
+    </div>
+  </div>
+</div>
+<div class="notes-drawer" id="drawer"><div class="meta" id="d-meta"></div><div class="txt" id="d-txt"></div></div>
+<div class="hint" id="hint">→ AVANZAR · ← RETROCEDER · M ÍNDICE · N NOTAS · F PANTALLA COMPLETA · ? AYUDA</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
