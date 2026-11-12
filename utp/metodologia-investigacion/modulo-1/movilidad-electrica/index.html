@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#060a19">
+<title>Movilidad eléctrica · El cosmos de la investigación</title>
+<meta name="description" content="Análisis crítico y comparativo de dos artículos científicos sobre movilidad eléctrica y sostenibilidad. Presentación web animada.">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="motion.css">
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas><div class="scene-art" aria-hidden="true"></div><div class="vignette" aria-hidden="true"></div>
+<header><a class="brand" href="#portada" aria-label="Volver a la portada"><span class="brand-star">✦</span><span>Cosmos <span class="brand-small">del conocimiento</span></span></a><div class="header-right"><a class="course-back" href="../../" title="Volver al curso">Curso</a><span id="chapter">Análisis de artículos científicos</span><button id="indexButton" title="Índice" aria-label="Abrir índice">☷</button><button id="motionButton" aria-pressed="false" title="Pausar efectos">Pausar efectos</button><button id="fullButton" title="Pantalla completa" aria-label="Pantalla completa">⛶</button></div></header>
+<main id="stage" aria-label="Presentación de nueve diapositivas" tabindex="-1"></main>
+<footer><div class="footer-left"><span id="counter">01 / 09</span><span class="footer-line"></span><span id="sectionName">Inicio</span></div><nav id="starNav" aria-label="Diapositivas"></nav><div class="footer-actions"><button id="notesButton" aria-label="Abrir notas del expositor">Notas</button><button id="prev" aria-label="Diapositiva anterior">←</button><button id="next" aria-label="Diapositiva siguiente">→</button></div></footer>
+<div class="progress" aria-hidden="true"><div id="progressBar"></div></div><div id="energy" aria-hidden="true"></div>
+<dialog id="indexDialog"><div class="dialog-head"><h2>El recorrido</h2><button data-close aria-label="Cerrar índice">×</button></div><p>Nueve escenas para comparar dos formas de investigar.</p><div id="indexList"></div></dialog>
+<dialog id="notesDialog"><div class="dialog-head"><h2>Notas del expositor</h2><button data-close aria-label="Cerrar notas">×</button></div><div id="notesContent"></div><div class="sources"><h3>Documentos de apoyo</h3><a href="sources/Presentacion_analisis_articulos.pptx" download>Presentación original · PowerPoint</a><a href="sources/Analisis-comparativo-articulos.pdf" target="_blank" rel="noopener">Análisis comparativo · PDF</a><h3>Referencias de los artículos</h3><a href="https://doi.org/10.3390/en19020505" target="_blank" rel="noopener">Ombati (2026) · Energies 19(2), 505</a><a href="https://doi.org/10.1109/ACCESS.2025.3643749" target="_blank" rel="noopener">Dávalos Soto et al. (2025) · IEEE Access 13</a></div></dialog>
+<div id="status" role="status" class="sr-only"></div><script src="celestial.js"></script><script src="transitions.js"></script><script src="motion.js"></script><script src="app.js"></script>
+</body></html>

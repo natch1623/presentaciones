@@ -16,6 +16,13 @@
       "descripcion": "Clases 1 y 2 (teoría) — de los fundamentos y modos de falla a la documentación del diagnóstico, con seguridad eléctrica IEC 60601-1.",
       "acento": "#60a5fa",
       "estado": "disponible"
+    },
+    {
+      "id": "metodologia-investigacion",
+      "nombre": "Metodología de la Investigación",
+      "descripcion": "Análisis crítico y comparativo de artículos científicos sobre movilidad eléctrica.",
+      "acento": "#d9b66f",
+      "estado": "disponible"
     }
   ]
 }

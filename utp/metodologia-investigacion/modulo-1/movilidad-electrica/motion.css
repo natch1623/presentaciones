@@ -1,0 +1,39 @@
+/* Continuous scene changes and decorative celestial accents. */
+.stage-ghost{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;scrollbar-width:none}
+.stage-ghost *{animation:none!important}
+.stage-ghost .slide{opacity:1!important}
+#transitionRibbon{position:fixed;left:0;top:42%;width:29vw;height:1px;z-index:3;pointer-events:none;opacity:0;background:linear-gradient(90deg,transparent,#86d8ec,#edce88,transparent);box-shadow:0 0 12px 2px #9ddbe84d;transform-origin:center}
+.scene-active .route li:before{animation:step-spark 1s ease-out var(--step-delay,450ms) both}
+.scene-active .diagram circle{transform-box:fill-box;transform-origin:center;animation:node-breathe 4.8s ease-in-out infinite alternate}
+.scene-active .diagram circle:nth-of-type(2n){animation-delay:-1.6s}
+.scene-active .diagram circle:nth-of-type(3n){animation-delay:-3.1s}
+.scene-active .big-stat{position:relative;width:fit-content}
+.scene-active .big-stat:after{content:'';position:absolute;left:0;right:0;bottom:-5px;height:1px;background:linear-gradient(90deg,transparent,currentColor,transparent);box-shadow:0 0 8px currentColor;transform-origin:left;animation:stat-spark 5s ease-in-out infinite}
+.scene-active .track{overflow:hidden}
+.scene-active .bar:after{content:'';position:absolute;inset:-2px 0;width:30%;background:linear-gradient(90deg,transparent,#ffffff9c,transparent);animation:bar-glint 5.5s ease-in-out infinite;animation-delay:1.6s}
+.scene-active .equation{position:relative;width:fit-content}
+.scene-active .equation:after{content:'';position:absolute;left:0;right:0;bottom:-9px;height:1px;background:linear-gradient(90deg,var(--blue),var(--gold));transform-origin:center;animation:closing-link 1.4s var(--ease) both}
+.scene-active .hero .primary{animation:invitation-glow 4s ease-in-out infinite alternate}
+.paused #transitionRibbon{display:none}
+@keyframes step-spark{0%{box-shadow:0 0 0 #85dce800;opacity:.45}50%{box-shadow:0 0 17px #85dce86b;opacity:1}100%{box-shadow:0 0 0 #85dce800;opacity:1}}
+@keyframes node-breathe{from{opacity:.45}to{opacity:1}}
+@keyframes stat-spark{0%,100%{opacity:.1;transform:scaleX(.35)}45%,60%{opacity:.7;transform:scaleX(1)}}
+@keyframes bar-glint{0%,32%{opacity:0;transform:translateX(-120%)}40%{opacity:.6}64%,100%{opacity:0;transform:translateX(440%)}}
+@keyframes closing-link{from{opacity:0;transform:scaleX(.05)}to{opacity:.8;transform:scaleX(1)}}
+@keyframes invitation-glow{from{box-shadow:0 0 15px #d9b66f08}to{box-shadow:0 0 24px #d9b66f24}}
+@media(prefers-reduced-motion:reduce){.stage-ghost,#transitionRibbon{display:none}.scene-active *,.scene-active *:before,.scene-active *:after{animation:none!important}}
+
+/* Nebulosa y círculo zodiacal: profundidad celeste sin personajes. */
+#celestialTransition{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
+#celestialTransition[hidden]{display:none}
+.scene-art{background:radial-gradient(ellipse at 84% 34%,#28669425,transparent 57%),radial-gradient(ellipse at 20% 95%,#2935632b,transparent 58%),linear-gradient(120deg,#060a19 15%,#0a1126 70%,#10192b)!important}
+body:not([data-slide="0"]):not([data-slide="8"]) .scene-art{opacity:1!important}
+.scene-art:before{width:100vw;height:100vh;right:-12vw;top:-5vh;border:0;border-radius:0;box-shadow:none;background:radial-gradient(ellipse at 65% 45%,#287cae22 0,transparent 38%),radial-gradient(ellipse at 82% 68%,#74539a1c 0,transparent 35%),radial-gradient(ellipse at 45% 58%,#b58b4220 0,transparent 36%);animation:nebula-drift 28s ease-in-out infinite alternate}
+.scene-art:after{width:95vw;height:42vh;top:36vh;right:-28vw;border:0;border-radius:50%;box-shadow:none;filter:blur(40px);background:linear-gradient(178deg,transparent 25%,#5086a017 46%,#b5bad00b 50%,#51376a17 57%,transparent 75%);animation:galaxy-drift 36s ease-in-out infinite alternate}
+#stars{opacity:.95}
+.vignette{background:linear-gradient(90deg,#060a1933,transparent 70%),linear-gradient(0deg,#060a19 0%,transparent 22%,transparent 78%,#060a1970)}
+@keyframes nebula-drift{from{transform:translate(-2%,0) scale(1);opacity:.6}to{transform:translate(3%,-2%) scale(1.08);opacity:1}}
+@keyframes galaxy-drift{from{transform:rotate(-30deg) translateX(0);opacity:.45}to{transform:rotate(-24deg) translateX(-4%);opacity:.85}}
+@media(max-width:850px){.scene-art:before,.scene-art:after{opacity:.65;right:-10vw}.scene-art:after{right:-40vw}}
+@media(prefers-reduced-motion:reduce){#celestialTransition{display:none}.scene-art:before,.scene-art:after{animation:none!important}}
+.scene-art{z-index:0}#stars,.vignette{z-index:1}

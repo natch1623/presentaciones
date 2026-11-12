@@ -241,3 +241,7 @@ es exactamente lo que hace el workflow de despliegue.
 | `→` `↓` `espacio` | Siguiente lámina |
 | `←` `↑` | Lámina anterior |
 | `F` | Pantalla completa |
+
+## Metodología de la Investigación
+
+Presentación animada de nueve láminas: [Movilidad eléctrica: del impacto social a la red de distribución](utp/metodologia-investigacion/modulo-1/movilidad-electrica/). Disponible desde el menú UTP. Este deck es HTML/CSS/JavaScript estático; su comando `npm run build` prepara los archivos en `dist` sin dependencias externas para integrarse al workflow de Pages existente.

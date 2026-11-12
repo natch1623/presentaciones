@@ -1,0 +1,24 @@
+{
+  "curso": "Metodología de la Investigación",
+  "institucion": "Universidad Tecnológica de Panamá",
+  "carrera": "Ingeniería Electromecánica",
+  "modulos": [
+    {
+      "id": "modulo-1",
+      "numero": "I",
+      "titulo": "Análisis de artículos científicos",
+      "descripcion": "Comparación de problemas, metodología, enfoque y aportes de dos estudios sobre movilidad eléctrica.",
+      "acento": "#d9b66f",
+      "presentaciones": [
+        {
+          "id": "movilidad-electrica",
+          "etiqueta": "Análisis comparativo",
+          "titulo": "Movilidad eléctrica: del impacto social a la red de distribución",
+          "descripcion": "Presentación animada de Ivan-Acevedo, Ameth Saldaña y Luis Dawkinns.",
+          "laminas": 9,
+          "estado": "disponible"
+        }
+      ]
+    }
+  ]
+}
